@@ -1,0 +1,32 @@
+:root {
+	--bg: radial-gradient(circle at 20% 20%, #f4f7ff 0, #eef2ff 35%, #e8f4ff 70%, #e3f6ff 100%);
+	--card: #0f172a;
+	--text: #0b1221;
+	--muted: #4b5563;
+	--accent: #22c55e;
+	--accent-dark: #16a34a;
+	--border: rgba(255, 255, 255, 0.08);
+	--shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: 'Manrope', 'Segoe UI', sans-serif;
+	background: var(--bg);
+	background-size: 140% 140%;
+	color: var(--text);
+	padding: 32px 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation: none !important;
+		transition: none !important;
+	}
+}

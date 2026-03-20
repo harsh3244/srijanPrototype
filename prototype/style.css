@@ -45,6 +45,14 @@ body > * {
     margin-right: auto;
 }
 
+.site-logo {
+    display: block;
+    width: clamp(88px, 14vw, 132px);
+    height: auto;
+    margin: 0 auto 18px;
+    filter: drop-shadow(0 16px 24px rgba(43, 67, 25, 0.18));
+}
+
 h1 {
     margin: 0 0 18px;
     font-size: clamp(2.8rem, 6vw, 5rem);
@@ -52,6 +60,7 @@ h1 {
     letter-spacing: -0.04em;
     text-transform: uppercase;
     color: var(--accent-dark);
+    text-align: center;
 }
 
 body > p:first-of-type {

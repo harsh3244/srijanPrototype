@@ -20,7 +20,6 @@ body {
     font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     color: var(--text);
     background:
-        linear-gradient(rgba(244, 239, 223, 0.82), rgba(244, 239, 223, 0.9)),
         radial-gradient(circle at top left, rgba(154, 201, 74, 0.28), transparent 32%),
         radial-gradient(circle at bottom right, rgba(214, 171, 74, 0.22), transparent 28%),
         url("assests/bg1.jpg") center / cover no-repeat fixed,

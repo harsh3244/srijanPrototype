@@ -1,0 +1,132 @@
+🗓️ DAY 1 – Planning + Basic Frontend
+✅ Step 1: Finalize Features (2–3 hours)
+
+Decide exactly what you will build:
+
+Home page
+
+Crop guide page
+
+Weather section
+
+Market price section
+
+👉 Don’t add more features now. Keep it focused.
+
+✅ Step 2: Collect Data (3–4 hours)
+
+You need basic content:
+
+Crop names + tips (Google, govt sites)
+
+Sample market prices (can be fake/demo)
+
+Weather API (like OpenWeather)
+
+✅ Step 3: Create Basic UI (HTML + CSS)
+
+Make simple pages:
+
+Pages to create:
+
+index.html (Home)
+
+crops.html
+
+weather.html
+
+market.html
+
+Example Structure:
+<nav>
+  <h1>Farmer Help Platform</h1>
+  <a href="crops.html">Crops</a>
+  <a href="weather.html">Weather</a>
+  <a href="market.html">Market</a>
+</nav>
+
+👉 Focus on:
+
+Clean layout
+
+Simple design
+
+Mobile friendly (important!)
+
+🗓️ DAY 2 – Add Functionality (JS + API)
+✅ Step 4: Weather API Integration
+
+Use:
+
+OpenWeather API
+
+Example:
+
+fetch("https://api.openweathermap.org/data/2.5/weather?q=Pune&appid=YOUR_API_KEY")
+
+Show:
+
+Temperature
+
+Weather condition
+
+✅ Step 5: Crop Info Section
+
+Static data (cards)
+
+Example:
+
+<div class="card">
+  <h3>Wheat</h3>
+  <p>Best season: Winter</p>
+</div>
+✅ Step 6: Market Prices
+
+Static table (no need real API)
+
+<table>
+<tr><th>Crop</th><th>Price</th></tr>
+<tr><td>Rice</td><td>₹2000/quintal</td></tr>
+</table>
+✅ Step 7: Add Basic JavaScript
+
+Button interactions
+
+Search bar (optional)
+
+🗓️ DAY 3 – Polish + Demo Ready
+✅ Step 8: Improve UI
+
+Add colors (green theme 🌱)
+
+Add icons (use Font Awesome)
+
+Add spacing and alignment
+
+✅ Step 9: Make It Presentable
+
+Add:
+
+Title
+
+Description of platform
+
+“How it helps farmers”
+
+✅ Step 10: Prepare Demo Pitch 🎤
+
+Explain:
+
+Problem: Farmers don’t have one platform
+
+Solution: Your app
+
+Features
+
+Future scope
+
+🧠 Tech Stack (Simple & Fast)
+Part	Tech
+Frontend	HTML, CSS, JS
+API	OpenWeather
+Hosting	GitHub Pages / Netlify

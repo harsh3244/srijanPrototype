@@ -23,7 +23,7 @@ body {
         linear-gradient(rgba(244, 239, 223, 0.82), rgba(244, 239, 223, 0.9)),
         radial-gradient(circle at top left, rgba(154, 201, 74, 0.28), transparent 32%),
         radial-gradient(circle at bottom right, rgba(214, 171, 74, 0.22), transparent 28%),
-        url("assests/images.jpg") center / cover no-repeat fixed,
+        url("assests/bg1.jpg") center / cover no-repeat fixed,
         linear-gradient(180deg, #f7f3e7 0%, var(--bg) 100%);
     line-height: 1.6;
 }

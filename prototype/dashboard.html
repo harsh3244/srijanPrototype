@@ -66,7 +66,7 @@
             <div class="sidebar-panel">
                 <span class="sidebar-panel__label">Core Flow</span>
                 <strong>Save farmer details, then solve labour access.</strong>
-                <p>The dashboard begins with the farmer profile, then moves into labour discovery, AI support, and matched scheme guidance.</p>
+                <p>The dashboard begins with profile setup, then moves into labour discovery, tutorial guidance, and matched scheme support.</p>
             </div>
 
             <div class="sidebar-panel sidebar-panel--soft">
@@ -95,6 +95,15 @@
                 </div>
 
                 <div class="topbar__right">
+                    <div class="global-language-row global-language-row--topbar">
+                        <label class="global-language-label" for="ui-language-select-dashboard">Language</label>
+                        <select id="ui-language-select-dashboard" class="global-language-select" data-ui-language-select>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="mr">Marathi</option>
+                        </select>
+                    </div>
+
                     <button class="icon-button" type="button" title="Notifications">
                         <i class="ri-notification-3-line" aria-hidden="true"></i>
                         <span class="icon-badge" data-alert-count>3</span>
@@ -123,11 +132,11 @@
                 <section class="view-section is-active" data-view="home">
                     <div class="hero-panel hero-panel--home">
                         <div class="hero-panel__copy">
-                            <span class="eyebrow">Farmer Home</span>
+                            <span class="eyebrow" data-home-eyebrow>Farmer Home</span>
                             <h2 data-home-welcome>Welcome to your smart farming support dashboard.</h2>
                             <p>
                                 Save farmer details first, choose the farm location using search or the map,
-                                and then use the dashboard for labour support, AI guidance, and scheme discovery.
+                                and then use the dashboard for labour support, guided tutorial help, and scheme discovery.
                             </p>
 
                             <div class="hero-actions">
@@ -144,19 +153,19 @@
 
                         <div class="hero-metrics">
                             <article class="metric-tile">
-                                <span>Farmer Name</span>
+                                <span data-stat-name-label>Farmer Name</span>
                                 <strong data-stat-name>Not saved yet</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Main Crop</span>
+                                <span data-stat-crop-label>Main Crop</span>
                                 <strong data-stat-crop>Profile needed</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Land Area</span>
+                                <span data-stat-land-label>Land Area</span>
                                 <strong data-stat-land>Profile needed</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Suggested Schemes</span>
+                                <span data-stat-schemes-label>Suggested Schemes</span>
                                 <strong data-stat-schemes>0 matches</strong>
                             </article>
                         </div>
@@ -168,13 +177,13 @@
                         <article class="panel-card">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Farmer Profile</span>
-                                    <h3>Farmer Details Form</h3>
+                                    <span class="section-kicker" data-profile-form-kicker>Farmer Profile</span>
+                                    <h3 data-profile-form-title>Farmer Details Form</h3>
                                 </div>
-                                <p>All data is stored in localStorage for this hackathon prototype.</p>
+                                <p data-profile-form-desc>All data is stored in localStorage for this hackathon prototype.</p>
                             </div>
 
-                            <form id="farmer-details-form" class="form-grid form-grid--double">
+                            <form id="farmer-details-form" data-profile-type="farmer" class="form-grid form-grid--double">
                                 <label class="field">
                                     <span>Full Name</span>
                                     <input type="text" name="farmerName" placeholder="Enter full name" required>
@@ -283,13 +292,68 @@
                                     </button>
                                 </div>
                             </form>
+
+                            <form id="labour-details-form" data-profile-type="labour" class="form-grid form-grid--double" hidden>
+                                <label class="field">
+                                    <span>Full Name</span>
+                                    <input type="text" name="workerName" placeholder="Enter full name" required>
+                                </label>
+                                <label class="field">
+                                    <span>Mobile Number</span>
+                                    <input type="tel" name="mobileNumber" inputmode="numeric" placeholder="10-digit mobile number" required>
+                                </label>
+                                <label class="field">
+                                    <span>Current Location</span>
+                                    <input type="text" name="currentLocation" placeholder="Village / city / district" required>
+                                </label>
+                                <label class="field">
+                                    <span>Preferred Work Type</span>
+                                    <select name="preferredWorkType" required>
+                                        <option value="">Select work type</option>
+                                        <option>Harvesting</option>
+                                        <option>Sugarcane Cutting</option>
+                                        <option>Weeding</option>
+                                        <option>Transplanting</option>
+                                        <option>Spraying</option>
+                                        <option>Loading</option>
+                                    </select>
+                                </label>
+                                <label class="field">
+                                    <span>Experience (years)</span>
+                                    <input type="number" name="experienceYears" min="0" step="1" placeholder="Example: 3">
+                                </label>
+                                <label class="field">
+                                    <span>Expected Daily Wage (Rs.)</span>
+                                    <input type="number" name="expectedWage" min="0" step="10" placeholder="Example: 550">
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Skills</span>
+                                    <input type="text" name="skillTags" placeholder="Example: Harvesting, Spraying, Machine support">
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Availability</span>
+                                    <select name="availability">
+                                        <option value="">Select availability</option>
+                                        <option>Available today</option>
+                                        <option>Available this week</option>
+                                        <option>Limited availability</option>
+                                    </select>
+                                </label>
+
+                                <div class="form-actions form-actions--wide">
+                                    <button class="btn btn--primary" type="submit">
+                                        <i class="ri-save-line" aria-hidden="true"></i>
+                                        Save Profile
+                                    </button>
+                                </div>
+                            </form>
                         </article>
 
                         <article class="panel-card panel-card--accent">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Profile Snapshot</span>
-                                    <h3>Saved Farmer Summary</h3>
+                                    <span class="section-kicker" data-profile-summary-kicker>Profile Snapshot</span>
+                                    <h3 data-profile-summary-title>Saved Farmer Summary</h3>
                                 </div>
                                 <p data-profile-state>Profile not saved yet</p>
                             </div>
@@ -307,9 +371,9 @@
                     <div class="section-head">
                         <div>
                             <span class="section-kicker">Recommendations</span>
-                            <h3>Personalized actions for this farmer</h3>
+                            <h3 data-recommendations-title>Personalized actions for this farmer</h3>
                         </div>
-                        <p>These cards adapt to the saved location, land area, crop, and farming type.</p>
+                        <p data-recommendations-desc>These cards adapt to the saved location, land area, crop, and farming type.</p>
                     </div>
 
                     <div class="card-grid card-grid--service" id="recommendations-grid"></div>

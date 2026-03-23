@@ -6,7 +6,7 @@
     <title>AgriShield | Farmer Labour Dashboard</title>
     <meta
         name="description"
-        content="Hackathon prototype for a farmer-first dashboard with Home, Labour Finding, AI Chatbot, and Government Schemes."
+        content="Hackathon prototype for a farmer-first dashboard with Home, Labour Finding, Tutorial Guide, and Government Schemes."
     >
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,10 +53,6 @@
                     <i class="ri-team-line" aria-hidden="true"></i>
                     <span>Labour Finding</span>
                 </button>
-                <button class="sidebar-link" type="button" data-nav="requests">
-                    <i class="ri-briefcase-4-line" aria-hidden="true"></i>
-                    <span>Farmer Requests</span>
-                </button>
                 <button class="sidebar-link" type="button" data-nav="chatbot">
                     <i class="ri-message-3-line" aria-hidden="true"></i>
                     <span>AI Chatbot</span>
@@ -65,12 +61,16 @@
                     <i class="ri-government-line" aria-hidden="true"></i>
                     <span>Government Schemes</span>
                 </button>
+                <button class="sidebar-link" type="button" data-open-guide>
+                    <i class="ri-book-open-line" aria-hidden="true"></i>
+                    <span>App Guide</span>
+                </button>
             </nav>
 
             <div class="sidebar-panel">
                 <span class="sidebar-panel__label">Core Flow</span>
                 <strong>Save farmer details, then solve labour access.</strong>
-                <p>The dashboard begins with the farmer profile, then moves into labour discovery, AI support, and matched scheme guidance.</p>
+                <p>The dashboard begins with profile setup, then moves into labour discovery, tutorial guidance, and matched scheme support.</p>
             </div>
 
             <div class="sidebar-panel sidebar-panel--soft">
@@ -78,7 +78,7 @@
                 <ul class="simple-list simple-list--sidebar">
                     <li><i class="ri-check-line" aria-hidden="true"></i><span>Save the farmer profile</span></li>
                     <li><i class="ri-check-line" aria-hidden="true"></i><span>Find or post labour needs</span></li>
-                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Ask AI and review schemes</span></li>
+                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Review scheme recommendations</span></li>
                 </ul>
             </div>
         </aside>
@@ -88,17 +88,26 @@
         <div class="app-main">
             <header class="topbar">
                 <div class="topbar__left">
-                    <button class="menu-button" type="button" data-sidebar-open aria-label="Open sidebar">
+                    <button class="menu-button" type="button" data-sidebar-open aria-label="Open sidebar" position="fixed">
                         <i class="ri-menu-3-line" aria-hidden="true"></i>
                     </button>
                     <div>
                         <span class="topbar__kicker">Farmer Labour Support Platform</span>
                         <h1 data-page-title>Home</h1>
-                        <p data-page-subtitle>Save farmer details and unlock labour, AI, and scheme recommendations.</p>
+                        <p data-page-subtitle>Save farmer details and unlock labour and scheme recommendations.</p>
                     </div>
                 </div>
 
                 <div class="topbar__right">
+                    <div class="global-language-row global-language-row--topbar">
+                        <label class="global-language-label" for="ui-language-select-dashboard">Language</label>
+                        <select id="ui-language-select-dashboard" class="global-language-select" data-ui-language-select>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="mr">Marathi</option>
+                        </select>
+                    </div>
+
                     <button class="icon-button" type="button" title="Notifications">
                         <i class="ri-notification-3-line" aria-hidden="true"></i>
                         <span class="icon-badge" data-alert-count>3</span>
@@ -116,6 +125,10 @@
                         <i class="ri-logout-box-r-line" aria-hidden="true"></i>
                         Logout
                     </button>
+                    <button class="btn btn--secondary btn--compact" type="button" data-open-guide>
+                        <i class="ri-question-line" aria-hidden="true"></i>
+                        Guide
+                    </button>
                 </div>
             </header>
 
@@ -123,11 +136,11 @@
                 <section class="view-section is-active" data-view="home">
                     <div class="hero-panel hero-panel--home">
                         <div class="hero-panel__copy">
-                            <span class="eyebrow">Farmer Home</span>
+                            <span class="eyebrow" data-home-eyebrow>Farmer Home</span>
                             <h2 data-home-welcome>Welcome to your smart farming support dashboard.</h2>
                             <p>
                                 Save farmer details first, choose the farm location using search or the map,
-                                and then use the dashboard for labour support, AI guidance, and scheme discovery.
+                                and then use the dashboard for labour support, guided tutorial help, and scheme discovery.
                             </p>
 
                             <div class="hero-actions">
@@ -135,28 +148,28 @@
                                     <i class="ri-team-line" aria-hidden="true"></i>
                                     Explore Labour
                                 </button>
-                                <button class="btn btn--secondary" type="button" data-jump-view="chatbot">
-                                    <i class="ri-message-3-line" aria-hidden="true"></i>
-                                    Ask AI
+                                <button class="btn btn--secondary" type="button" data-jump-view="schemes">
+                                    <i class="ri-government-line" aria-hidden="true"></i>
+                                    View Schemes
                                 </button>
                             </div>
                         </div>
 
                         <div class="hero-metrics">
                             <article class="metric-tile">
-                                <span>Farmer Name</span>
+                                <span data-stat-name-label>Farmer Name</span>
                                 <strong data-stat-name>Not saved yet</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Main Crop</span>
+                                <span data-stat-crop-label>Main Crop</span>
                                 <strong data-stat-crop>Profile needed</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Land Area</span>
+                                <span data-stat-land-label>Land Area</span>
                                 <strong data-stat-land>Profile needed</strong>
                             </article>
                             <article class="metric-tile">
-                                <span>Suggested Schemes</span>
+                                <span data-stat-schemes-label>Suggested Schemes</span>
                                 <strong data-stat-schemes>0 matches</strong>
                             </article>
                         </div>
@@ -168,13 +181,13 @@
                         <article class="panel-card">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Farmer Profile</span>
-                                    <h3>Farmer Details Form</h3>
+                                    <span class="section-kicker" data-profile-form-kicker>Farmer Profile</span>
+                                    <h3 data-profile-form-title>Farmer Details Form</h3>
                                 </div>
-                                <p>All data is stored in localStorage for this hackathon prototype.</p>
+                                <p data-profile-form-desc>All data is stored in localStorage for this hackathon prototype.</p>
                             </div>
 
-                            <form id="farmer-details-form" class="form-grid form-grid--double">
+                            <form id="farmer-details-form" data-profile-type="farmer" class="form-grid form-grid--double">
                                 <label class="field">
                                     <span>Full Name</span>
                                     <input type="text" name="farmerName" placeholder="Enter full name" required>
@@ -283,13 +296,68 @@
                                     </button>
                                 </div>
                             </form>
+
+                            <form id="labour-details-form" data-profile-type="labour" class="form-grid form-grid--double" hidden>
+                                <label class="field">
+                                    <span>Full Name</span>
+                                    <input type="text" name="workerName" placeholder="Enter full name" required>
+                                </label>
+                                <label class="field">
+                                    <span>Mobile Number</span>
+                                    <input type="tel" name="mobileNumber" inputmode="numeric" placeholder="10-digit mobile number" required>
+                                </label>
+                                <label class="field">
+                                    <span>Current Location</span>
+                                    <input type="text" name="currentLocation" placeholder="Village / city / district" required>
+                                </label>
+                                <label class="field">
+                                    <span>Preferred Work Type</span>
+                                    <select name="preferredWorkType" required>
+                                        <option value="">Select work type</option>
+                                        <option>Harvesting</option>
+                                        <option>Sugarcane Cutting</option>
+                                        <option>Weeding</option>
+                                        <option>Transplanting</option>
+                                        <option>Spraying</option>
+                                        <option>Loading</option>
+                                    </select>
+                                </label>
+                                <label class="field">
+                                    <span>Experience (years)</span>
+                                    <input type="number" name="experienceYears" min="0" step="1" placeholder="Example: 3">
+                                </label>
+                                <label class="field">
+                                    <span>Expected Daily Wage (Rs.)</span>
+                                    <input type="number" name="expectedWage" min="0" step="10" placeholder="Example: 550">
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Skills</span>
+                                    <input type="text" name="skillTags" placeholder="Example: Harvesting, Spraying, Machine support">
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Availability</span>
+                                    <select name="availability">
+                                        <option value="">Select availability</option>
+                                        <option>Available today</option>
+                                        <option>Available this week</option>
+                                        <option>Limited availability</option>
+                                    </select>
+                                </label>
+
+                                <div class="form-actions form-actions--wide">
+                                    <button class="btn btn--primary" type="submit">
+                                        <i class="ri-save-line" aria-hidden="true"></i>
+                                        Save Profile
+                                    </button>
+                                </div>
+                            </form>
                         </article>
 
                         <article class="panel-card panel-card--accent">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Profile Snapshot</span>
-                                    <h3>Saved Farmer Summary</h3>
+                                    <span class="section-kicker" data-profile-summary-kicker>Profile Snapshot</span>
+                                    <h3 data-profile-summary-title>Saved Farmer Summary</h3>
                                 </div>
                                 <p data-profile-state>Profile not saved yet</p>
                             </div>
@@ -307,9 +375,9 @@
                     <div class="section-head">
                         <div>
                             <span class="section-kicker">Recommendations</span>
-                            <h3>Personalized actions for this farmer</h3>
+                            <h3 data-recommendations-title>Personalized actions for this farmer</h3>
                         </div>
-                        <p>These cards adapt to the saved location, land area, crop, and farming type.</p>
+                        <p data-recommendations-desc>These cards adapt to the saved location, land area, crop, and farming type.</p>
                     </div>
 
                     <div class="card-grid card-grid--service" id="recommendations-grid"></div>
@@ -324,8 +392,89 @@
                         <p>This is the core farmer problem-solving section of the prototype.</p>
                     </div>
 
+                    <!-- simplified high-contrast icon-driven options for illiterate users -->
+                    <div class="labour-simple-grid" id="labour-simple-grid">
+                        <button class="labour-simple-btn" id="btn-simple-hire" data-mode="hire" aria-label="Hire workers">
+                            <i class="ri-tools-line"></i>
+                            <strong>हायर</strong>
+                            <small>Hire workers</small>
+                        </button>
+                        <button class="labour-simple-btn" id="btn-simple-work" data-mode="work" aria-label="Get work">
+                            <i class="ri-user-star-line"></i>
+                            <strong>काम</strong>
+                            <small>Get work</small>
+                        </button>
+                    </div>
+
+                    <div class="labour-voice-actions">
+                        <button class="btn btn--ghost btn--compact" id="btn-speak-instructions" type="button">
+                            <i class="ri-mic-line"></i> Voice Guide
+                        </button>
+                        <label class="field" style="display:inline-flex;gap:.4rem;align-items:center;">
+                            <span>Language</span>
+                            <select id="labour-language-select" class="field">
+                                <option value="en-US">English</option>
+                                <option value="hi-IN">हिन्दी</option>
+                                <option value="mr-IN">मराठी</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="insight-box">
+                        <span class="insight-box__label">Step guidance</span>
+                        <strong id="labour-step-text">Choose Hire Workers or Get Work to continue.</strong>
+                    </div>
+
+                    <article class="panel-card" id="labour-hire-flow" hidden>
+                        <div class="section-head"><div><span class="section-kicker">Hire Workers</span><h3>Step 1/2: Post a simple order</h3></div></div>
+                        <form id="labour-hire-step-form" class="form-grid form-grid--single">
+                            <div class="field-with-voice">
+                                <label class="field"><span>Work type</span><input type="text" name="workType" id="hire-workType" placeholder="e.g., Harvesting" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-workType" aria-label="Voice input for work type" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Location</span><input type="text" name="location" id="hire-location" placeholder="Village" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-location" aria-label="Voice input for location" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>No. workers</span><input type="number" name="workersNeeded" id="hire-workersNeeded" min="1" placeholder="5" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-workersNeeded" aria-label="Voice input for workers" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Wage/day</span><input type="number" name="dailyWage" id="hire-dailyWage" min="0" placeholder="500" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-dailyWage" aria-label="Voice input for wage" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="form-actions"><button class="btn btn--primary" type="submit">Post</button><button class="btn btn--secondary" type="button" id="btn-cancel-hire">Cancel</button></div>
+                        </form>
+                    </article>
+
+                    <article class="panel-card" id="labour-work-flow" hidden>
+                        <div class="section-head"><div><span class="section-kicker">Get Work</span><h3>Step 1/2: Free application</h3></div></div>
+                        <form id="labour-work-step-form" class="form-grid form-grid--single">
+                            <div class="field-with-voice">
+                                <label class="field"><span>Name</span><input type="text" name="applicantName" id="work-applicantName" placeholder="Full name" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-applicantName" aria-label="Voice input for name" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Work type</span><input type="text" name="workType" id="work-workType" placeholder="e.g., Weeding" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-workType" aria-label="Voice input for work type" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Experience</span><input type="number" name="experience" id="work-experience" min="0" placeholder="2" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-experience" aria-label="Voice input for experience" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="form-actions"><button class="btn btn--primary" type="submit">Apply</button><button class="btn btn--secondary" type="button" id="btn-cancel-work">Cancel</button></div>
+                        </form>
+                    </article>
+
                     <article class="panel-card">
-                        <div class="filters-grid">
+                        <div class="section-head"><div><span class="section-kicker">Matched Suggestions</span><h3>Likely labour matches</h3></div></div>
+                        <div id="matched-labour-list"></div>
+                    </article>
+
+                    <article class="panel-card">
+                        <div class="section-head"><div><span class="section-kicker">Labour Filters</span><h3>Filter workers by need and availability</h3></div></div>
+                        <p>Use these filters to quickly narrow labour options.</p>
+                        <form id="labour-need-form" class="form-grid form-grid--single">
                             <label class="field">
                                 <span>Work Type</span>
                                 <select id="labour-filter-work">
@@ -348,7 +497,7 @@
                             </label>
                             <label class="field">
                                 <span>Location</span>
-                                <input type="text" id="labour-filter-location" placeholder="Search location">
+                                <input type="text" id="labour-filter-location" name="location" placeholder="Search location">
                             </label>
                             <label class="field">
                                 <span>Minimum Workers</span>
@@ -374,7 +523,7 @@
                                     Reset Filters
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </article>
 
                     <div class="dashboard-grid dashboard-grid--split">
@@ -393,10 +542,10 @@
                         <article class="panel-card">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Post Labour Requirement</span>
-                                    <h3>Tell workers what you need</h3>
+                                    <span class="section-kicker">Government Schemes</span>
+                                    <h3>Scheme recommendations for your profile</h3>
                                 </div>
-                                <p>Requests are stored locally in the browser so they remain available during the demo.</p>
+                                <p>Based on saved farmer details, these scheme options help meet your labour and farming needs.</p>
                             </div>
 
                             <form id="labour-need-form" class="form-grid form-grid--single">
@@ -444,59 +593,6 @@
                     </div>
                 </section>
 
-                <section class="view-section" data-view="requests">
-                    <div class="section-banner section-banner--soft">
-                        <div>
-                            <span class="eyebrow">Farmer Requests</span>
-                            <h2>Browse farmer labour requirements and apply as a labour user.</h2>
-                        </div>
-                        <p>Use filters to see nearby work, then apply or reach out directly.</p>
-                    </div>
-
-                    <article class="panel-card">
-                        <div class="filters-grid">
-                            <label class="field">
-                                <span>Work Type</span>
-                                <select id="market-filter-work">
-                                    <option value="">All work types</option>
-                                    <option>Harvesting</option>
-                                    <option>Sugarcane Cutting</option>
-                                    <option>Weeding</option>
-                                    <option>Transplanting</option>
-                                    <option>Spraying</option>
-                                    <option>Loading</option>
-                                </select>
-                            </label>
-                            <label class="field">
-                                <span>Location</span>
-                                <input type="text" id="market-filter-location" placeholder="District / state / village">
-                            </label>
-                            <label class="field">
-                                <span>Date Needed</span>
-                                <input type="date" id="market-filter-date">
-                            </label>
-                            <div class="form-actions">
-                                <button class="btn btn--secondary" type="button" id="market-reset-button">
-                                    <i class="ri-refresh-line" aria-hidden="true"></i>
-                                    Reset Filters
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="panel-card">
-                        <div class="section-head">
-                            <div>
-                                <span class="section-kicker">Live Requests</span>
-                                <h3>Farmer labour needs you can apply to</h3>
-                            </div>
-                            <p id="market-result-meta">Loading farmer requests...</p>
-                        </div>
-
-                        <div class="card-grid" id="labour-market-list"></div>
-                    </article>
-                </section>
-
                 <section class="view-section" data-view="chatbot">
                     <div class="section-banner section-banner--soft">
                         <div>
@@ -516,35 +612,13 @@
                                 <p>Tap a prompt to simulate realistic labour and support questions in the demo.</p>
                             </div>
 
-                            <div class="chip-list">
-                                <button class="chip-button" type="button" data-chat-chip="Labour advice">Labour advice</button>
-                                <button class="chip-button" type="button" data-chat-chip="Crop help">Crop help</button>
-                                <button class="chip-button" type="button" data-chat-chip="Worker shortage">Worker shortage</button>
-                                <button class="chip-button" type="button" data-chat-chip="Scheme help">Scheme help</button>
-                                <button class="chip-button" type="button" data-chat-chip="Small farmer support">Small farmer support</button>
-                            </div>
-
-                            <div class="quick-help">
-                                <p>Example questions:</p>
-                                <ul class="simple-list">
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>How many labourers do I need for harvesting 2 acres?</span></li>
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>What should I do if workers are unavailable?</span></li>
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>Which scheme is useful for small farmers?</span></li>
-                                </ul>
-                            </div>
-                        </article>
-
-                        <article class="panel-card panel-card--chat">
-                            <div class="chat-window" id="chat-window"></div>
-
-                            <form id="chat-form" class="chat-form">
-                                <input type="text" id="chat-input" placeholder="Ask about labour, crops, worker shortage, or schemes" autocomplete="off">
-                                <button class="btn btn--primary btn--icon" type="submit" aria-label="Send chat message">
-                                    <i class="ri-send-plane-line" aria-hidden="true"></i>
-                                </button>
-                            </form>
+                            <div class="card-grid card-grid--scheme" id="labour-scheme-card-grid"></div>
                         </article>
                     </div>
+
+                    <article class="panel-card">
+                        <div id="posted-labour-list"></div>
+                    </article>
                 </section>
 
                 <section class="view-section" data-view="schemes">
@@ -581,6 +655,292 @@
         </div>
     </div>
 
+    <!-- Hire a Worker Modal -->
+    <div class="modal" id="hire-worker-modal" data-modal="hire-worker">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Post a Job</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <form id="hire-worker-form" class="form-grid form-grid--single">
+                <label class="field">
+                    <span>Job Title</span>
+                    <input type="text" name="jobTitle" placeholder="e.g., Harvesting Workers, Sugarcane Cutters" required>
+                </label>
+                <label class="field">
+                    <span>Job Description</span>
+                    <textarea name="jobDescription" rows="4" placeholder="Describe the job details, responsibilities, and requirements" required></textarea>
+                </label>
+                <label class="field">
+                    <span>Work Type</span>
+                    <select name="workType" required>
+                        <option value="">Select work type</option>
+                        <option>Harvesting</option>
+                        <option>Sugarcane Cutting</option>
+                        <option>Weeding</option>
+                        <option>Transplanting</option>
+                        <option>Spraying</option>
+                        <option>Loading</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Number of Workers Needed</span>
+                    <input type="number" name="workersNeeded" min="1" placeholder="Example: 5" required>
+                </label>
+                <label class="field">
+                    <span>Date Required</span>
+                    <input type="date" name="jobDate" required>
+                </label>
+                <label class="field">
+                    <span>Time Required</span>
+                    <input type="time" name="jobTime" required>
+                </label>
+                <label class="field">
+                    <span>Location</span>
+                    <input type="text" name="jobLocation" placeholder="Farm location / address" required>
+                </label>
+                <label class="field">
+                    <span>Daily Wage (in Rs.)</span>
+                    <input type="number" name="dailyWage" min="0" step="10" placeholder="Example: 500" required>
+                </label>
+                <label class="field">
+                    <span>Skills Required (Optional)</span>
+                    <input type="text" name="skillsRequired" placeholder="e.g., Machine operation, Weeding experience">
+                </label>
+                <label class="field">
+                    <span>Contact Mobile Number</span>
+                    <input type="tel" name="contactMobile" placeholder="Your contact number" required>
+                </label>
+
+                <div class="form-actions">
+                    <button class="btn btn--primary btn--wide" type="submit">
+                        <i class="ri-send-plane-line" aria-hidden="true"></i>
+                        Post Job
+                    </button>
+                    <button class="btn btn--secondary btn--wide" type="button" data-modal-close>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Apply for Job Modal -->
+    <div class="modal" id="apply-job-modal" data-modal="apply-job">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-dialog--large">
+            <div class="modal-header">
+                <h2>Browse & Apply for Jobs</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Job Listings -->
+                <div class="job-listings-container">
+                    <div class="job-search-bar">
+                        <label class="search-field">
+                            <i class="ri-search-line" aria-hidden="true"></i>
+                            <input type="text" id="job-search-input" placeholder="Search jobs by title, location, or type..." autocomplete="off">
+                        </label>
+                        <div class="job-filters">
+                            <select id="job-filter-type">
+                                <option value="">All job types</option>
+                                <option>Harvesting</option>
+                                <option>Sugarcane Cutting</option>
+                                <option>Weeding</option>
+                                <option>Transplanting</option>
+                                <option>Spraying</option>
+                                <option>Loading</option>
+                                <option>Other</option>
+                            </select>
+                            <select id="job-filter-wage">
+                                <option value="">All wages</option>
+                                <option value="0-300">Up to Rs. 300</option>
+                                <option value="300-500">Rs. 300 - 500</option>
+                                <option value="500-800">Rs. 500 - 800</option>
+                                <option value="800">Rs. 800+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="job-listings" class="job-listings"></div>
+                    <div id="no-jobs-message" class="empty-state" style="display: none;">
+                        <i class="ri-inbox-line" aria-hidden="true"></i>
+                        <p>No jobs available. Try different filters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Application Modal (Opens from job listing) -->
+    <div class="modal" id="job-application-modal" data-modal="job-application">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Apply for Job</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="job-application-details" class="job-application-details"></div>
+
+                <form id="job-application-form" class="form-grid form-grid--single">
+                    <label class="field">
+                        <span>Your Full Name</span>
+                        <input type="text" name="applicantName" placeholder="Enter your full name" required>
+                    </label>
+                    <label class="field">
+                        <span>Mobile Number</span>
+                        <input type="tel" name="applicantMobile" placeholder="Your contact number" required>
+                    </label>
+                    <label class="field">
+                        <span>Your Experience (Years)</span>
+                        <input type="number" name="experience" min="0" placeholder="Example: 3" required>
+                    </label>
+                    <label class="field">
+                        <span>Your Skills</span>
+                        <textarea name="skills" rows="3" placeholder="List your skills and expertise" required></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Why are you interested in this job?</span>
+                        <textarea name="coverLetter" rows="3" placeholder="Tell the employer why you're a good fit" required></textarea>
+                    </label>
+                    <label class="field">
+                        <span class="field-checkbox">
+                            <input type="checkbox" name="availability" required>
+                            <span>I am available on the specified date</span>
+                        </label>
+                    </label>
+
+                    <div class="form-actions">
+                        <button class="btn btn--primary btn--wide" type="submit">
+                            <i class="ri-send-plane-line" aria-hidden="true"></i>
+                            Submit Application
+                        </button>
+                        <button class="btn btn--secondary btn--wide" type="button" data-modal-close>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" data-modal="guide-welcome">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Welcome to AgriShield</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p>This one-time guide helps you understand login, profile setup, labour finding, and scheme flow.</p>
+                <div class="form-actions">
+                    <button class="btn btn--primary" type="button" id="open-guide-now">
+                        <i class="ri-book-open-line" aria-hidden="true"></i>
+                        Open Tutorial
+                    </button>
+                    <button class="btn btn--secondary" type="button" id="skip-guide-now" data-modal-close>
+                        Skip for now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" data-modal="guide-tutorial">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-dialog--large">
+            <div class="modal-header">
+                <h2>App Tutorial / Guide</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="guide-card-main">
+                    <div class="section-head section-head--tight">
+                        <div>
+                            <span class="eyebrow">App Guide</span>
+                            <h3>Follow these steps</h3>
+                        </div>
+                        <p>Use this tutorial directly from the dashboard.</p>
+                    </div>
+
+                    <div class="guide-step-list" data-guide-step-list></div>
+                </div>
+
+                <div class="guide-card-main guide-card-main--voice" style="margin-top: 1rem;">
+                    <div class="section-head section-head--tight">
+                        <div>
+                            <span class="eyebrow">Voice Help</span>
+                            <h3>Listen and control by voice</h3>
+                        </div>
+                        <p>Use buttons or speak commands.</p>
+                    </div>
+
+                    <div class="guide-language-row">
+                        <label class="guide-language-label" for="guide-language-select">Voice Language</label>
+                        <select id="guide-language-select" class="guide-language-select" data-guide-language>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi (हिन्दी)</option>
+                            <option value="mr">Marathi (मराठी)</option>
+                            <option value="ta">Tamil (தமிழ்)</option>
+                            <option value="te">Telugu (తెలుగు)</option>
+                            <option value="bn">Bengali (বাংলা)</option>
+                        </select>
+                    </div>
+
+                    <div class="voice-controls">
+                        <button class="btn btn--primary" type="button" data-guide-voice-play>
+                            <i class="ri-play-circle-line" aria-hidden="true"></i>
+                            Play Full Guide
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-repeat>
+                            <i class="ri-repeat-line" aria-hidden="true"></i>
+                            Repeat Step
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-stop>
+                            <i class="ri-stop-circle-line" aria-hidden="true"></i>
+                            Stop Voice
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-listen>
+                            <i class="ri-mic-line" aria-hidden="true"></i>
+                            Voice Commands
+                        </button>
+                    </div>
+
+                    <div class="guide-voice-status" data-guide-voice-status>
+                        Voice help is ready. Press Play Full Guide to start.
+                    </div>
+
+                    <div class="guide-command-list">
+                        <div class="guide-command-chip">Say: play guide</div>
+                        <div class="guide-command-chip">Say: next step</div>
+                        <div class="guide-command-chip">Say: previous step</div>
+                        <div class="guide-command-chip">Say: repeat</div>
+                        <div class="guide-command-chip">Say: stop</div>
+                        <div class="guide-command-chip">Say: step 1 to step 6</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" data-toast aria-live="polite"></div>
 
     <script src="js/mock-data.js"></script>
@@ -588,6 +948,9 @@
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         crossorigin=""
     ></script>
+    <script src="js/voice-utils.js"></script>
+    <script src="js/voice-integration.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
+

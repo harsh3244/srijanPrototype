@@ -101,7 +101,7 @@ select {
     width: 22rem;
     height: 22rem;
     border-radius: 50%;
-    background: rgba(54, 196, 85, 0.12);
+    background: rgba(37, 201, 72, 0.37);
     filter: blur(90px);
     pointer-events: none;
     z-index: -1;
@@ -711,7 +711,7 @@ select {
 
 .choice-button.is-active,
 .language-button.is-active {
-    color: #082013;
+    color:  #fff;
     background: linear-gradient(135deg, var(--green), var(--teal));
     border-color: transparent;
 }

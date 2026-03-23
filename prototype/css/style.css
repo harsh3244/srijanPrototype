@@ -245,8 +245,18 @@ button {
     display: grid;
 }
 
+.guide-shell {
+    min-height: 100vh;
+    display: grid;
+}
+
 .login-story,
 .login-panel {
+    padding: 1.35rem;
+}
+
+.guide-story,
+.guide-panel {
     padding: 1.35rem;
 }
 
@@ -259,6 +269,16 @@ button {
         linear-gradient(180deg, rgba(9, 35, 23, 0.28), rgba(13, 50, 35, 0.8)),
         url("../assests/bg1.jpg") center / cover no-repeat;
 }
+
+    .guide-story {
+        display: grid;
+        gap: 1.3rem;
+        align-content: start;
+        color: #eafff0;
+        background:
+        linear-gradient(180deg, rgba(9, 35, 23, 0.38), rgba(13, 50, 35, 0.84)),
+        url("../assests/bg1.jpg") center / cover no-repeat;
+    }
 
 .login-story__copy h1,
 .section-head h2,
@@ -283,6 +303,20 @@ button {
     font-size: 1.06rem;
     line-height: 1.8;
     color: rgba(234, 255, 240, 0.86);
+}
+
+.guide-story__copy h1 {
+    color: #fff;
+    font-size: clamp(2.2rem, 6vw, 4.1rem);
+    line-height: 1.03;
+    max-width: 12ch;
+}
+
+.guide-story__copy p {
+    max-width: 38rem;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    color: rgba(234, 255, 240, 0.88);
 }
 
 .story-grid {
@@ -404,10 +438,148 @@ button {
     place-items: center;
 }
 
+.guide-panel {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+}
+
 .login-card {
     width: min(32rem, 100%);
     padding: 1.45rem;
     background: rgba(255, 255, 255, 0.86);
+}
+
+.guide-card-main {
+    padding: 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(18px);
+}
+
+.guide-card-main--voice {
+    background: linear-gradient(180deg, rgba(201, 243, 218, 0.18), rgba(255, 255, 255, 0.92));
+}
+
+.guide-step-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.guide-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.9);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.guide-step:hover {
+    transform: translateY(-1px);
+}
+
+.guide-step.is-active {
+    border-color: rgba(42, 173, 95, 0.42);
+    box-shadow: 0 12px 26px rgba(42, 173, 95, 0.12);
+    background: rgba(232, 248, 238, 0.9);
+}
+
+.guide-step__index {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--green-600), var(--teal-500));
+}
+
+.guide-step h3 {
+    margin: 0;
+    color: var(--text-strong);
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+
+.guide-step p {
+    margin: 0.35rem 0 0;
+    color: var(--text-base);
+    line-height: 1.6;
+}
+
+.guide-links-row {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.guide-language-row {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+}
+
+.guide-language-label {
+    color: var(--text-strong);
+    font-weight: 700;
+}
+
+.guide-language-select {
+    width: 100%;
+    min-height: 3.1rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text-strong);
+}
+
+.guide-language-select:focus {
+    outline: none;
+    border-color: rgba(42, 173, 95, 0.28);
+    box-shadow: 0 0 0 4px rgba(42, 173, 95, 0.09);
+}
+
+.voice-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.guide-voice-status {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(235, 247, 239, 0.84), rgba(255, 255, 255, 0.96));
+    color: var(--text-strong);
+    font-weight: 700;
+}
+
+.guide-command-list {
+    margin-top: 0.9rem;
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.guide-command-chip {
+    min-height: 2.6rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.7rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.78);
+    color: var(--text-strong);
+    font-weight: 700;
 }
 
 .section-head {
@@ -861,6 +1033,52 @@ body.modal-open {
     font-weight: 800;
 }
 
+.global-language-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.global-language-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-base);
+}
+
+.global-language-select {
+    min-width: 9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-strong);
+    padding: 0.42rem 0.6rem;
+}
+
+.global-language-select:focus {
+    outline: 2px solid rgba(42, 173, 95, 0.22);
+    outline-offset: 1px;
+}
+
+.global-language-row--topbar {
+    margin: 0;
+    padding: 0.32rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.global-language-row--topbar .global-language-label {
+    font-size: 0.78rem;
+}
+
+.global-language-row--topbar .global-language-select {
+    min-width: 7.5rem;
+    font-size: 0.84rem;
+    padding: 0.35rem 0.5rem;
+}
+
 .app-shell {
     min-height: 100vh;
 }
@@ -871,6 +1089,7 @@ body.modal-open {
     left: 0;
     bottom: 0;
     width: 18.5rem;
+    min-width: 18.5rem;
     padding: 1.2rem;
     display: flex;
     flex-direction: column;
@@ -997,20 +1216,26 @@ body.modal-open {
 
 .app-main {
     margin-left: 18.5rem;
+    width: calc(100% - 18.5rem);
+    max-width: calc(100vw - 18.5rem);
     padding: 1.1rem 1.2rem 2rem;
+    min-width: calc(100% - 18.5rem);
 }
 
 .topbar {
-    position: sticky;
-    top: 1rem;
-    z-index: 40;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    z-index: auto;
     display: flex;
+    flex-wrap: wrap;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1.2rem;
-    padding: 1rem 1.1rem;
+    margin-bottom: 0;
+    padding: 0.9rem 1.1rem;
     border: 1px solid var(--line);
     border-radius: 1.45rem;
     background: rgba(255, 255, 255, 0.82);
@@ -1629,9 +1854,402 @@ body.modal-open {
     visibility: visible;
 }
 
+/* Labour Finder Options */
+.labour-options-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.labour-option-card {
+    padding: 1.8rem;
+    background: var(--surface-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.labour-option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.labour-option-header {
+    font-size: 3rem;
+    color: var(--green-600);
+    margin-bottom: 1rem;
+}
+
+.labour-option-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    color: var(--text-strong);
+}
+
+.labour-option-card p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.labour-simple-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.labour-simple-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: 2px solid var(--green-600);
+    border-radius: 1.2rem;
+    background: rgba(243, 250, 244, 0.9);
+    color: var(--text-strong);
+    font-size: 1.15rem;
+    min-height: 10rem;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.labour-simple-btn i {
+    font-size: 2.4rem;
+}
+
+.labour-simple-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 25px rgba(41, 81, 57, 0.24);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.labour-voice-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.labour-voice-actions select {
+    height: 2.75rem;
+    padding: 0.4rem;
+    border-radius: 0.85rem;
+    border: 1px solid var(--line);
+    background: white;
+}
+
+#labour-hire-flow,
+#labour-work-flow {
+    margin-bottom: 1rem;
+}
+
+#labour-hire-flow .form-actions,
+#labour-work-flow .form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+}
+
+#labour-hire-flow .field,
+#labour-work-flow .field {
+    font-size: 1.03rem;
+}
+
+#labour-hire-flow .field input,
+#labour-work-flow .field input {
+    font-size: 1.05rem;
+}
+
+.btn--block {
+    width: 100%;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.modal.is-open {
+    display: grid;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 200ms ease;
+}
+
+.modal-dialog {
+    position: relative;
+    margin: auto;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    background: var(--surface-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 300ms ease;
+    overflow: hidden;
+}
+
+.modal-dialog--large {
+    max-width: 800px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-strong);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 180ms ease;
+}
+
+.modal-close:hover {
+    color: var(--text-strong);
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+/* Job Listings */
+.job-listings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.job-search-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.job-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.job-listings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.job-card {
+    padding: 1.2rem;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.job-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: var(--surface-strong);
+}
+
+.job-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.8rem;
+}
+
+.job-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0;
+}
+
+.job-card-wage {
+    font-weight: 700;
+    color: var(--green-600);
+    font-size: 1rem;
+}
+
+.job-card-location {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.job-card-description {
+    color: var(--text-base);
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+}
+
+.job-card-details {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.job-card-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.job-card-apply {
+    width: 100%;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 180ms ease;
+}
+
+.job-card-apply:hover {
+    background: var(--green-700);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    opacity: 0.5;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.job-application-details {
+    background: var(--surface-soft);
+    padding: 1.2rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--line);
+}
+
+.job-application-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-strong);
+}
+
+.job-application-details p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.field-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.field-checkbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.form-grid--single {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.form-actions {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+}
+
+.search-field input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    color: var(--text-base);
+}
+
+.search-field input::placeholder {
+    color: var(--text-muted);
+}
+
 @media (min-width: 700px) {
+    .guide-command-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .form-grid--double,
     .filters-grid,
+    .labour-options-grid,
     .highlight-row,
     .stats-grid,
     .summary-grid,
@@ -1657,6 +2275,15 @@ body.modal-open {
 }
 
 @media (min-width: 1024px) {
+    .guide-shell {
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    }
+
+    .guide-story,
+    .guide-panel {
+        padding: 2rem;
+    }
+
     .login-shell {
         grid-template-columns: minmax(0, 1.12fr) minmax(24rem, 0.88fr);
     }
@@ -1671,7 +2298,8 @@ body.modal-open {
     }
 
     .dashboard-grid--split {
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 1rem;
     }
 
     .dashboard-grid--chat {
@@ -1718,6 +2346,22 @@ body.modal-open {
 }
 
 @media (max-width: 1099px) {
+    .app-main {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 1.1rem;
+    }
+
+    .app-sidebar {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .topbar {
+        left: auto;
+        right: auto;
+    }
+
     body.sidebar-open {
         overflow: hidden;
     }
@@ -1810,5 +2454,285 @@ body.modal-open {
         animation: none !important;
         transition-duration: 0.01ms !important;
         transition-delay: 0ms !important;
+    }
+}
+
+/**
+ * Voice Input Styles
+ * Mic button styling and animations for speech-to-text input
+ */
+
+/* Wrapper for input + mic button */
+.voice-input-wrapper,
+.field-with-voice {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    position: relative;
+}
+
+.voice-input-wrapper input,
+.field-with-voice .field {
+    flex: 1 1 auto;
+    margin: 0;
+}
+
+.field-with-voice {
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+/* Mic Button Base Styles */
+.voice-mic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--line-strong);
+    background: var(--surface-soft);
+    color: var(--text-base);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.voice-mic-btn:hover:not(:disabled) {
+    border-color: var(--green-500);
+    background: var(--mint-200);
+    color: var(--green-700);
+}
+
+.voice-mic-btn:focus-visible {
+    outline: 2px solid var(--green-500);
+    outline-offset: 2px;
+}
+
+.voice-mic-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Mic Icon */
+.voice-mic-icon {
+    display: inline-flex;
+    font-size: 1.1rem;
+}
+
+/* Status Dot */
+.voice-status-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+/* Listening State - Animated pulse */
+.voice-mic-btn--listening {
+    border-color: var(--warning-500);
+    background: rgba(216, 148, 34, 0.08);
+    color: var(--warning-500);
+    animation: voicePulse 1.5s ease-in-out infinite;
+}
+
+.voice-mic-btn--listening .voice-status-dot {
+    background: var(--warning-500);
+    animation: voiceDotPulse 1.5s ease-in-out infinite;
+}
+
+/* Success State */
+.voice-mic-btn--success {
+    border-color: var(--green-500);
+    background: rgba(42, 173, 95, 0.08);
+    color: var(--green-500);
+    animation: voiceSuccess 0.4s ease;
+}
+
+.voice-mic-btn--success .voice-status-dot {
+    background: var(--green-500);
+    animation: voiceSuccessDot 0.4s ease;
+}
+
+/* Error State */
+.voice-mic-btn--error {
+    border-color: var(--danger-500);
+    background: rgba(223, 111, 88, 0.08);
+    color: var(--danger-500);
+    animation: voiceError 0.3s ease;
+}
+
+.voice-mic-btn--error .voice-status-dot {
+    background: var(--danger-500);
+}
+
+/* Animations */
+
+@keyframes voicePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+@keyframes voiceDotPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 var(--warning-500);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(216, 148, 34, 0.3);
+    }
+}
+
+@keyframes voiceSuccess {
+    0% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes voiceSuccessDot {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes voiceError {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+/* Voice Status Badge (for showing listening/processing status) */
+.voice-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(42, 173, 95, 0.1);
+    border: 1px solid var(--green-400);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--green-700);
+    animation: fadeIn 0.3s ease;
+}
+
+.voice-status-badge.listening {
+    background: rgba(216, 148, 34, 0.1);
+    border-color: var(--warning-500);
+    color: var(--warning-500);
+}
+
+.voice-status-badge.error {
+    background: rgba(223, 111, 88, 0.1);
+    border-color: var(--danger-500);
+    color: var(--danger-500);
+}
+
+.voice-status-badge::before {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: voiceStatusBlink 1.5s ease-in-out infinite;
+}
+
+.voice-status-badge.success::before {
+    animation: none;
+}
+
+@keyframes voiceStatusBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Waveform animation for visual feedback */
+.voice-waveform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    height: 1rem;
+}
+
+.voice-waveform-bar {
+    width: 0.15rem;
+    background: var(--green-500);
+    border-radius: 0.1rem;
+    animation: waveformBar 0.8s ease-in-out infinite;
+}
+
+.voice-waveform-bar:nth-child(1) { animation-delay: 0s; }
+.voice-waveform-bar:nth-child(2) { animation-delay: 0.15s; }
+.voice-waveform-bar:nth-child(3) { animation-delay: 0.3s; }
+.voice-waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+.voice-waveform-bar:nth-child(5) { animation-delay: 0s; }
+
+@keyframes waveformBar {
+    0%, 100% {
+        height: 0.3rem;
+    }
+    50% {
+        height: 1rem;
+    }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .voice-mic-btn {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .voice-mic-icon {
+        font-size: 1rem;
+    }
+
+    .voice-status-dot {
+        width: 0.4rem;
+        height: 0.4rem;
     }
 }

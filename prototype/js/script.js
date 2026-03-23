@@ -1,33 +1,15 @@
 (function () {
-    const API_BASE = getApiBase();
-    const DEMO_USER = {
-        username: "demo_farmer",
-        password: "demo1234",
-        mobile: "9876543210"
+    const STORAGE_KEYS = {
+        users: "agrishield_auth_users",
+        session: "agrishield_auth_session"
     };
-    const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
-    const DEFAULT_CHAT_GREETING = {
-        role: "bot",
-        text: "Namaste. I can help with labour planning, crop work, worker shortage handling, and scheme support. Ask me a question or tap a quick prompt."
+
+    const USER_STORAGE_KEYS = {
+        profile: "agrishield_labour_profile",
+        labourPosts: "agrishield_labour_posts",
+        chatHistory: "agrishield_labour_chat_history",
+        activeView: "agrishield_labour_active_view"
     };
-    const state = {
-        session: null,
-        profile: {},
-        labourProfile: null,
-        labourPosts: [],
-        labourMarketPosts: [],
-        roles: ["farmer"],
-        chatHistory: [],
-        activeView: "home",
-        activeSchemeFilter: "all"
-    };
-    const mapState = {
-        instance: null,
-        marker: null,
-        form: null,
-        searchResults: []
-    };
-    const page = document.body.dataset.page;
 
     const VIEW_META = {
         home: {
@@ -37,10 +19,6 @@
         labour: {
             title: "Labour Finding",
             subtitle: "Browse available labour, use filters, and post labour requirements."
-        },
-        requests: {
-            title: "Farmer Requests",
-            subtitle: "Browse farmer labour needs and apply as a labour user."
         },
         chatbot: {
             title: "AI Chatbot",
@@ -52,44 +30,40 @@
         }
     };
 
-    function getApiBase() {
-        const { port } = window.location;
-        return port === "3000" ? "" : "http://localhost:3000";
-    }
+    const DEMO_USER = {
+        username: "demo_farmer",
+        mobile: "9876543210",
+        password: "demo1234"
+    };
 
-    async function apiRequest(path, options = {}) {
-        const { method = "GET", body } = options;
-        const fetchOptions = {
-            method,
-            credentials: "include",
-            headers: { "Content-Type": "application/json" }
-        };
+    const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
+    const DEFAULT_CHAT_GREETING = {
+        role: "bot",
+        text: "Namaste. I can help with labour planning, crop work, labour shortage handling, and useful farmer schemes. Ask me a question or tap a quick prompt."
+    };
 
-        if (body !== undefined) {
-            fetchOptions.body = JSON.stringify(body);
-        }
+    const state = {
+        session: null,
+        profile: null,
+        labourPosts: [],
+        chatHistory: [],
+        activeView: "home",
+        activeSchemeFilter: "all"
+    };
+    const mapState = {
+        instance: null,
+        marker: null,
+        form: null,
+        searchResults: []
+    };
 
-        const response = await fetch(`${API_BASE}${path}`, fetchOptions);
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok || data.ok === false) {
-            const message = data.message || `Request to ${path} failed`;
-            throw new Error(message);
-        }
-
-        return data;
-    }
-
-    async function fetchSessionUser() {
-        try {
-            const data = await apiRequest("/api/auth/me");
-            return data.authenticated ? data.user : null;
-        } catch {
-            return null;
-        }
-    }
+    const page = document.body.dataset.page;
 
     document.addEventListener("DOMContentLoaded", () => {
+        state.uiLanguage = normalizeUiLanguage(getStoredValue(STORAGE_KEYS.uiLanguage, "en"));
+        initLanguageSelectors();
+        applyPageTranslations();
+
         if (page === "login") {
             void initLoginPage();
         }
@@ -105,7 +79,338 @@
         if (page === "labour-register") {
             void initLabourRegisterPage();
         }
+
     });
+
+    function initLanguageSelectors() {
+        const selects = document.querySelectorAll("[data-ui-language-select]");
+
+        if (!selects.length) {
+            return;
+        }
+
+        selects.forEach((select) => {
+            select.value = state.uiLanguage;
+
+            select.addEventListener("change", () => {
+                const nextLanguage = normalizeUiLanguage(select.value);
+
+                state.uiLanguage = nextLanguage;
+                setStoredValue(STORAGE_KEYS.uiLanguage, nextLanguage);
+                selects.forEach((item) => {
+                    item.value = nextLanguage;
+                });
+
+                applyPageTranslations();
+
+                if (page === "dashboard") {
+                    refreshGlobalUI();
+                    setActiveView(state.activeView);
+                }
+            });
+        });
+    }
+
+    function applyPageTranslations() {
+        document.documentElement.lang = state.uiLanguage;
+
+        if (page === "login") {
+            applyLoginPageTranslations();
+            return;
+        }
+
+        if (page === "register") {
+            applyRegisterPageTranslations();
+            return;
+        }
+
+        if (page === "dashboard") {
+            applyDashboardStaticTranslations();
+        }
+    }
+
+    function applyLoginPageTranslations() {
+        const copy = getUiCopy("login");
+        setText(".global-language-label", getUiCopy("common").languageLabel);
+        setText(".login-story .brand-badge small", copy.storyTagline);
+        setText(".login-story__copy .eyebrow", copy.storyEyebrow);
+        setText(".login-story__copy h1", copy.storyTitle);
+        setText(".login-story__copy p", copy.storyDesc);
+        setText(".login-panel .section-head .eyebrow", copy.sectionEyebrow);
+        setText(".login-panel .section-head h2", copy.sectionTitle);
+        setText(".login-panel .section-head p", copy.sectionDesc);
+        setAuthFormLabels("login");
+    }
+
+    function applyRegisterPageTranslations() {
+        const copy = getUiCopy("register");
+        setText(".global-language-label", getUiCopy("common").languageLabel);
+        setText(".login-story .brand-badge small", copy.storyTagline);
+        setText(".login-story__copy .eyebrow", copy.storyEyebrow);
+        setText(".login-story__copy h1", copy.storyTitle);
+        setText(".login-story__copy p", copy.storyDesc);
+        setText(".login-panel .section-head .eyebrow", copy.sectionEyebrow);
+        setText(".login-panel .section-head h2", copy.sectionTitle);
+        setText(".login-panel .section-head p", copy.sectionDesc);
+        setAuthFormLabels("register");
+    }
+
+    function applyDashboardStaticTranslations() {
+        const copy = getUiCopy("dashboard");
+
+        setText(".global-language-row--topbar .global-language-label", getUiCopy("common").languageLabel);
+        setText(".brand-badge--sidebar small", copy.sidebarTagline);
+        setText(".topbar__kicker", copy.topbarKicker);
+        setText('[data-nav="home"] span', copy.navHome);
+        setText('[data-nav="labour"] span', copy.navLabour);
+        setText('[data-nav="schemes"] span', copy.navSchemes);
+        setText("[data-open-guide] span", copy.navGuide);
+
+        const guideButtons = document.querySelectorAll("[data-open-guide]");
+        if (guideButtons.length > 1) {
+            const topGuideLabel = guideButtons[guideButtons.length - 1].querySelector("span");
+            if (topGuideLabel) {
+                topGuideLabel.textContent = copy.guideButton;
+            }
+        }
+
+        setButtonText("#logout-button", copy.logoutButton);
+        setText(".hero-panel__copy > p", copy.homeHeroLead);
+        setButtonText('[data-jump-view="labour"]', copy.heroExplore);
+        setButtonText('[data-jump-view="schemes"]', copy.heroSchemes);
+    }
+
+    function setAuthFormLabels(authPage) {
+        if (authPage === "login") {
+            setFieldLabel("login-form", "role", getUiText("loginLabelRole", "Login As"));
+            setFieldLabel("login-form", "username", getUiText("loginLabelUsername", "Username"));
+            setFieldLabel("login-form", "password", getUiText("loginLabelPassword", "Password"));
+            setFieldLabel("login-form", "captchaAnswer", getUiText("loginLabelCaptchaAnswer", "CAPTCHA Answer"));
+            setText("#login-form .field:nth-of-type(4) > span", getUiText("loginLabelCaptcha", "CAPTCHA"));
+            setOptionLabel("login-form", "role", "", getUiText("rolePlaceholder", "Select role"));
+            setOptionLabel("login-form", "role", "farmer", getUiText("roleFarmer", "Farmer"));
+            setOptionLabel("login-form", "role", "labour", getUiText("roleLabour", "Labour"));
+            setPlaceholder("login-form", "username", getUiText("placeholderUsername", "Enter your username"));
+            setPlaceholder("login-form", "password", getUiText("placeholderPassword", "Enter your password"));
+            setPlaceholder("login-form", "captchaAnswer", getUiText("placeholderCaptcha", "Enter the answer"));
+            setButtonText("#login-form button[type='submit']", getUiText("loginButton", "Login"));
+            setButtonText("#demo-login-button", getUiText("demoLoginButton", "Fill Demo Login"));
+            setButtonText("#captcha-refresh", getUiText("captchaRefreshButton", "Refresh"));
+            setInlineLeadText(".auth-switch", getUiText("loginSwitchLead", "Don’t have an account?"));
+            setText(".auth-switch a", getUiText("loginSwitchLink", "Register here"));
+            setText(".login-note p", getUiText("loginNote", "User data is stored only in localStorage for the prototype. No backend or encryption is used."));
+        }
+
+        if (authPage === "register") {
+            setFieldLabel("register-form", "fullName", getUiText("registerLabelFullName", "Full Name"));
+            setFieldLabel("register-form", "role", getUiText("registerLabelRole", "Register As"));
+            setFieldLabel("register-form", "mobile", getUiText("registerLabelMobile", "Mobile Number"));
+            setFieldLabel("register-form", "username", getUiText("registerLabelUsername", "Username"));
+            setFieldLabel("register-form", "password", getUiText("registerLabelPassword", "Password"));
+            setFieldLabel("register-form", "confirmPassword", getUiText("registerLabelConfirmPassword", "Confirm Password"));
+            setOptionLabel("register-form", "role", "", getUiText("rolePlaceholder", "Select role"));
+            setOptionLabel("register-form", "role", "farmer", getUiText("roleFarmer", "Farmer"));
+            setOptionLabel("register-form", "role", "labour", getUiText("roleLabour", "Labour"));
+            setPlaceholder("register-form", "fullName", getUiText("placeholderFullName", "Enter your full name"));
+            setPlaceholder("register-form", "mobile", getUiText("placeholderMobile", "10-digit mobile number"));
+            setPlaceholder("register-form", "username", getUiText("placeholderCreateUsername", "Create a username"));
+            setPlaceholder("register-form", "password", getUiText("placeholderCreatePassword", "Create a password"));
+            setPlaceholder("register-form", "confirmPassword", getUiText("placeholderConfirmPassword", "Re-enter password"));
+            setButtonText("#register-form button[type='submit']", getUiText("registerButton", "Register"));
+            setInlineLeadText(".auth-switch", getUiText("registerSwitchLead", "Already have an account?"));
+            setText(".auth-switch a", getUiText("registerSwitchLink", "Login here"));
+        }
+    }
+
+    function getUiCopy(section) {
+        const languagePack = UI_COPY[state.uiLanguage] || UI_COPY.en;
+        const defaultPack = UI_COPY.en;
+
+        return {
+            ...(defaultPack[section] || {}),
+            ...(languagePack[section] || {})
+        };
+    }
+
+    function getUiText(key, fallback) {
+        const fallbackByLanguage = {
+            en: {
+                loginLabelRole: "Login As",
+                loginLabelUsername: "Username",
+                loginLabelPassword: "Password",
+                loginLabelCaptchaAnswer: "CAPTCHA Answer",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "Select role",
+                roleFarmer: "Farmer",
+                roleLabour: "Labour",
+                placeholderUsername: "Enter your username",
+                placeholderPassword: "Enter your password",
+                placeholderCaptcha: "Enter the answer",
+                loginButton: "Login",
+                demoLoginButton: "Fill Demo Login",
+                captchaRefreshButton: "Refresh",
+                loginSwitchLead: "Don’t have an account?",
+                loginSwitchLink: "Register here",
+                loginNote: "User data is stored only in localStorage for the prototype. No backend or encryption is used.",
+                registerLabelFullName: "Full Name",
+                registerLabelRole: "Register As",
+                registerLabelMobile: "Mobile Number",
+                registerLabelUsername: "Username",
+                registerLabelPassword: "Password",
+                registerLabelConfirmPassword: "Confirm Password",
+                placeholderFullName: "Enter your full name",
+                placeholderMobile: "10-digit mobile number",
+                placeholderCreateUsername: "Create a username",
+                placeholderCreatePassword: "Create a password",
+                placeholderConfirmPassword: "Re-enter password",
+                registerButton: "Register",
+                registerSwitchLead: "Already have an account?",
+                registerSwitchLink: "Login here"
+            },
+            hi: {
+                loginLabelRole: "लॉगिन प्रकार",
+                loginLabelUsername: "यूज़रनेम",
+                loginLabelPassword: "पासवर्ड",
+                loginLabelCaptchaAnswer: "CAPTCHA उत्तर",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "भूमिका चुनें",
+                roleFarmer: "किसान",
+                roleLabour: "लेबर",
+                placeholderUsername: "अपना यूज़रनेम दर्ज करें",
+                placeholderPassword: "अपना पासवर्ड दर्ज करें",
+                placeholderCaptcha: "उत्तर दर्ज करें",
+                loginButton: "लॉगिन",
+                demoLoginButton: "डेमो लॉगिन भरें",
+                captchaRefreshButton: "रिफ्रेश",
+                loginSwitchLead: "खाता नहीं है?",
+                loginSwitchLink: "यहां रजिस्टर करें",
+                loginNote: "इस प्रोटोटाइप में डेटा केवल localStorage में सेव होता है। कोई बैकएंड या एन्क्रिप्शन उपयोग नहीं है।",
+                registerLabelFullName: "पूरा नाम",
+                registerLabelRole: "रजिस्टर प्रकार",
+                registerLabelMobile: "मोबाइल नंबर",
+                registerLabelUsername: "यूज़रनेम",
+                registerLabelPassword: "पासवर्ड",
+                registerLabelConfirmPassword: "पासवर्ड पुष्टि",
+                placeholderFullName: "अपना पूरा नाम दर्ज करें",
+                placeholderMobile: "10 अंकों का मोबाइल नंबर",
+                placeholderCreateUsername: "यूज़रनेम बनाएं",
+                placeholderCreatePassword: "पासवर्ड बनाएं",
+                placeholderConfirmPassword: "पासवर्ड फिर से दर्ज करें",
+                registerButton: "रजिस्टर",
+                registerSwitchLead: "पहले से खाता है?",
+                registerSwitchLink: "यहां लॉगिन करें"
+            },
+            mr: {
+                loginLabelRole: "लॉगिन प्रकार",
+                loginLabelUsername: "युजरनेम",
+                loginLabelPassword: "पासवर्ड",
+                loginLabelCaptchaAnswer: "CAPTCHA उत्तर",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "भूमिका निवडा",
+                roleFarmer: "शेतकरी",
+                roleLabour: "मजूर",
+                placeholderUsername: "तुमचा युजरनेम टाका",
+                placeholderPassword: "तुमचा पासवर्ड टाका",
+                placeholderCaptcha: "उत्तर टाका",
+                loginButton: "लॉगिन",
+                demoLoginButton: "डेमो लॉगिन भरा",
+                captchaRefreshButton: "रीफ्रेश",
+                loginSwitchLead: "खाते नाही?",
+                loginSwitchLink: "इथे नोंदणी करा",
+                loginNote: "या प्रोटोटाइपमध्ये डेटा फक्त localStorage मध्ये साठवला जातो. कोणताही बॅकएंड किंवा एन्क्रिप्शन वापरलेले नाही.",
+                registerLabelFullName: "पूर्ण नाव",
+                registerLabelRole: "नोंदणी प्रकार",
+                registerLabelMobile: "मोबाइल नंबर",
+                registerLabelUsername: "युजरनेम",
+                registerLabelPassword: "पासवर्ड",
+                registerLabelConfirmPassword: "पासवर्ड पुष्टी",
+                placeholderFullName: "तुमचे पूर्ण नाव टाका",
+                placeholderMobile: "10 अंकी मोबाइल नंबर",
+                placeholderCreateUsername: "युजरनेम तयार करा",
+                placeholderCreatePassword: "पासवर्ड तयार करा",
+                placeholderConfirmPassword: "पासवर्ड पुन्हा टाका",
+                registerButton: "नोंदणी",
+                registerSwitchLead: "आधीच खाते आहे?",
+                registerSwitchLink: "इथे लॉगिन करा"
+            }
+        };
+
+        const selectedMap = fallbackByLanguage[state.uiLanguage] || fallbackByLanguage.en;
+        return selectedMap[key] || fallbackByLanguage.en[key] || fallback || "";
+    }
+
+    function normalizeUiLanguage(value) {
+        const languageCode = cleanText(value).toLowerCase();
+        return SUPPORTED_UI_LANGUAGES.includes(languageCode) ? languageCode : "en";
+    }
+
+    function setFieldLabel(formId, fieldName, labelText) {
+        const control = document.querySelector(`#${formId} [name='${fieldName}']`);
+        const label = control?.closest("label")?.querySelector("span");
+        if (label) {
+            label.textContent = labelText;
+        }
+    }
+
+    function setPlaceholder(formId, fieldName, placeholderText) {
+        const control = document.querySelector(`#${formId} [name='${fieldName}']`);
+        if (control && "placeholder" in control) {
+            control.placeholder = placeholderText;
+        }
+    }
+
+    function setOptionLabel(formId, fieldName, value, text) {
+        const option = document.querySelector(`#${formId} [name='${fieldName}'] option[value='${value}']`);
+        if (option) {
+            option.textContent = text;
+        }
+    }
+
+    function setButtonText(selector, text) {
+        const button = document.querySelector(selector);
+
+        if (!button) {
+            return;
+        }
+
+        const labelNode = Array.from(button.childNodes)
+            .find((node) => node.nodeType === Node.TEXT_NODE && cleanText(node.textContent));
+
+        if (labelNode) {
+            labelNode.textContent = ` ${text}`;
+            return;
+        }
+
+        const spanNode = button.querySelector("span:not(.icon-badge)");
+        if (spanNode) {
+            spanNode.textContent = text;
+            return;
+        }
+
+        if (button.querySelector("i")) {
+            button.append(document.createTextNode(` ${text}`));
+            return;
+        }
+
+        button.textContent = text;
+    }
+
+    function setInlineLeadText(selector, text) {
+        const node = document.querySelector(selector);
+
+        if (!node) {
+            return;
+        }
+
+        const leadNode = Array.from(node.childNodes)
+            .find((child) => child.nodeType === Node.TEXT_NODE && cleanText(child.textContent));
+
+        if (!leadNode) {
+            return;
+        }
+
+        leadNode.textContent = `\n                    ${text}\n                    `;
+    }
 
     async function initDashboardPage() {
         const sessionUser = await fetchSessionUser();
@@ -286,30 +591,38 @@
                 return;
             }
 
-            try {
-                await ensureDemoUser();
-                await apiRequest("/api/auth/simple-login", {
-                    method: "POST",
-                    body: { username, password }
-                });
+            const user = findUserByUsername(username);
 
-                setAuthFeedback(feedback, "success", "Login successful. Redirecting...");
-                showToast("Login successful.");
-                window.setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 400);
-            } catch (error) {
-                setAuthFeedback(feedback, "error", error.message || "Unable to log in.");
-                generateCaptcha(loginForm);
+            if (!user || user.password !== password) {
+                setAuthFeedback(feedback, "error", "Username or password is incorrect.");
+                loginForm.elements.password.value = "";
                 loginForm.elements.captchaAnswer.value = "";
+                generateCaptcha(loginForm);
+                showToast("Invalid login credentials.");
+                return;
             }
+
+            const session = {
+                isLoggedIn: true,
+                username: user.username,
+                mobile: user.mobile,
+                loginAt: new Date().toISOString()
+            };
+
+            setStoredValue(STORAGE_KEYS.session, session);
+            setStoredValue(getUserStorageKey(USER_STORAGE_KEYS.activeView, user.username), "home");
+            clearAuthFeedback(feedback);
+            setAuthFeedback(feedback, "success", "Login successful. Redirecting to dashboard...");
+            showToast("Login successful.");
+
+            window.setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 500);
         });
     }
 
-    async function initRegisterPage() {
-        const existingUser = await fetchSessionUser();
-
-        if (existingUser) {
+    function initRegisterPage() {
+        if (hasActiveSession()) {
             window.location.replace("dashboard.html");
             return;
         }
@@ -322,32 +635,29 @@
             return;
         }
 
-        const aadharController = {
-            getVerifiedPayload: () => ({
-                status: "review",
-                summary: "Aadhar images attached for manual review.",
-                aadharNumber: cleanNumber(registerForm.elements.aadharNumber.value).slice(0, 12),
-                verificationToken: null
-            }),
-            reset: () => {}
-        };
+        clearAuthFeedback(feedback);
+
+        demoRegisterButton?.addEventListener("click", () => {
+            registerForm.elements.username.value = DEMO_USER.username;
+            registerForm.elements.mobile.value = DEMO_USER.mobile;
+            registerForm.elements.password.value = DEMO_USER.password;
+            registerForm.elements.confirmPassword.value = DEMO_USER.password;
+            clearAuthFeedback(feedback);
+            showToast("Demo registration details added.");
+        });
 
         attachAuthFieldListeners(registerForm, feedback);
 
         registerForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const fullName = cleanText(registerForm.elements.fullName.value);
-            const mobile = cleanNumber(registerForm.elements.mobile.value);
-            const username = cleanText(registerForm.elements.username.value);
-            const password = String(registerForm.elements.password.value || "");
-            const confirmPassword = String(registerForm.elements.confirmPassword.value || "");
-            const consentChecked = registerForm.elements.aadharConsent?.checked ?? true;
-            const aadharData = aadharController.getVerifiedPayload();
-            const aadharFront = registerForm.elements.aadharFileFront?.files?.[0];
-            const aadharBack = registerForm.elements.aadharFileBack?.files?.[0];
+            const formData = new FormData(registerForm);
+            const username = cleanText(formData.get("username"));
+            const mobile = cleanNumber(formData.get("mobile"));
+            const password = String(formData.get("password") || "");
+            const confirmPassword = String(formData.get("confirmPassword") || "");
 
-            if (!fullName || !mobile || !username || !password || !confirmPassword) {
+            if (!username || !mobile || !password || !confirmPassword) {
                 setAuthFeedback(feedback, "error", "All registration fields are required.");
                 return;
             }
@@ -378,19 +688,15 @@
                 return;
             }
 
-            try {
-                await apiRequest("/api/auth/simple-register", {
-                    method: "POST",
-                    body: {
-                        fullName,
-                        username,
-                        mobile,
-                        password,
-                        aadharNumber: aadharData.aadharNumber,
-                        aadharConsent: consentChecked,
-                        aadharVerificationToken: aadharData.verificationToken
-                    }
-                });
+            const users = getUsers();
+
+            users.push({
+                username,
+                usernameKey: normalizeUsername(username),
+                mobile,
+                password,
+                createdAt: new Date().toISOString()
+            });
 
                 registerForm.reset();
                 aadharController.reset();
@@ -420,414 +726,569 @@
             return;
         }
 
-        const aadharController = {
-            getVerifiedPayload: () => ({
-                status: "review",
-                summary: "Aadhar images attached for manual review.",
-                aadharNumber: cleanNumber(form.elements.aadharNumber?.value).slice(0, 12),
-                verificationToken: null
-            }),
-            reset: () => {}
-        };
+        state.session = session;
+        state.profile = getUserStoredValue(USER_STORAGE_KEYS.profile, {});
+        state.labourPosts = getUserStoredValue(USER_STORAGE_KEYS.labourPosts, []);
+        state.chatHistory = getUserStoredValue(USER_STORAGE_KEYS.chatHistory, []);
+        state.activeView = getUserStoredValue(USER_STORAGE_KEYS.activeView, "home");
 
-        attachAuthFieldListeners(form, feedback);
+        if (!state.chatHistory.length) {
+            state.chatHistory = [DEFAULT_CHAT_GREETING];
+            setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
+        }
 
-        const setMode = (mode) => {
-            const normalized = mode === "group" ? "group" : "self";
-            form.elements.registrationType.value = normalized;
-            modeSwitch?.querySelectorAll("button").forEach((item) => {
-                item.classList.toggle("is-active", item.dataset.mode === normalized);
-            });
+        bindSidebar();
+        bindTopbar();
+        bindHomeSection();
+        bindLabourSection();
+        bindChatSection();
+        bindSchemesSection();
 
-            if (groupOnlyBlock) {
-                if (normalized === "group") {
-                    groupOnlyBlock.removeAttribute("hidden");
-                    groupOnlyBlock.style.display = "grid";
-                } else {
-                    groupOnlyBlock.setAttribute("hidden", "true");
-                    groupOnlyBlock.style.display = "none";
-                }
-            }
-        };
+        refreshGlobalUI();
+        setActiveView(state.activeView);
+    }
 
-        modeSwitch?.addEventListener("click", (event) => {
-            const button = event.target.closest("[data-mode]");
-            if (!button) {
-                return;
-            }
+    function initGuidePage() {
+        const stepList = document.querySelector("[data-guide-step-list]");
+        const statusNode = document.querySelector("[data-guide-voice-status]");
+        const languageSelect = document.querySelector("[data-guide-language]");
+        const openGuideButtons = document.querySelectorAll("[data-open-guide]");
+        const playButton = document.querySelector("[data-guide-voice-play]");
+        const repeatButton = document.querySelector("[data-guide-voice-repeat]");
+        const stopButton = document.querySelector("[data-guide-voice-stop]");
+        const listenButton = document.querySelector("[data-guide-voice-listen]");
 
-            setMode(button.dataset.mode);
-        });
+        if (!stepList || !statusNode) {
+            return;
+        }
 
-        // Ensure default state (self) hides the group block on load.
-        setMode(form.elements.registrationType.value || "self");
-
-        addMemberButton?.addEventListener("click", () => {
-            if (!memberList) {
-                return;
-            }
-
-            if (memberList.children.length >= 25) {
-                showToast("Maximum 25 members allowed.");
-                return;
-            }
-
-            const row = document.createElement("div");
-            row.className = "member-row";
-            row.innerHTML = `
-                <div class="field">
-                    <span>Member Name</span>
-                    <input type="text" name="memberName" placeholder="Full name">
-                </div>
-                <div class="field">
-                    <span>Contact</span>
-                    <input type="tel" name="memberContact" inputmode="numeric" placeholder="Mobile">
-                </div>
-                <button class="icon-button" type="button" aria-label="Remove member">
-                    <i class="ri-delete-bin-line" aria-hidden="true"></i>
-                </button>
-            `;
-
-            row.querySelector(".icon-button")?.addEventListener("click", () => {
-                row.remove();
-            });
-
-            memberList.appendChild(row);
-        });
-
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const registrationType = form.elements.registrationType.value === "group" ? "group" : "self";
-            const headName = cleanText(form.elements.headName.value);
-            const contactNumber = cleanNumber(form.elements.contactNumber.value);
-            const address = cleanText(form.elements.address.value);
-            const username = cleanText(form.elements.username.value);
-            const password = String(form.elements.password.value || "");
-            const confirmPassword = String(form.elements.confirmPassword.value || "");
-            const aadharData = aadharController.getVerifiedPayload();
-            const aadharFront = form.elements.aadharFileFront?.files?.[0];
-            const aadharBack = form.elements.aadharFileBack?.files?.[0];
-            const members = [];
-
-            if (!headName || !contactNumber || !username || !password || !confirmPassword) {
-                setAuthFeedback(feedback, "error", "All required fields must be filled.");
-                return;
-            }
-
-            if (contactNumber.length !== 10) {
-                setAuthFeedback(feedback, "error", "Enter a valid 10-digit contact number.");
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                setAuthFeedback(feedback, "error", "Passwords do not match.");
-                return;
-            }
-
-            if (!aadharFront || !aadharBack) {
-                setAuthFeedback(feedback, "error", "Attach both front and back Aadhar images.");
-                return;
-            }
-
-            if (registrationType === "group") {
-                memberList?.querySelectorAll(".member-row").forEach((row) => {
-                    const name = cleanText(row.querySelector("input[name='memberName']")?.value);
-                    const contact = cleanNumber(row.querySelector("input[name='memberContact']")?.value);
-
-                    if (name) {
-                        members.push({ name, contact });
+        const guideContent = {
+            en: {
+                label: "English",
+                speechLang: "en-IN",
+                recognitionLang: "en-IN",
+                readyText: "Voice help is ready. Press Play Full Guide to start.",
+                steps: [
+                    {
+                        title: "Login or register first",
+                        detail: "Open the login page if you already have an account. If not, create a simple account from register."
+                    },
+                    {
+                        title: "Save farmer details on Home",
+                        detail: "Enter name, mobile, village, crop, and land area. These details are used for personalized help."
+                    },
+                    {
+                        title: "Choose farm location on map",
+                        detail: "Search your place or click on the map. Saved location improves labour suggestions."
+                    },
+                    {
+                        title: "Use Labour Finding",
+                        detail: "Filter available workers, then post your labour requirement with date, time, and location."
+                    },
+                    {
+                        title: "Review recommendations",
+                        detail: "Check alerts and suggested actions to plan labour demand and next farm steps."
+                    },
+                    {
+                        title: "Review Government Schemes",
+                        detail: "Open schemes to check eligibility, required documents, and the best matching support options."
                     }
-                });
+                ]
+            },
+            hi: {
+                label: "Hindi",
+                speechLang: "hi-IN",
+                recognitionLang: "hi-IN",
+                readyText: "वॉइस गाइड तैयार है। शुरू करने के लिए प्ले दबाएं।",
+                steps: [
+                    {
+                        title: "पहले लॉगिन या रजिस्टर करें",
+                        detail: "अगर आपका अकाउंट है तो लॉगिन खोलें। नया यूज़र हो तो रजिस्टर पेज से अकाउंट बनाएं।"
+                    },
+                    {
+                        title: "होम पर किसान विवरण सेव करें",
+                        detail: "नाम, मोबाइल, गांव, फसल और जमीन का क्षेत्र भरें। इसी से सुझाव बेहतर मिलते हैं।"
+                    },
+                    {
+                        title: "मैप पर खेत की लोकेशन चुनें",
+                        detail: "स्थान खोजें या मैप पर क्लिक करें। सेव लोकेशन से लेबर मैचिंग बेहतर होती है।"
+                    },
+                    {
+                        title: "लेबर फाइंडिंग का उपयोग करें",
+                        detail: "उपलब्ध मजदूर फ़िल्टर करें और तारीख, समय, स्थान के साथ अपनी जरूरत पोस्ट करें।"
+                    },
+                    {
+                        title: "सुझाव देखें",
+                        detail: "अलर्ट और सुझाए गए कदम देखकर लेबर प्लानिंग और अगले काम तय करें।"
+                    },
+                    {
+                        title: "सरकारी योजनाएं देखें",
+                        detail: "पात्रता, जरूरी दस्तावेज़ और आपके लिए उपयुक्त योजना की जानकारी देखें।"
+                    }
+                ]
+            },
+            mr: {
+                label: "Marathi",
+                speechLang: "mr-IN",
+                recognitionLang: "mr-IN",
+                readyText: "व्हॉइस गाईड तयार आहे. सुरू करण्यासाठी प्ले दाबा.",
+                steps: [
+                    {
+                        title: "सुरुवातीला लॉगिन किंवा नोंदणी करा",
+                        detail: "खाते असेल तर लॉगिन करा. नसेल तर रजिस्टर पेजवरून नवीन खाते तयार करा."
+                    },
+                    {
+                        title: "होममध्ये शेतकरी माहिती सेव्ह करा",
+                        detail: "नाव, मोबाईल, गाव, पीक आणि क्षेत्रफळ भरा. यामुळे योग्य सूचना मिळतात."
+                    },
+                    {
+                        title: "नकाशावर शेताची जागा निवडा",
+                        detail: "ठिकाण शोधा किंवा नकाशावर क्लिक करा. सेव्ह केलेली जागा मजूर जुळवण्यात मदत करते."
+                    },
+                    {
+                        title: "Labour Finding वापरा",
+                        detail: "उपलब्ध मजूर फिल्टर करा आणि तारीख, वेळ, ठिकाणासह गरज पोस्ट करा."
+                    },
+                    {
+                        title: "शिफारसी पहा",
+                        detail: "अलर्ट आणि सुचवलेली कृती पाहून मजूर नियोजन आणि पुढची कामे ठरवा."
+                    },
+                    {
+                        title: "सरकारी योजना तपासा",
+                        detail: "पात्रता, आवश्यक कागदपत्रे आणि योग्य योजना यांची माहिती पाहा."
+                    }
+                ]
+            },
+            ta: {
+                label: "Tamil",
+                speechLang: "ta-IN",
+                recognitionLang: "ta-IN",
+                readyText: "வாய்ஸ் வழிகாட்டி தயாராக உள்ளது. தொடங்க Play அழுத்தவும்.",
+                steps: [
+                    {
+                        title: "முதலில் Login அல்லது Register செய்யவும்",
+                        detail: "கணக்கு இருந்தால் Login பக்கம் திறக்கவும். புதியவர் என்றால் Register மூலம் கணக்கு உருவாக்கவும்."
+                    },
+                    {
+                        title: "Home-ல் விவசாயி விவரங்களை சேமிக்கவும்",
+                        detail: "பெயர், மொபைல், கிராமம், பயிர், நில அளவை பதிவு செய்யவும். அதனால் பரிந்துரைகள் மேம்படும்."
+                    },
+                    {
+                        title: "வரைபடத்தில் பண்ணை இடத்தை தேர்வு செய்யவும்",
+                        detail: "இடத்தை தேடவும் அல்லது வரைபடத்தில் கிளிக் செய்யவும். சேமித்த இடம் தொழிலாளர் பொருத்தத்தை மேம்படுத்தும்."
+                    },
+                    {
+                        title: "Labour Finding பயன்படுத்தவும்",
+                        detail: "கிடைக்கும் தொழிலாளர்களை வடிகட்டி, தேதி, நேரம், இடத்துடன் தேவையை பதிவிடவும்."
+                    },
+                    {
+                        title: "பரிந்துரைகளை பார்க்கவும்",
+                        detail: "அலர்ட் மற்றும் பரிந்துரைக்கப்பட்ட நடவடிக்கைகளை பார்த்து அடுத்த பணிகளை திட்டமிடுங்கள்."
+                    },
+                    {
+                        title: "அரசு திட்டங்களை பார்க்கவும்",
+                        detail: "தகுதி, ஆவணங்கள் மற்றும் உங்களுக்கு பொருந்தும் திட்ட விவரங்களை சரிபார்க்கவும்."
+                    }
+                ]
+            },
+            te: {
+                label: "Telugu",
+                speechLang: "te-IN",
+                recognitionLang: "te-IN",
+                readyText: "వాయిస్ గైడ్ సిద్ధంగా ఉంది. ప్రారంభించడానికి ప్లే నొక్కండి.",
+                steps: [
+                    {
+                        title: "ముందుగా Login లేదా Register చేయండి",
+                        detail: "ఖాతా ఉంటే Login తెరవండి. లేకపోతే Register ద్వారా కొత్త ఖాతా సృష్టించండి."
+                    },
+                    {
+                        title: "Homeలో రైతు వివరాలు సేవ్ చేయండి",
+                        detail: "పేరు, మొబైల్, గ్రామం, పంట, భూభాగం నమోదు చేయండి. అప్పుడు సూచనలు మెరుగవుతాయి."
+                    },
+                    {
+                        title: "మ్యాప్‌లో పొలం లొకేషన్ ఎంచుకోండి",
+                        detail: "స్థలాన్ని వెతకండి లేదా మ్యాప్‌పై క్లిక్ చేయండి. సేవ్ చేసిన స్థానం పనివారి మ్యాచింగ్‌కు సహాయపడుతుంది."
+                    },
+                    {
+                        title: "Labour Finding ఉపయోగించండి",
+                        detail: "అందుబాటులో ఉన్న పనివారిని ఫిల్టర్ చేసి, తేదీ, సమయం, స్థలంతో అవసరం పోస్ట్ చేయండి."
+                    },
+                    {
+                        title: "సిఫార్సులు చూడండి",
+                        detail: "అలర్ట్స్ మరియు సూచించిన చర్యలను చూసి పనివారి ప్లానింగ్ మరియు తదుపరి పనులు నిర్ణయించండి."
+                    },
+                    {
+                        title: "ప్రభుత్వ పథకాలు పరిశీలించండి",
+                        detail: "అర్హత, అవసరమైన పత్రాలు, మీకు సరిపోయే పథకాలను చూడండి."
+                    }
+                ]
+            },
+            bn: {
+                label: "Bengali",
+                speechLang: "bn-IN",
+                recognitionLang: "bn-IN",
+                readyText: "ভয়েস গাইড প্রস্তুত। শুরু করতে Play চাপুন।",
+                steps: [
+                    {
+                        title: "প্রথমে Login বা Register করুন",
+                        detail: "অ্যাকাউন্ট থাকলে Login খুলুন। না থাকলে Register পেজ থেকে নতুন অ্যাকাউন্ট তৈরি করুন।"
+                    },
+                    {
+                        title: "Home-এ কৃষকের তথ্য সেভ করুন",
+                        detail: "নাম, মোবাইল, গ্রাম, ফসল, জমির পরিমাণ দিন। এতে ভালো পরামর্শ পাওয়া যায়।"
+                    },
+                    {
+                        title: "ম্যাপে খামারের অবস্থান বাছুন",
+                        detail: "জায়গা খুঁজুন বা ম্যাপে ক্লিক করুন। সেভ করা লোকেশন শ্রমিক মিলাতে সাহায্য করে।"
+                    },
+                    {
+                        title: "Labour Finding ব্যবহার করুন",
+                        detail: "উপলব্ধ শ্রমিক ফিল্টার করুন এবং তারিখ, সময়, লোকেশনসহ প্রয়োজন পোস্ট করুন।"
+                    },
+                    {
+                        title: "পরামর্শ দেখুন",
+                        detail: "অ্যালার্ট এবং প্রস্তাবিত পদক্ষেপ দেখে শ্রম পরিকল্পনা ও পরের কাজ ঠিক করুন।"
+                    },
+                    {
+                        title: "সরকারি স্কিম দেখুন",
+                        detail: "যোগ্যতা, দরকারি কাগজপত্র এবং আপনার জন্য মানানসই স্কিম দেখুন।"
+                    }
+                ]
+            }
+        };
 
-                if (members.length > 25) {
-                    setAuthFeedback(feedback, "error", "Maximum 25 members allowed.");
+        let currentStep = 0;
+        let isSequencePlaying = false;
+        let recognition = null;
+        let isListening = false;
+        let activeUtterance = null;
+        let activeLanguage = languageSelect?.value || "en";
+        let availableVoices = [];
+
+        const getGuideModel = () => guideContent[activeLanguage] || guideContent.en;
+
+        const setStatus = (message) => {
+            statusNode.textContent = message;
+        };
+
+        const loadVoices = () => {
+            if (!("speechSynthesis" in window)) {
+                return;
+            }
+
+            availableVoices = window.speechSynthesis.getVoices() || [];
+        };
+
+        const getVoiceForLanguage = (speechLang) => {
+            if (!availableVoices.length) {
+                return null;
+            }
+
+            const normalizedLang = String(speechLang || "").toLowerCase();
+            const primaryCode = normalizedLang.split("-")[0];
+
+            return availableVoices.find((voice) => voice.lang?.toLowerCase() === normalizedLang)
+                || availableVoices.find((voice) => voice.lang?.toLowerCase().startsWith(`${primaryCode}-`))
+                || availableVoices.find((voice) => voice.lang?.toLowerCase().startsWith(primaryCode))
+                || null;
+        };
+
+        const renderSteps = () => {
+            const steps = getGuideModel().steps;
+            stepList.innerHTML = steps.map((step, index) => `
+                <article class="guide-step ${index === currentStep ? "is-active" : ""}">
+                    <span class="guide-step__index">${index + 1}</span>
+                    <div>
+                        <h3>${escapeHtml(step.title)}</h3>
+                        <p>${escapeHtml(step.detail)}</p>
+                    </div>
+                </article>
+            `).join("");
+        };
+
+        const stopVoice = (statusMessage = "Voice playback stopped.") => {
+            isSequencePlaying = false;
+
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            activeUtterance = null;
+            setStatus(statusMessage);
+        };
+
+        const speakCurrentStep = (continueSequence = false) => {
+            const model = getGuideModel();
+            const steps = model.steps;
+
+            if (!("speechSynthesis" in window)) {
+                setStatus("Voice playback is not supported in this browser.");
+                return;
+            }
+
+            const step = steps[currentStep];
+
+            if (!step) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(`Step ${currentStep + 1}. ${step.title}. ${step.detail}`);
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            utterance.lang = model.speechLang;
+
+            const selectedVoice = getVoiceForLanguage(model.speechLang);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            utterance.onend = () => {
+                activeUtterance = null;
+                const activeSteps = getGuideModel().steps;
+
+                if (continueSequence && isSequencePlaying) {
+                    if (currentStep < activeSteps.length - 1) {
+                        currentStep += 1;
+                        renderSteps();
+                        speakCurrentStep(true);
+                    } else {
+                        isSequencePlaying = false;
+                        setStatus("Guide completed. You can replay or say a step number.");
+                    }
                     return;
                 }
+
+                setStatus(`Finished step ${currentStep + 1}.`);
+            };
+
+            utterance.onerror = () => {
+                isSequencePlaying = false;
+                activeUtterance = null;
+                setStatus("Voice playback failed. Try again.");
+            };
+
+            activeUtterance = utterance;
+            setStatus(`Speaking step ${currentStep + 1}: ${step.title}`);
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const goToStep = (index) => {
+            const activeSteps = getGuideModel().steps;
+
+            if (index < 0 || index >= activeSteps.length) {
+                return;
             }
 
-            try {
-                setAuthFeedback(feedback, "success", "Submitting registration...");
+            currentStep = index;
+            renderSteps();
+        };
 
-                const aadharImage = await optimizeImageForVerification(aadharFront);
+        const parseStepCommand = (text) => {
+            const match = text.match(/(?:step|स्टेप|पायरी|படி|దశ|ধাপ)\s*(\d+)/i);
 
-                await apiRequest("/api/labour/register", {
-                    method: "POST",
-                    body: {
-                        registrationType,
-                        headName,
-                        contactNumber,
-                        address,
-                        username,
-                        password,
-                        members,
-                        aadharNumber: aadharData.aadharNumber,
-                        aadharImage,
-                        aadharStatus: aadharData.status,
-                        aadharSummary: aadharData.summary
-                    }
-                });
+            if (!match) {
+                return null;
+            }
 
-                setAuthFeedback(feedback, "success", "Registration submitted successfully.");
-                showToast("Labour registration submitted.");
-                form.reset();
-                memberList.innerHTML = "";
-                aadharController.reset();
+            const index = Number(match[1]) - 1;
+            return Number.isInteger(index) ? index : null;
+        };
 
-                if (groupOnlyBlock) {
-                    groupOnlyBlock.setAttribute("hidden", "true");
+        const runVoiceCommand = (spokenText) => {
+            const command = spokenText.toLowerCase();
+            const compactCommand = command.replace(/\s+/g, " ");
+            const stepIndex = parseStepCommand(command);
+            const activeSteps = getGuideModel().steps;
+
+            if (compactCommand.includes("next") || compactCommand.includes("अगला") || compactCommand.includes("पुढ") || compactCommand.includes("తర్వాత") || compactCommand.includes("পরের") || compactCommand.includes("அடுத்து")) {
+                goToStep(Math.min(activeSteps.length - 1, currentStep + 1));
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("previous") || compactCommand.includes("back") || compactCommand.includes("पिछला") || compactCommand.includes("मागील") || compactCommand.includes("ముందు") || compactCommand.includes("আগের") || compactCommand.includes("முந்தைய")) {
+                goToStep(Math.max(0, currentStep - 1));
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("repeat") || compactCommand.includes("दुबारा") || compactCommand.includes("पुन्हा") || compactCommand.includes("మళ్లీ") || compactCommand.includes("আবার") || compactCommand.includes("மீண்டும்")) {
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("play") || compactCommand.includes("चलाओ") || compactCommand.includes("सुरू") || compactCommand.includes("ప్రారంభ") || compactCommand.includes("চালু") || compactCommand.includes("தொடங்கு")) {
+                isSequencePlaying = true;
+                speakCurrentStep(true);
+                return;
+            }
+
+            if (compactCommand.includes("stop") || compactCommand.includes("रुको") || compactCommand.includes("थांब") || compactCommand.includes("ఆపు") || compactCommand.includes("বন্ধ") || compactCommand.includes("நிறுத்து")) {
+                stopVoice("Voice playback stopped by command.");
+                return;
+            }
+
+            if (stepIndex !== null) {
+                goToStep(Math.max(0, Math.min(activeSteps.length - 1, stepIndex)));
+                speakCurrentStep(false);
+                return;
+            }
+
+            setStatus("Command not recognized. Try: next, previous, repeat, play, stop, or step number.");
+        };
+
+        const setupVoiceRecognition = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition || !listenButton) {
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = getGuideModel().recognitionLang;
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const latest = event.results[event.results.length - 1];
+
+                if (!latest || !latest[0]) {
+                    return;
                 }
-            } catch (error) {
-                setAuthFeedback(feedback, "error", error.message || "Registration failed.");
-                showToast(error.message || "Registration failed.");
+
+                const transcript = latest[0].transcript.trim();
+                setStatus(`Heard: ${transcript}`);
+                runVoiceCommand(transcript);
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    try {
+                        recognition.lang = getGuideModel().recognitionLang;
+                        recognition.start();
+                    } catch {
+                        isListening = false;
+                        listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+                        setStatus("Voice command listening stopped.");
+                    }
+                }
+            };
+
+            recognition.onerror = () => {
+                setStatus("Voice commands are temporarily unavailable.");
+            };
+        };
+
+        renderSteps();
+        setupVoiceRecognition();
+        setStatus(getGuideModel().readyText);
+
+        loadVoices();
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        openGuideButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                openModal("guide-tutorial");
+            });
+        });
+
+        languageSelect?.addEventListener("change", () => {
+            activeLanguage = languageSelect.value in guideContent ? languageSelect.value : "en";
+            currentStep = 0;
+            isSequencePlaying = false;
+            stopVoice(getGuideModel().readyText);
+
+            if (recognition) {
+                recognition.lang = getGuideModel().recognitionLang;
             }
+
+            renderSteps();
+        });
+
+        playButton?.addEventListener("click", () => {
+            isSequencePlaying = true;
+            speakCurrentStep(true);
+        });
+
+        repeatButton?.addEventListener("click", () => {
+            isSequencePlaying = false;
+            speakCurrentStep(false);
+        });
+
+        stopButton?.addEventListener("click", () => {
+            stopVoice();
+        });
+
+        listenButton?.addEventListener("click", () => {
+            if (!recognition) {
+                setStatus("Voice commands are not supported in this browser.");
+                return;
+            }
+
+            if (!isListening) {
+                isListening = true;
+                listenButton.innerHTML = "<i class=\"ri-mic-off-line\" aria-hidden=\"true\"></i>Stop Listening";
+
+                try {
+                    recognition.start();
+                    setStatus("Listening for commands. Try: next, repeat, stop, or step number.");
+                } catch {
+                    isListening = false;
+                    listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+                    setStatus("Unable to start voice commands.");
+                }
+
+                return;
+            }
+
+            isListening = false;
+            listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+            recognition.stop();
+            setStatus("Voice command listening stopped.");
+        });
+
+        stepList.addEventListener("click", (event) => {
+            const stepCard = event.target.closest(".guide-step");
+
+            if (!stepCard) {
+                return;
+            }
+
+            const stepCards = Array.from(stepList.querySelectorAll(".guide-step"));
+            const stepIndex = stepCards.indexOf(stepCard);
+
+            if (stepIndex < 0) {
+                return;
+            }
+
+            goToStep(stepIndex);
+            isSequencePlaying = false;
+            speakCurrentStep(false);
         });
     }
 
-    function createAadharVerificationController(options) {
-        const {
-            feedbackNode,
-            holderSourceInput,
-            openButton,
-            modal,
-            closeButtons = [],
-            verifyButton,
-            holderMirrorInput,
-            aadharInput,
-            fileInput,
-            statusPills = [],
-            statusTexts = [],
-            summaryNodes = []
-        } = options;
-        const state = {
-            status: "pending",
-            aadharNumber: "",
-            verificationToken: "",
-            verifiedHolderName: "",
-            summary: ""
-        };
+    function bindGuideOnboarding() {
+        const openGuideButton = document.getElementById("open-guide-now");
+        const skipGuideButton = document.getElementById("skip-guide-now");
+        const hasSeenOnboarding = getUserStoredValue(USER_STORAGE_KEYS.guideOnboardingSeen, false);
 
-        const statusMap = {
-            pending: {
-                label: "Pending",
-                className: "status-pill--soft"
-            },
-            processing: {
-                label: "Processing",
-                className: "status-pill--info"
-            },
-            review: {
-                label: "Needs Review",
-                className: "status-pill--warning"
-            },
-            verified: {
-                label: "Verified",
-                className: "status-pill--success"
-            },
-            failed: {
-                label: "Failed",
-                className: "status-pill--error"
-            }
-        };
-
-        renderStatus("pending", "No Aadhar verification has been completed yet.", "Only masked Aadhar details are kept after verification.");
-
-        holderSourceInput?.addEventListener("input", () => {
-            syncHolderName();
-
-            if (state.verificationToken && cleanText(holderSourceInput.value) !== state.verifiedHolderName) {
-                reset("pending", "Holder name changed. Verify Aadhar again.", "The previous verification token was cleared.");
-            }
+        openGuideButton?.addEventListener("click", () => {
+            closeModal("guide-welcome");
+            openModal("guide-tutorial");
         });
 
-        aadharInput?.addEventListener("input", () => {
-            const digits = cleanNumber(aadharInput.value).slice(0, 12);
-            aadharInput.value = formatAadharDigits(digits);
-
-            if (state.verificationToken && digits !== state.aadharNumber) {
-                reset("pending", "Aadhar number changed. Verify Aadhar again.", "The previous verification token was cleared.");
-            }
+        skipGuideButton?.addEventListener("click", () => {
+            closeModal("guide-welcome");
         });
 
-        fileInput?.addEventListener("change", () => {
-            clearAuthFeedback(feedbackNode);
-
-            if (state.verificationToken) {
-                reset("pending", "A new Aadhar image was selected. Verify Aadhar again.", "The previous verification token was cleared.");
-            }
-        });
-
-        openButton?.addEventListener("click", () => {
-            syncHolderName();
-            toggleModal(true);
-        });
-
-        closeButtons.forEach((button) => {
-            button?.addEventListener("click", () => {
-                toggleModal(false);
-            });
-        });
-
-        modal?.addEventListener("click", (event) => {
-            if (event.target === modal) {
-                toggleModal(false);
-            }
-        });
-
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && modal && !modal.hidden) {
-                toggleModal(false);
-            }
-        });
-
-        verifyButton?.addEventListener("click", async () => {
-            const holderName = cleanText(holderSourceInput?.value);
-            const aadharNumber = cleanNumber(aadharInput?.value).slice(0, 12);
-            const file = fileInput?.files?.[0];
-            const validationMessage = getAadharValidationMessage({ holderName, aadharNumber, file });
-
-            clearAuthFeedback(feedbackNode);
-
-            if (validationMessage) {
-                renderStatus("failed", "Verification could not start.", validationMessage);
-                setAuthFeedback(feedbackNode, "error", validationMessage);
-                return;
-            }
-
-            renderStatus("processing", "Gemini verification is running.", "Processing the uploaded Aadhar image.");
-
-            try {
-                const imageBase64 = await optimizeImageForVerification(file);
-                const result = await apiRequest("/api/aadhar/verify", {
-                    method: "POST",
-                    body: {
-                        holderName,
-                        aadharNumber,
-                        imageBase64
-                    }
-                });
-
-                if ((result.status === "verified" || result.status === "review") && result.verificationToken) {
-                    state.status = result.status;
-                    state.aadharNumber = aadharNumber;
-                    state.verificationToken = result.verificationToken;
-                    state.verifiedHolderName = holderName;
-                    state.summary = result.summary || "";
-
-                    renderStatus(
-                        result.status,
-                        result.status === "verified"
-                            ? `Verified ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
-                            : `Marked for review ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`,
-                        result.summary || (result.status === "verified"
-                            ? "Aadhar details matched successfully."
-                            : "Aadhar details were saved for manual review.")
-                    );
-                    setAuthFeedback(
-                        feedbackNode,
-                        "success",
-                        result.status === "verified"
-                            ? `Aadhar verified for ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
-                            : `Aadhar moved to review for ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
-                    );
-                    showToast(result.status === "verified" ? "Aadhar verified." : "Aadhar moved to review.");
-                    if (fileInput) {
-                        fileInput.value = "";
-                    }
-                    window.setTimeout(() => toggleModal(false), 350);
-                    return;
-                }
-
-                reset(
-                    "failed",
-                    "Verification failed.",
-                    result.summary || "The Aadhar details could not be verified. Check the image and try again."
-                );
-                setAuthFeedback(feedbackNode, "error", result.summary || "Aadhar verification failed.");
-                showToast("Aadhar verification failed.");
-            } catch (error) {
-                reset("failed", "Verification failed.", error.message || "Aadhar verification failed.");
-                setAuthFeedback(feedbackNode, "error", error.message || "Aadhar verification failed.");
-                showToast(error.message || "Aadhar verification failed.");
-            }
-        });
-
-        function syncHolderName() {
-            if (holderMirrorInput) {
-                holderMirrorInput.value = cleanText(holderSourceInput?.value);
-            }
+        if (!hasSeenOnboarding) {
+            setUserStoredValue(USER_STORAGE_KEYS.guideOnboardingSeen, true);
+            openModal("guide-welcome");
         }
-
-        function toggleModal(visible) {
-            if (!modal) {
-                return;
-            }
-
-            modal.hidden = !visible;
-            document.body.classList.toggle("modal-open", visible);
-
-            if (visible) {
-                syncHolderName();
-            }
-        }
-
-        function renderStatus(status, text, summary) {
-            const config = statusMap[status] || statusMap.pending;
-
-            statusPills.forEach((node) => {
-                if (!node) {
-                    return;
-                }
-
-                node.textContent = config.label;
-                node.classList.remove("status-pill--soft", "status-pill--info", "status-pill--success", "status-pill--warning", "status-pill--error");
-                node.classList.add(config.className);
-            });
-
-            statusTexts.forEach((node) => {
-                if (node) {
-                    node.textContent = text;
-                }
-            });
-
-            summaryNodes.forEach((node) => {
-                if (node) {
-                    node.textContent = summary;
-                }
-            });
-        }
-
-        function reset(status = "pending", text = "No Aadhar verification has been completed yet.", summary = "Only masked Aadhar details are kept after verification.", clearInputs = false) {
-            state.status = status;
-            state.aadharNumber = "";
-            state.verificationToken = "";
-            state.verifiedHolderName = "";
-            state.summary = "";
-            clearAuthFeedback(feedbackNode);
-            if (clearInputs) {
-                if (aadharInput) {
-                    aadharInput.value = "";
-                }
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-            }
-            renderStatus(status, text, summary);
-        }
-
-        return {
-            getVerifiedPayload() {
-                if (state.status !== "verified" || !state.verificationToken) {
-                    return null;
-                }
-
-                return {
-                    aadharNumber: state.aadharNumber,
-                    verificationToken: state.verificationToken
-                };
-            },
-            reset
-        };
     }
 
     function bindSidebar() {
@@ -883,24 +1344,39 @@
     }
 
     function bindHomeSection() {
-        const form = document.getElementById("farmer-details-form");
+        const farmerForm = document.getElementById("farmer-details-form");
+        const labourForm = document.getElementById("labour-details-form");
+        const activeForm = state.userRole === "labour" ? labourForm : farmerForm;
 
-        if (!form) {
+        if (!activeForm) {
             return;
         }
 
-        fillFormWithProfile(form, state.profile);
-        prefillHomeFormDefaults(form);
-        initLocationPicker(form);
-        bindLocationSearch(form);
+        if (farmerForm) {
+            farmerForm.hidden = state.userRole !== "farmer";
+        }
 
-        form.addEventListener("submit", async (event) => {
+        if (labourForm) {
+            labourForm.hidden = state.userRole !== "labour";
+        }
+
+        fillFormWithProfile(activeForm, state.profile);
+        prefillHomeFormDefaults(activeForm);
+
+        if (state.userRole === "farmer") {
+            initLocationPicker(activeForm);
+            bindLocationSearch(activeForm);
+        }
+
+        form.addEventListener("submit", (event) => {
             event.preventDefault();
 
-            const profile = readProfileFromForm(form);
+            const profile = readProfileFromForm(activeForm);
 
-            if (profile.farmerName.length < 2) {
-                showToast("Enter a valid farmer name.");
+            const primaryName = state.userRole === "labour" ? profile.workerName : profile.farmerName;
+
+            if (cleanText(primaryName).length < 2) {
+                showToast(`Enter a valid ${state.userRole === "labour" ? "worker" : "farmer"} name.`);
                 return;
             }
 
@@ -909,18 +1385,15 @@
                 return;
             }
 
-            try {
-                await saveProfileToApi(profile);
-                refreshGlobalUI();
-                syncMapSelectionFromProfile(profile);
-                renderLabourCards();
-                renderMatchedLabourSuggestions();
-                renderSchemesView();
-                prefillLabourFormDefaults(document.getElementById("labour-need-form"));
-                showToast("Farmer details saved successfully.");
-            } catch (error) {
-                showToast(error.message || "Unable to save farmer details.");
-            }
+            state.profile = profile;
+            setUserStoredValue(USER_STORAGE_KEYS.profile, profile);
+            refreshGlobalUI();
+            syncMapSelectionFromProfile(profile);
+            renderLabourCards();
+            renderMatchedLabourSuggestions();
+            renderSchemesView();
+            prefillLabourFormDefaults(document.getElementById("labour-need-form"));
+            showToast("Farmer details saved successfully.");
         });
 
         refreshHomeSection();
@@ -1016,64 +1489,6 @@
         renderPostedLabourRequirements();
     }
 
-    function bindRequestsSection() {
-        const resetButton = document.getElementById("market-reset-button");
-        const filterElements = [
-            document.getElementById("market-filter-work"),
-            document.getElementById("market-filter-location"),
-            document.getElementById("market-filter-date")
-        ];
-        const marketList = document.getElementById("labour-market-list");
-
-        filterElements.forEach((element) => {
-            element?.addEventListener("input", renderLabourMarketCards);
-            element?.addEventListener("change", renderLabourMarketCards);
-        });
-
-        resetButton?.addEventListener("click", () => {
-            filterElements.forEach((element) => {
-                if (!element) {
-                    return;
-                }
-
-                if (element.tagName === "SELECT" || element.type === "date") {
-                    element.value = "";
-                } else {
-                    element.value = "";
-                }
-            });
-
-            renderLabourMarketCards();
-        });
-
-        marketList?.addEventListener("click", async (event) => {
-            const applyButton = event.target.closest("[data-apply-id]");
-
-            if (!applyButton) {
-                return;
-            }
-
-            const postId = Number(applyButton.dataset.applyId || 0);
-            const card = applyButton.closest("[data-apply-card]");
-            const messageInput = card?.querySelector("[data-apply-message]");
-            const message = cleanText(messageInput?.value) || "Interested in this labour requirement.";
-
-            if (!postId) {
-                showToast("Unable to apply. Invalid request.");
-                return;
-            }
-
-            try {
-                await applyToLabourPost(postId, message);
-                showToast("Application sent to farmer.");
-            } catch (error) {
-                showToast(error.message || "Unable to apply.");
-            }
-        });
-
-        renderLabourMarketCards();
-    }
-
     function bindChatSection() {
         const chatForm = document.getElementById("chat-form");
         const chatInput = document.getElementById("chat-input");
@@ -1081,11 +1496,11 @@
 
         chipButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                void sendChatMessage(button.dataset.chatChip);
+                sendChatMessage(button.dataset.chatChip);
             });
         });
 
-        chatForm?.addEventListener("submit", (event) => {
+        document.getElementById("labour-hire-step-form")?.addEventListener("submit", (event) => {
             event.preventDefault();
 
             const message = cleanText(chatInput.value);
@@ -1094,11 +1509,13 @@
                 return;
             }
 
-            void sendChatMessage(message);
+            sendChatMessage(message);
             chatInput.value = "";
         });
 
-        renderChatHistory();
+        function greedyTrim(value) {
+            return String(value || "").trim();
+        }
     }
 
     function bindSchemesSection() {
@@ -1126,18 +1543,22 @@
     }
 
     function refreshTopbarProfile() {
-        const farmerName = state.profile?.farmerName || state.session?.username || "Farmer";
+        const displayName = state.userRole === "labour"
+            ? state.profile?.workerName || state.session?.fullName || state.session?.username || "Labour"
+            : state.profile?.farmerName || state.session?.fullName || state.session?.username || "Farmer";
         const profileMeta = state.profile?.district
             ? `${state.profile.district}${state.profile.state ? `, ${state.profile.state}` : ""}`
+            : state.profile?.currentLocation
+                ? state.profile.currentLocation
             : state.profile?.village
                 ? `${state.profile.village}${state.profile.state ? `, ${state.profile.state}` : ""}`
             : state.session?.mobile
                 ? `Mobile: ${state.session.mobile}`
                 : "Authenticated user";
 
-        setText("[data-topbar-name]", farmerName);
+        setText("[data-topbar-name]", displayName);
         setText("[data-topbar-meta]", profileMeta);
-        setText("[data-profile-avatar]", getInitials(farmerName));
+        setText("[data-profile-avatar]", getInitials(displayName));
     }
 
     function refreshAlertCount() {
@@ -1149,6 +1570,7 @@
 
     function setActiveView(viewKey) {
         state.activeView = VIEW_META[viewKey] ? viewKey : "home";
+        setUserStoredValue(USER_STORAGE_KEYS.activeView, state.activeView);
 
         document.querySelectorAll("[data-nav]").forEach((button) => {
             button.classList.toggle("is-active", button.dataset.nav === state.activeView);
@@ -1158,8 +1580,8 @@
             section.classList.toggle("is-active", section.dataset.view === state.activeView);
         });
 
-        setText("[data-page-title]", VIEW_META[state.activeView].title);
-        setText("[data-page-subtitle]", VIEW_META[state.activeView].subtitle);
+        setText("[data-page-title]", viewMetaByLanguage[state.activeView].title);
+        setText("[data-page-subtitle]", viewMetaByLanguage[state.activeView].subtitle);
 
         if (state.activeView === "home" && mapState.instance) {
             window.setTimeout(() => {
@@ -1170,6 +1592,7 @@
         if (state.activeView === "labour") {
             renderLabourCards();
             renderMatchedLabourSuggestions();
+            renderLabourSchemesPanel();
         }
 
         if (state.activeView === "requests") {
@@ -1182,20 +1605,40 @@
     }
 
     function refreshHomeSection() {
-        const name = state.profile?.farmerName || state.session?.username || "Farmer";
-        const recommendations = buildRecommendations(state.profile);
+        const name = state.userRole === "labour"
+            ? state.profile?.workerName || state.session?.fullName || state.session?.username || "Labour"
+            : state.profile?.farmerName || state.session?.fullName || state.session?.username || "Farmer";
+        const isFarmerRole = state.userRole === "farmer";
+        const homeText = getHomeTextPack(isFarmerRole);
+        const recommendations = buildRecommendations(state.profile, state.userRole);
         const relevantSchemes = getRelevantSchemes(state.profile);
         const nearbyLabourers = getNearbyLabourers(state.profile);
         const summaryItems = buildProfileSummary(state.profile);
 
-        setText("[data-home-welcome]", `Welcome ${name}, your farmer setup dashboard is ready.`);
-        setText("[data-stat-name]", state.profile?.farmerName || "Not saved yet");
-        setText("[data-stat-crop]", state.profile?.mainCrop || "Profile needed");
-        setText("[data-stat-land]", state.profile?.landArea ? `${state.profile.landArea} acres` : "Profile needed");
-        setText("[data-stat-schemes]", `${relevantSchemes.length} matches`);
-        setText("[data-profile-state]", state.profile?.farmerName ? "Profile saved on this device" : "Complete the form for personalized help");
+        setText("[data-home-eyebrow]", homeText.homeEyebrow);
+        setText("[data-home-welcome]", homeText.welcomeTemplate.replace("{name}", name));
+        setText("[data-stat-name-label]", homeText.statNameLabel);
+        setText("[data-stat-crop-label]", homeText.statCropLabel);
+        setText("[data-stat-land-label]", homeText.statLandLabel);
+        setText("[data-stat-schemes-label]", homeText.statSchemesLabel);
+        setText("[data-stat-name]", isFarmerRole ? (state.profile?.farmerName || homeText.notSaved) : (state.profile?.workerName || homeText.notSaved));
+        setText("[data-stat-crop]", isFarmerRole ? (state.profile?.mainCrop || homeText.profileNeeded) : (state.profile?.preferredWorkType || homeText.profileNeeded));
+        setText("[data-stat-land]", isFarmerRole
+            ? (state.profile?.landArea ? `${state.profile.landArea} ${homeText.acresUnit}` : homeText.profileNeeded)
+            : (state.profile?.experienceYears ? `${state.profile.experienceYears} ${homeText.yearsUnit}` : homeText.profileNeeded));
+        setText("[data-stat-schemes]", `${relevantSchemes.length} ${homeText.matchesUnit}`);
+        setText("[data-profile-form-kicker]", homeText.profileKicker);
+        setText("[data-profile-form-title]", homeText.profileTitle);
+        setText("[data-profile-form-desc]", homeText.profileDesc);
+        setText("[data-profile-summary-title]", homeText.summaryTitle);
+        setText("[data-recommendations-title]", homeText.recommendationsTitle);
+        setText("[data-recommendations-desc]", homeText.recommendationsDesc);
+        setText("[data-profile-state]", (isFarmerRole ? state.profile?.farmerName : state.profile?.workerName)
+            ? homeText.profileSaved
+            : homeText.completeForm);
 
         renderHomeSummaryStats({
+            isFarmerRole,
             nearbyWorkers: getNearbyWorkerTotal(state.profile),
             nearbyListings: nearbyLabourers.length,
             schemeCount: relevantSchemes.slice(0, 3).length,
@@ -1209,15 +1652,171 @@
             setText("[data-home-next-step]", recommendations[0].title);
             setText("[data-home-next-detail]", recommendations[0].reason);
         } else {
-            setText("[data-home-next-step]", "Save the farmer details and pick the farm location.");
-            setText("[data-home-next-detail]", "The dashboard will use this saved profile to prepare labour, AI, and scheme suggestions in the next steps.");
+            setText("[data-home-next-step]", homeText.nextStepTitle);
+            setText("[data-home-next-detail]", homeText.nextStepDetail);
         }
+    }
+
+    function getHomeTextPack(isFarmerRole) {
+        const language = state.uiLanguage;
+
+        const text = {
+            en: {
+                farmer: {
+                    homeEyebrow: "Farmer Home",
+                    welcomeTemplate: "Welcome {name}, your farmer setup dashboard is ready.",
+                    statNameLabel: "Farmer Name",
+                    statCropLabel: "Main Crop",
+                    statLandLabel: "Land Area",
+                    statSchemesLabel: "Suggested Schemes",
+                    profileKicker: "Farmer Profile",
+                    profileTitle: "Farmer Details Form",
+                    profileDesc: "All data is stored in localStorage for this hackathon prototype.",
+                    summaryTitle: "Saved Farmer Summary",
+                    recommendationsTitle: "Personalized actions for this farmer",
+                    recommendationsDesc: "These cards adapt to the saved location, land area, crop, and farming type."
+                },
+                labour: {
+                    homeEyebrow: "Labour Home",
+                    welcomeTemplate: "Welcome {name}, your labour setup dashboard is ready.",
+                    statNameLabel: "Worker Name",
+                    statCropLabel: "Preferred Work",
+                    statLandLabel: "Experience",
+                    statSchemesLabel: "Matched Schemes",
+                    profileKicker: "Labour Profile",
+                    profileTitle: "Labour Details Form",
+                    profileDesc: "Add labour profile details to personalize opportunities and recommendations.",
+                    summaryTitle: "Saved Labour Summary",
+                    recommendationsTitle: "Personalized actions for this labour profile",
+                    recommendationsDesc: "These cards adapt to work preference, location, availability, and saved profile details."
+                },
+                notSaved: "Not saved yet",
+                profileNeeded: "Profile needed",
+                profileSaved: "Profile saved on this device",
+                completeForm: "Complete the form for personalized help",
+                nextStepTitle: "Save the farmer details and pick the farm location.",
+                nextStepDetail: "The dashboard will use this saved profile to prepare labour and scheme suggestions in the next steps.",
+                acresUnit: "acres",
+                yearsUnit: "years",
+                matchesUnit: "matches"
+            },
+            hi: {
+                farmer: {
+                    homeEyebrow: "किसान होम",
+                    welcomeTemplate: "स्वागत है {name}, आपका किसान डैशबोर्ड तैयार है।",
+                    statNameLabel: "किसान नाम",
+                    statCropLabel: "मुख्य फसल",
+                    statLandLabel: "भूमि क्षेत्र",
+                    statSchemesLabel: "सुझाव योजनाएं",
+                    profileKicker: "किसान प्रोफाइल",
+                    profileTitle: "किसान विवरण फॉर्म",
+                    profileDesc: "सारा डेटा इस प्रोटोटाइप में localStorage में सेव होता है।",
+                    summaryTitle: "सेव किसान सारांश",
+                    recommendationsTitle: "इस किसान के लिए निजी सुझाव",
+                    recommendationsDesc: "ये कार्ड लोकेशन, जमीन, फसल और खेती प्रकार के आधार पर बदलते हैं।"
+                },
+                labour: {
+                    homeEyebrow: "लेबर होम",
+                    welcomeTemplate: "स्वागत है {name}, आपका लेबर डैशबोर्ड तैयार है।",
+                    statNameLabel: "वर्कर नाम",
+                    statCropLabel: "पसंदीदा काम",
+                    statLandLabel: "अनुभव",
+                    statSchemesLabel: "मिलान योजनाएं",
+                    profileKicker: "लेबर प्रोफाइल",
+                    profileTitle: "लेबर विवरण फॉर्म",
+                    profileDesc: "लेबर प्रोफाइल सेव करें ताकि अवसर और सुझाव बेहतर हों।",
+                    summaryTitle: "सेव लेबर सारांश",
+                    recommendationsTitle: "इस लेबर प्रोफाइल के लिए निजी सुझाव",
+                    recommendationsDesc: "ये कार्ड काम, लोकेशन, उपलब्धता और प्रोफाइल पर आधारित हैं।"
+                },
+                notSaved: "अभी सेव नहीं",
+                profileNeeded: "प्रोफाइल जरूरी",
+                profileSaved: "प्रोफाइल इस डिवाइस पर सेव है",
+                completeForm: "व्यक्तिगत सहायता के लिए फॉर्म पूरा करें",
+                nextStepTitle: "किसान विवरण सेव करें और खेत की लोकेशन चुनें।",
+                nextStepDetail: "डैशबोर्ड उसी प्रोफाइल से अगली लेबर और योजना सलाह तैयार करेगा।",
+                acresUnit: "एकड़",
+                yearsUnit: "वर्ष",
+                matchesUnit: "मिलान"
+            },
+            mr: {
+                farmer: {
+                    homeEyebrow: "शेतकरी मुख्यपृष्ठ",
+                    welcomeTemplate: "स्वागत {name}, तुमचा शेतकरी डॅशबोर्ड तयार आहे.",
+                    statNameLabel: "शेतकरी नाव",
+                    statCropLabel: "मुख्य पीक",
+                    statLandLabel: "जमीन क्षेत्र",
+                    statSchemesLabel: "सुचवलेल्या योजना",
+                    profileKicker: "शेतकरी प्रोफाइल",
+                    profileTitle: "शेतकरी माहिती फॉर्म",
+                    profileDesc: "हा सर्व डेटा या प्रोटोटाइपमध्ये localStorage मध्ये जतन होतो.",
+                    summaryTitle: "जतन केलेला शेतकरी सारांश",
+                    recommendationsTitle: "या शेतकऱ्यासाठी वैयक्तिक सूचना",
+                    recommendationsDesc: "हे कार्ड लोकेशन, जमीन, पीक आणि शेती प्रकारानुसार बदलतात."
+                },
+                labour: {
+                    homeEyebrow: "मजूर मुख्यपृष्ठ",
+                    welcomeTemplate: "स्वागत {name}, तुमचा मजूर डॅशबोर्ड तयार आहे.",
+                    statNameLabel: "कामगार नाव",
+                    statCropLabel: "पसंतीचे काम",
+                    statLandLabel: "अनुभव",
+                    statSchemesLabel: "जुळणाऱ्या योजना",
+                    profileKicker: "मजूर प्रोफाइल",
+                    profileTitle: "मजूर माहिती फॉर्म",
+                    profileDesc: "मजूर प्रोफाइल जतन करा जेणेकरून सूचना अधिक योग्य मिळतील.",
+                    summaryTitle: "जतन केलेला मजूर सारांश",
+                    recommendationsTitle: "या मजूर प्रोफाइलसाठी वैयक्तिक सूचना",
+                    recommendationsDesc: "हे कार्ड काम, लोकेशन, उपलब्धता आणि प्रोफाइल तपशीलानुसार बदलतात."
+                },
+                notSaved: "अजून जतन नाही",
+                profileNeeded: "प्रोफाइल आवश्यक",
+                profileSaved: "प्रोफाइल या डिव्हाइसवर जतन आहे",
+                completeForm: "वैयक्तिक मदतीसाठी फॉर्म पूर्ण करा",
+                nextStepTitle: "शेतकरी माहिती जतन करा आणि शेताचे ठिकाण निवडा.",
+                nextStepDetail: "डॅशबोर्ड या प्रोफाइलवरून पुढील मजूर आणि योजना सूचना तयार करेल.",
+                acresUnit: "एकर",
+                yearsUnit: "वर्षे",
+                matchesUnit: "जुळणी"
+            }
+        };
+
+        const languagePack = text[language] || text.en;
+        return {
+            ...languagePack,
+            ...(isFarmerRole ? languagePack.farmer : languagePack.labour)
+        };
     }
 
     function renderHomeSummaryStats(summary) {
         const container = document.getElementById("home-summary-grid");
 
         if (!container) {
+            return;
+        }
+
+        if (!summary.isFarmerRole) {
+            container.innerHTML = `
+                <article class="stat-card stat-card--hero">
+                    <span class="stat-card__label">Nearby labour signals</span>
+                    <strong>${escapeHtml(String(summary.nearbyWorkers || 0))}</strong>
+                    <p>${escapeHtml(String(summary.nearbyListings || 0))} listings are visible for labour matching in this area.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Profile completion</span>
+                    <strong>${escapeHtml(String(summary.completionCount || 0))}/7</strong>
+                    <p>Complete profile details improve matching in Labour Finding.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Suggested schemes</span>
+                    <strong>${escapeHtml(String(summary.schemeCount))}</strong>
+                    <p>Welfare and support schemes are shown using your profile details.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Availability status</span>
+                    <strong>${escapeHtml(state.profile?.availability || "Pending")}</strong>
+                    <p>Update availability to help employers see when you can work.</p>
+                </article>
+            `;
             return;
         }
 
@@ -1272,7 +1871,7 @@
                 <div class="empty-state empty-state--wide">
                     <i class="ri-lightbulb-flash-line" aria-hidden="true"></i>
                     <strong>Save farmer details to see personalized recommendations.</strong>
-                    <p>The Home page will recommend labour actions, AI help, and scheme support based on the farmer profile.</p>
+                    <p>The Home page will recommend labour actions, tutorial guidance, and scheme support based on the saved profile.</p>
                 </div>
             `;
             return;
@@ -1294,6 +1893,11 @@
 
         container.querySelectorAll("[data-jump-view]").forEach((button) => {
             button.addEventListener("click", () => {
+                if (button.dataset.jumpView === "guide-tutorial") {
+                    openModal("guide-tutorial");
+                    return;
+                }
+
                 setActiveView(button.dataset.jumpView);
             });
         });
@@ -1353,7 +1957,7 @@
                 </div>
                 <p>${escapeHtml(labourer.skills.join(", "))}</p>
                 <div class="card-actions">
-                    <a class="btn btn--secondary btn--compact" href="tel:${escapeHtml(labourer.contact)}">Contact</a>
+                    <button class="btn btn--secondary btn--compact" type="button" onclick="searchContactInfo('${escapeHtml(labourer.name)}', '${escapeHtml(labourer.location)}')">Contact</button>
                     <button class="btn btn--ghost btn--compact" type="button" data-labour-details="${escapeHtml(labourer.id)}">View Details</button>
                 </div>
             </article>
@@ -1511,9 +2115,7 @@
         `;
     }
 
-    function renderChatHistory() {
-        const container = document.getElementById("chat-window");
-
+    function renderSchemeCards(schemes, container) {
         if (!container) {
             return;
         }
@@ -1528,7 +2130,7 @@
         container.scrollTop = container.scrollHeight;
     }
 
-    async function sendChatMessage(message) {
+    function sendChatMessage(message) {
         const userMessage = {
             role: "user",
             text: message
@@ -1540,17 +2142,76 @@
         };
 
         state.chatHistory.push(userMessage, botMessage);
+        setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
         renderChatHistory();
-
-        try {
-            await sendChatToApi(userMessage.text, botMessage.text);
-        } catch (error) {
-            showToast(error.message || "Unable to save chat message.");
-        }
     }
 
     function getGeminiResponse() {
         return null;
+    }
+
+    function renderSchemesView() {
+        const summary = document.querySelector("[data-scheme-summary]");
+        const container = document.getElementById("scheme-card-grid");
+
+        if (!container || !summary) {
+            return;
+        }
+
+        const relevantSchemes = getRelevantSchemes(state.profile);
+        const filteredSchemes = relevantSchemes.filter((scheme) => {
+            return state.activeSchemeFilter === "all" || scheme.categories.includes(state.activeSchemeFilter);
+        });
+
+        if (state.profile?.farmerName) {
+            const landSize = state.profile.landArea ? `${state.profile.landArea} acres` : "unspecified land";
+            summary.textContent = `${filteredSchemes.length} schemes match this profile. The ranking is influenced by ${landSize}, crop type, and labour-related need.`;
+        } else {
+            summary.textContent = "Save farmer details on Home to personalize this list. For now, all demo schemes are shown.";
+        }
+
+        if (!filteredSchemes.length) {
+            container.innerHTML = `
+                <div class="empty-state empty-state--wide">
+                    <i class="ri-government-line" aria-hidden="true"></i>
+                    <strong>No schemes available.</strong>
+                    <p>Save profile details to see matched schemes.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = schemes.map((scheme) => `
+            <article class="scheme-card scheme-card--dashboard">
+                <div class="card-topline">
+                    <span class="status-pill status-pill--soft">${scheme.categories.slice(0, 2).map(formatCategoryLabel).join(" • ")}</span>
+                    <span class="status-pill status-pill--success">Recommended</span>
+                </div>
+                <h4>${escapeHtml(scheme.name)}</h4>
+                <p>${escapeHtml(scheme.description)}</p>
+                <div class="scheme-detail">
+                    <strong>Eligibility</strong>
+                    <p>${escapeHtml(scheme.eligibility)}</p>
+                </div>
+                <div class="scheme-detail">
+                    <strong>Benefits</strong>
+                    <p>${escapeHtml(scheme.benefits)}</p>
+                </div>
+                <div class="scheme-detail">
+                    <strong>Required documents</strong>
+                    <p>${escapeHtml(scheme.documents.join(", "))}</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn--ghost btn--compact" type="button" data-scheme-name="${escapeHtml(scheme.name)}">Why suggested</button>
+                </div>
+            </article>
+        `).join("");
+
+        container.querySelectorAll("[data-scheme-name]").forEach((button) => {
+            button.addEventListener("click", () => {
+                showToast(`${button.dataset.schemeName} fits land size, crop, or labour needs in this profile.`);
+            });
+        });
     }
 
     function renderSchemesView() {
@@ -1584,48 +2245,35 @@
             return;
         }
 
-        container.innerHTML = filteredSchemes.map((scheme) => `
-            <article class="scheme-card scheme-card--dashboard">
-                <div class="card-topline">
-                    <span class="status-pill status-pill--soft">${scheme.categories.slice(0, 2).map(formatCategoryLabel).join(" • ")}</span>
-                    <span class="status-pill status-pill--success">Recommended</span>
-                </div>
-                <h4>${escapeHtml(scheme.name)}</h4>
-                <p>${escapeHtml(scheme.description)}</p>
-                <div class="scheme-detail">
-                    <strong>Eligibility</strong>
-                    <p>${escapeHtml(scheme.eligibility)}</p>
-                </div>
-                <div class="scheme-detail">
-                    <strong>Benefits</strong>
-                    <p>${escapeHtml(scheme.benefits)}</p>
-                </div>
-                <div class="scheme-detail">
-                    <strong>Required documents</strong>
-                    <p>${escapeHtml(scheme.documents.join(", "))}</p>
-                </div>
-                <div class="card-actions">
-                    <button class="btn btn--primary btn--compact" type="button" data-scheme-cta="${escapeHtml(scheme.name)}">${escapeHtml(scheme.cta)}</button>
-                    <button class="btn btn--ghost btn--compact" type="button" data-scheme-name="${escapeHtml(scheme.name)}">Why suggested</button>
-                </div>
-            </article>
-        `).join("");
-
-        container.querySelectorAll("[data-scheme-cta]").forEach((button) => {
-            button.addEventListener("click", () => {
-                showToast(`${button.dataset.schemeCta} opened as a demo action.`);
-            });
-        });
-
-        container.querySelectorAll("[data-scheme-name]").forEach((button) => {
-            button.addEventListener("click", () => {
-                showToast(`${button.dataset.schemeName} fits land size, crop, or labour needs in this profile.`);
-            });
-        });
+        renderSchemeCards(filteredSchemes, container);
     }
 
-    function buildRecommendations(profile) {
-        if (!profile?.farmerName) {
+    function renderLabourSchemesPanel() {
+        const container = document.getElementById("labour-scheme-card-grid");
+
+        if (!container) {
+            return;
+        }
+
+        const relevantSchemes = getRelevantSchemes(state.profile);
+
+        if (!state.profile?.farmerName) {
+            document.getElementById("labour-scheme-summary").textContent = "Save farmer details to personalize this panel.";
+        } else {
+            document.getElementById("labour-scheme-summary").textContent = `${relevantSchemes.length} scheme(s) recommended for your saved profile.`;
+        }
+
+        renderSchemeCards(relevantSchemes, container);
+    }
+
+    function buildRecommendations(profile, role = state.userRole) {
+        const isFarmerRole = role !== "labour";
+
+        if (isFarmerRole && !profile?.farmerName) {
+            return [];
+        }
+
+        if (!isFarmerRole && !profile?.workerName) {
             return [];
         }
 
@@ -1634,6 +2282,36 @@
         const crop = (profile.mainCrop || "").toLowerCase();
         const relevantSchemes = getRelevantSchemes(profile).slice(0, 3);
         const hasMapLocation = Boolean(profile.latitude && profile.longitude);
+
+        if (!isFarmerRole) {
+            return [
+                {
+                    label: "Labour Finding",
+                    title: "Browse jobs and apply quickly",
+                    reason: profile.preferredWorkType
+                        ? `Use filters for ${profile.preferredWorkType} and location to find relevant work opportunities.`
+                        : "Set preferred work type in your profile, then use filters to find matching jobs.",
+                    icon: "ri-team-line",
+                    view: "labour"
+                },
+                {
+                    label: "Tutorial / Guide",
+                    title: "Use guided steps and voice help",
+                    reason: "Open tutorial to follow the worker flow and multilingual voice instructions.",
+                    icon: "ri-book-open-line",
+                    view: "guide-tutorial"
+                },
+                {
+                    label: "Government Schemes",
+                    title: "Check support schemes",
+                    reason: relevantSchemes.length
+                        ? `${relevantSchemes[0].name} is one of the top matches for this worker profile.`
+                        : "Open Government Schemes to check available support and eligibility.",
+                    icon: "ri-government-line",
+                    view: "schemes"
+                }
+            ];
+        }
 
         return [
             {
@@ -1648,13 +2326,13 @@
                 view: "labour"
             },
             {
-                label: "AI Chatbot",
-                title: "Get guidance from the AI assistant",
+                label: "Tutorial / Guide",
+                title: "Use guided steps and voice help",
                 reason: landArea >= 2 || LABOUR_HEAVY_CROPS.includes(crop)
-                    ? "This farm profile suggests labour-heavy work, so AI guidance can help plan worker needs and crop tasks."
-                    : "After saving the profile, AI can help with crop guidance, labour planning, and farmer questions.",
-                icon: "ri-message-3-line",
-                view: "chatbot"
+                    ? "This farm profile suggests labour-heavy work. Open the tutorial for step-by-step labour planning support."
+                    : "Open the tutorial to follow setup steps and use multilingual voice guidance.",
+                icon: "ri-book-open-line",
+                view: "guide-tutorial"
             },
             {
                 label: "Government Schemes",
@@ -1669,6 +2347,28 @@
     }
 
     function buildProfileSummary(profile) {
+        if (state.userRole === "labour") {
+            if (!profile?.workerName) {
+                return [
+                    { label: "Worker", value: "Not saved" },
+                    { label: "Location", value: "Not saved" },
+                    { label: "Preferred Work", value: "Not saved" },
+                    { label: "Availability", value: "Not saved" }
+                ];
+            }
+
+            return [
+                { label: "Worker", value: profile.workerName },
+                { label: "Mobile", value: profile.mobileNumber || "Not provided" },
+                { label: "Location", value: profile.currentLocation || "Not provided" },
+                { label: "Preferred Work", value: profile.preferredWorkType || "Not provided" },
+                { label: "Experience", value: profile.experienceYears ? `${profile.experienceYears} years` : "Not provided" },
+                { label: "Expected Wage", value: profile.expectedWage ? `Rs. ${profile.expectedWage}/day` : "Not provided" },
+                { label: "Availability", value: profile.availability || "Not provided" },
+                { label: "Skills", value: profile.skillTags || "Not provided" }
+            ];
+        }
+
         if (!profile?.farmerName) {
             return [
                 { label: "Farmer", value: "Not saved" },
@@ -1690,85 +2390,6 @@
             { label: "Farming Type", value: profile.farmingType || "Not provided" },
             { label: "Map Location", value: profile.latitude && profile.longitude ? "Selected" : "Not selected" }
         ];
-    }
-
-    function getMockChatbotResponse(message, profile) {
-        const prompt = message.toLowerCase();
-        const landArea = Number(profile?.landArea || 0);
-        const crop = (profile?.mainCrop || "").toLowerCase();
-        const topSchemes = getRelevantSchemes(profile).slice(0, 2).map((scheme) => scheme.name);
-
-        if (prompt.includes("labour advice")) {
-            return "For labour advice, start by selecting the work type on Labour Finding, check nearby group availability, and post the requirement with date, time, and location.";
-        }
-
-        if (prompt.includes("crop help")) {
-            return crop
-                ? `${profile.mainCrop} work often needs planning by stage. Use Labour Finding to search workers by task and post labour needs before the peak farm window.`
-                : "Save the main crop on Home first so I can give more crop-specific labour guidance.";
-        }
-
-        if (prompt.includes("scheme help")) {
-            return topSchemes.length
-                ? `Based on this profile, start with ${topSchemes.join(" and ")}. Open Government Schemes to see benefits, documents, and eligibility.`
-                : "Save land area, crop, and farming type on Home first so I can suggest better scheme matches.";
-        }
-
-        if (prompt.includes("worker shortage")) {
-            return "If workers are unavailable, widen the labour search, prefer group labour for urgent farm work, and post the requirement early with clear timing and location.";
-        }
-
-        if (prompt.includes("small farmer support")) {
-            return topSchemes.length
-                ? `For small farmer support, start with ${topSchemes[0]}. It is a strong match for this saved farmer profile.`
-                : "Save land area and farming type on Home first so I can suggest better support for a small farmer profile.";
-        }
-
-        if (prompt.includes("farm planning")) {
-            return "For farm planning, save the farmer profile, post labour needs early, and use the chatbot before harvesting or transplanting weeks.";
-        }
-
-        if (prompt.includes("how many labourers") && prompt.includes("2 acres")) {
-            return "For 2 acres, labour need depends on crop and urgency, but for manual harvesting you can start by planning 6 to 10 workers and then adjust by field condition.";
-        }
-
-        if (prompt.includes("sugarcane")) {
-            return "Sugarcane cutting usually needs experienced group labour because cutting, bundling, and loading are labour-intensive and time-sensitive.";
-        }
-
-        if (prompt.includes("labour shortage") || prompt.includes("workers are unavailable")) {
-            return "If workers are unavailable, post the requirement early, widen the location filter, consider group labour, and check labour-support or equipment subsidy schemes.";
-        }
-
-        if (prompt.includes("small farmers") || prompt.includes("small farmer")) {
-            return topSchemes.length
-                ? `For a small farmer profile, ${topSchemes[0]} is a strong starting point. You may also check labour-support schemes if wage pressure is high.`
-                : "PM-KISAN, seasonal working capital support, and crop insurance are common starting points for small farmers.";
-        }
-
-        if (prompt.includes("labour")) {
-            return "Open Labour Finding to filter by work type, choose between individual or group workers, and post the labour request with time and location.";
-        }
-
-        if (prompt.includes("scheme") || prompt.includes("government")) {
-            return topSchemes.length
-                ? `Based on this profile, look at ${topSchemes.join(" and ")} first. The scheme page will explain benefits, documents, and why they were suggested.`
-                : "Save the farmer profile first so I can rank relevant schemes more accurately.";
-        }
-
-        if (prompt.includes("crop")) {
-            return crop
-                ? `${profile.mainCrop} work should be planned with labour availability in mind. Use AI for task planning and Labour Finding to search by the work type you need.`
-                : "Save the main crop on Home and then ask again for more specific crop guidance.";
-        }
-
-        if (prompt.includes("plan")) {
-            return landArea
-                ? `For ${landArea} acres, start by estimating peak labour days, then post the request early and keep one backup labour group shortlisted.`
-                : "For better planning, save land area on Home first and then ask again.";
-        }
-
-        return "I can help with labour planning, labour shortage decisions, crop work guidance, and scheme support. Try a more specific farmer question.";
     }
 
     function getRelevantSchemes(profile) {
@@ -1873,6 +2494,19 @@
     function readProfileFromForm(form) {
         const formData = new FormData(form);
 
+        if (form.dataset.profileType === "labour") {
+            return {
+                workerName: cleanText(formData.get("workerName")),
+                mobileNumber: cleanNumber(formData.get("mobileNumber")),
+                currentLocation: cleanText(formData.get("currentLocation")),
+                preferredWorkType: cleanText(formData.get("preferredWorkType")),
+                experienceYears: cleanText(formData.get("experienceYears")),
+                expectedWage: cleanText(formData.get("expectedWage")),
+                skillTags: cleanText(formData.get("skillTags")),
+                availability: cleanText(formData.get("availability"))
+            };
+        }
+
         return {
             farmerName: cleanText(formData.get("farmerName")),
             mobileNumber: cleanNumber(formData.get("mobileNumber")),
@@ -1906,8 +2540,20 @@
             return;
         }
 
+        if (form.dataset.profileType === "labour") {
+            if (form.elements.workerName && !form.elements.workerName.value) {
+                form.elements.workerName.value = state.session?.fullName || state.session?.username || "";
+            }
+
+            if (form.elements.mobileNumber && !form.elements.mobileNumber.value) {
+                form.elements.mobileNumber.value = state.session?.mobile || "";
+            }
+
+            return;
+        }
+
         if (!form.elements.farmerName.value) {
-            form.elements.farmerName.value = state.session?.username || "";
+            form.elements.farmerName.value = state.session?.fullName || state.session?.username || "";
         }
 
         if (!form.elements.mobileNumber.value) {
@@ -1920,13 +2566,39 @@
             return;
         }
 
-        if (!form.elements.location.value) {
-            const parts = [state.profile?.fullAddress, state.profile?.village, state.profile?.district, state.profile?.state].filter(Boolean);
-            form.elements.location.value = parts.join(", ");
+        const locationField = form.elements.location || form.querySelector("#labour-filter-location");
+
+        if (!locationField) {
+            return;
+        }
+
+        if (!locationField.value) {
+            const parts = [
+                state.profile?.fullAddress,
+                state.profile?.currentLocation,
+                state.profile?.village,
+                state.profile?.district,
+                state.profile?.state
+            ].filter(Boolean);
+            locationField.value = parts.join(", ");
         }
     }
 
     function getProfileCompletionCount(profile) {
+        if (state.userRole === "labour") {
+            const fields = [
+                profile?.workerName,
+                profile?.mobileNumber,
+                profile?.currentLocation,
+                profile?.preferredWorkType,
+                profile?.experienceYears,
+                profile?.expectedWage,
+                profile?.availability
+            ];
+
+            return fields.filter((value) => Boolean(cleanText(value))).length;
+        }
+
         const fields = [
             profile?.farmerName,
             profile?.mobileNumber,
@@ -2294,12 +2966,25 @@
         }
     }
 
-    async function ensureDemoUser() {
-        try {
-            await apiRequest("/api/auth/bootstrap-demo", { method: "POST" });
-        } catch {
-            // Ignore errors (user may already exist)
+    function ensureDemoUser() {
+        const users = getUsers();
+        const existing = users.find((user) => user.usernameKey === normalizeUsername(DEMO_USER.username));
+
+        if (existing) {
+            return existing;
         }
+
+        const demoRecord = {
+            username: DEMO_USER.username,
+            usernameKey: normalizeUsername(DEMO_USER.username),
+            mobile: DEMO_USER.mobile,
+            password: DEMO_USER.password,
+            createdAt: new Date().toISOString()
+        };
+
+        users.push(demoRecord);
+        setStoredValue(STORAGE_KEYS.users, users);
+        return demoRecord;
     }
 
     function generateCaptcha(loginForm) {
@@ -2318,8 +3003,12 @@
     }
 
     function attachAuthFieldListeners(form, feedback) {
-        form.querySelectorAll("input").forEach((input) => {
-            input.addEventListener("input", () => {
+        form.querySelectorAll("input, select").forEach((field) => {
+            field.addEventListener("input", () => {
+                clearAuthFeedback(feedback);
+            });
+
+            field.addEventListener("change", () => {
                 clearAuthFeedback(feedback);
             });
         });
@@ -2361,11 +3050,13 @@
         return String(value || "").replace(/[^\d]/g, "");
     }
 
-    function formatAadharDigits(value) {
-        return cleanNumber(value)
-            .slice(0, 12)
-            .replace(/(\d{4})(?=\d)/g, "$1 ")
-            .trim();
+    function getUserStorageKey(baseKey, username = state.session?.username) {
+        const usernameKey = normalizeUsername(username);
+        return usernameKey ? `${baseKey}_${usernameKey}` : baseKey;
+    }
+
+    function getUserStoredValue(baseKey, fallbackValue) {
+        return getStoredValue(getUserStorageKey(baseKey), fallbackValue);
     }
 
     function maskAadharNumber(value) {
@@ -2450,54 +3141,5 @@
         showToast.timeoutId = window.setTimeout(() => {
             toast.classList.remove("is-visible");
         }, 2600);
-    }
-
-    function readFileAsBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error("Unable to read file."));
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function optimizeImageForVerification(file) {
-        const originalDataUrl = await readFileAsBase64(file);
-
-        if (!file.type.startsWith("image/")) {
-            return originalDataUrl;
-        }
-
-        try {
-            const image = await loadImage(originalDataUrl);
-            const maxDimension = 1280;
-            const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
-            const targetWidth = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
-            const targetHeight = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-
-            if (!context) {
-                return originalDataUrl;
-            }
-
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-            context.drawImage(image, 0, 0, targetWidth, targetHeight);
-
-            // Shrink document uploads before sending to Gemini to reduce quota pressure.
-            return canvas.toDataURL("image/jpeg", 0.82);
-        } catch {
-            return originalDataUrl;
-        }
-    }
-
-    function loadImage(dataUrl) {
-        return new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = () => resolve(image);
-            image.onerror = () => reject(new Error("Unable to process image."));
-            image.src = dataUrl;
-        });
     }
 })();

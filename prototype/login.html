@@ -64,7 +64,7 @@
                 <h1>Simple login for a farmer-first labour support dashboard.</h1>
                 <p>
                     Registered users can sign in with a username, password, and a small math CAPTCHA.
-                    Authentication now uses the API-backed session so you can move into Home, Labour Finding, AI Chatbot, and Government Schemes with real data.
+                    This keeps the prototype easy to demo without adding any backend and opens the Home, Labour Finding, AI Chatbot, and Government Schemes dashboard.
                 </p>
             </div>
 
@@ -109,7 +109,17 @@
                     <p>Use your registered username and password, then solve the CAPTCHA to continue.</p>
                 </div>
 
+                <div class="global-language-row">
+                    <label class="global-language-label" for="ui-language-select-login">Language</label>
+                    <select id="ui-language-select-login" class="global-language-select" data-ui-language-select>
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                    </select>
+                </div>
+
                 <form id="login-form" class="form-grid form-grid--single" novalidate>
+
                     <label class="field">
                         <span>Username</span>
                         <input type="text" name="username" placeholder="Enter your username" required>

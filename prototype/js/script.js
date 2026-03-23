@@ -7,24 +7,20 @@
     const USER_STORAGE_KEYS = {
         profile: "agrishield_labour_profile",
         labourPosts: "agrishield_labour_posts",
-        chatHistory: "agrishield_labour_chat_history",
         activeView: "agrishield_labour_active_view",
         jobPostings: "agrishield_job_postings",
-        jobApplications: "agrishield_job_applications"
+        jobApplications: "agrishield_job_applications",
+        guideOnboardingSeen: "agrishield_guide_onboarding_seen"
     };
 
     const VIEW_META = {
         home: {
             title: "Home",
-            subtitle: "Save farmer details and unlock labour, AI, and scheme recommendations."
+            subtitle: "Save farmer details and unlock labour and scheme recommendations."
         },
         labour: {
             title: "Labour Finding",
             subtitle: "Browse available labour, use filters, and post labour requirements."
-        },
-        chatbot: {
-            title: "AI Chatbot",
-            subtitle: "Ask for labour advice, crop help, worker shortage guidance, and scheme support."
         },
         schemes: {
             title: "Government Schemes",
@@ -39,16 +35,10 @@
     };
 
     const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
-    const DEFAULT_CHAT_GREETING = {
-        role: "bot",
-        text: "Namaste. I can help with labour planning, crop work, labour shortage handling, and useful farmer schemes. Ask me a question or tap a quick prompt."
-    };
-
     const state = {
         session: null,
         profile: null,
         labourPosts: [],
-        chatHistory: [],
         activeView: "home",
         activeSchemeFilter: "all",
         jobPostings: [],
@@ -76,6 +66,7 @@
         if (page === "dashboard") {
             initDashboardPage();
         }
+
     });
 
     function initLoginPage() {
@@ -264,26 +255,564 @@
         state.session = session;
         state.profile = getUserStoredValue(USER_STORAGE_KEYS.profile, {});
         state.labourPosts = getUserStoredValue(USER_STORAGE_KEYS.labourPosts, []);
-        state.chatHistory = getUserStoredValue(USER_STORAGE_KEYS.chatHistory, []);
         state.activeView = getUserStoredValue(USER_STORAGE_KEYS.activeView, "home");
         state.jobPostings = getUserStoredValue(USER_STORAGE_KEYS.jobPostings, []);
         state.jobApplications = getUserStoredValue(USER_STORAGE_KEYS.jobApplications, []);
-
-        if (!state.chatHistory.length) {
-            state.chatHistory = [DEFAULT_CHAT_GREETING];
-            setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
-        }
 
         bindSidebar();
         bindTopbar();
         bindHomeSection();
         bindLabourSection();
-        bindChatSection();
         bindSchemesSection();
         bindLinkedInLabourSection();
+        initGuidePage();
+        bindGuideOnboarding();
 
         refreshGlobalUI();
         setActiveView(state.activeView);
+    }
+
+    function initGuidePage() {
+        const stepList = document.querySelector("[data-guide-step-list]");
+        const statusNode = document.querySelector("[data-guide-voice-status]");
+        const languageSelect = document.querySelector("[data-guide-language]");
+        const openGuideButtons = document.querySelectorAll("[data-open-guide]");
+        const playButton = document.querySelector("[data-guide-voice-play]");
+        const repeatButton = document.querySelector("[data-guide-voice-repeat]");
+        const stopButton = document.querySelector("[data-guide-voice-stop]");
+        const listenButton = document.querySelector("[data-guide-voice-listen]");
+
+        if (!stepList || !statusNode) {
+            return;
+        }
+
+        const guideContent = {
+            en: {
+                label: "English",
+                speechLang: "en-IN",
+                recognitionLang: "en-IN",
+                readyText: "Voice help is ready. Press Play Full Guide to start.",
+                steps: [
+                    {
+                        title: "Login or register first",
+                        detail: "Open the login page if you already have an account. If not, create a simple account from register."
+                    },
+                    {
+                        title: "Save farmer details on Home",
+                        detail: "Enter name, mobile, village, crop, and land area. These details are used for personalized help."
+                    },
+                    {
+                        title: "Choose farm location on map",
+                        detail: "Search your place or click on the map. Saved location improves labour suggestions."
+                    },
+                    {
+                        title: "Use Labour Finding",
+                        detail: "Filter available workers, then post your labour requirement with date, time, and location."
+                    },
+                    {
+                        title: "Review recommendations",
+                        detail: "Check alerts and suggested actions to plan labour demand and next farm steps."
+                    },
+                    {
+                        title: "Review Government Schemes",
+                        detail: "Open schemes to check eligibility, required documents, and the best matching support options."
+                    }
+                ]
+            },
+            hi: {
+                label: "Hindi",
+                speechLang: "hi-IN",
+                recognitionLang: "hi-IN",
+                readyText: "वॉइस गाइड तैयार है। शुरू करने के लिए प्ले दबाएं।",
+                steps: [
+                    {
+                        title: "पहले लॉगिन या रजिस्टर करें",
+                        detail: "अगर आपका अकाउंट है तो लॉगिन खोलें। नया यूज़र हो तो रजिस्टर पेज से अकाउंट बनाएं।"
+                    },
+                    {
+                        title: "होम पर किसान विवरण सेव करें",
+                        detail: "नाम, मोबाइल, गांव, फसल और जमीन का क्षेत्र भरें। इसी से सुझाव बेहतर मिलते हैं।"
+                    },
+                    {
+                        title: "मैप पर खेत की लोकेशन चुनें",
+                        detail: "स्थान खोजें या मैप पर क्लिक करें। सेव लोकेशन से लेबर मैचिंग बेहतर होती है।"
+                    },
+                    {
+                        title: "लेबर फाइंडिंग का उपयोग करें",
+                        detail: "उपलब्ध मजदूर फ़िल्टर करें और तारीख, समय, स्थान के साथ अपनी जरूरत पोस्ट करें।"
+                    },
+                    {
+                        title: "सुझाव देखें",
+                        detail: "अलर्ट और सुझाए गए कदम देखकर लेबर प्लानिंग और अगले काम तय करें।"
+                    },
+                    {
+                        title: "सरकारी योजनाएं देखें",
+                        detail: "पात्रता, जरूरी दस्तावेज़ और आपके लिए उपयुक्त योजना की जानकारी देखें।"
+                    }
+                ]
+            },
+            mr: {
+                label: "Marathi",
+                speechLang: "mr-IN",
+                recognitionLang: "mr-IN",
+                readyText: "व्हॉइस गाईड तयार आहे. सुरू करण्यासाठी प्ले दाबा.",
+                steps: [
+                    {
+                        title: "सुरुवातीला लॉगिन किंवा नोंदणी करा",
+                        detail: "खाते असेल तर लॉगिन करा. नसेल तर रजिस्टर पेजवरून नवीन खाते तयार करा."
+                    },
+                    {
+                        title: "होममध्ये शेतकरी माहिती सेव्ह करा",
+                        detail: "नाव, मोबाईल, गाव, पीक आणि क्षेत्रफळ भरा. यामुळे योग्य सूचना मिळतात."
+                    },
+                    {
+                        title: "नकाशावर शेताची जागा निवडा",
+                        detail: "ठिकाण शोधा किंवा नकाशावर क्लिक करा. सेव्ह केलेली जागा मजूर जुळवण्यात मदत करते."
+                    },
+                    {
+                        title: "Labour Finding वापरा",
+                        detail: "उपलब्ध मजूर फिल्टर करा आणि तारीख, वेळ, ठिकाणासह गरज पोस्ट करा."
+                    },
+                    {
+                        title: "शिफारसी पहा",
+                        detail: "अलर्ट आणि सुचवलेली कृती पाहून मजूर नियोजन आणि पुढची कामे ठरवा."
+                    },
+                    {
+                        title: "सरकारी योजना तपासा",
+                        detail: "पात्रता, आवश्यक कागदपत्रे आणि योग्य योजना यांची माहिती पाहा."
+                    }
+                ]
+            },
+            ta: {
+                label: "Tamil",
+                speechLang: "ta-IN",
+                recognitionLang: "ta-IN",
+                readyText: "வாய்ஸ் வழிகாட்டி தயாராக உள்ளது. தொடங்க Play அழுத்தவும்.",
+                steps: [
+                    {
+                        title: "முதலில் Login அல்லது Register செய்யவும்",
+                        detail: "கணக்கு இருந்தால் Login பக்கம் திறக்கவும். புதியவர் என்றால் Register மூலம் கணக்கு உருவாக்கவும்."
+                    },
+                    {
+                        title: "Home-ல் விவசாயி விவரங்களை சேமிக்கவும்",
+                        detail: "பெயர், மொபைல், கிராமம், பயிர், நில அளவை பதிவு செய்யவும். அதனால் பரிந்துரைகள் மேம்படும்."
+                    },
+                    {
+                        title: "வரைபடத்தில் பண்ணை இடத்தை தேர்வு செய்யவும்",
+                        detail: "இடத்தை தேடவும் அல்லது வரைபடத்தில் கிளிக் செய்யவும். சேமித்த இடம் தொழிலாளர் பொருத்தத்தை மேம்படுத்தும்."
+                    },
+                    {
+                        title: "Labour Finding பயன்படுத்தவும்",
+                        detail: "கிடைக்கும் தொழிலாளர்களை வடிகட்டி, தேதி, நேரம், இடத்துடன் தேவையை பதிவிடவும்."
+                    },
+                    {
+                        title: "பரிந்துரைகளை பார்க்கவும்",
+                        detail: "அலர்ட் மற்றும் பரிந்துரைக்கப்பட்ட நடவடிக்கைகளை பார்த்து அடுத்த பணிகளை திட்டமிடுங்கள்."
+                    },
+                    {
+                        title: "அரசு திட்டங்களை பார்க்கவும்",
+                        detail: "தகுதி, ஆவணங்கள் மற்றும் உங்களுக்கு பொருந்தும் திட்ட விவரங்களை சரிபார்க்கவும்."
+                    }
+                ]
+            },
+            te: {
+                label: "Telugu",
+                speechLang: "te-IN",
+                recognitionLang: "te-IN",
+                readyText: "వాయిస్ గైడ్ సిద్ధంగా ఉంది. ప్రారంభించడానికి ప్లే నొక్కండి.",
+                steps: [
+                    {
+                        title: "ముందుగా Login లేదా Register చేయండి",
+                        detail: "ఖాతా ఉంటే Login తెరవండి. లేకపోతే Register ద్వారా కొత్త ఖాతా సృష్టించండి."
+                    },
+                    {
+                        title: "Homeలో రైతు వివరాలు సేవ్ చేయండి",
+                        detail: "పేరు, మొబైల్, గ్రామం, పంట, భూభాగం నమోదు చేయండి. అప్పుడు సూచనలు మెరుగవుతాయి."
+                    },
+                    {
+                        title: "మ్యాప్‌లో పొలం లొకేషన్ ఎంచుకోండి",
+                        detail: "స్థలాన్ని వెతకండి లేదా మ్యాప్‌పై క్లిక్ చేయండి. సేవ్ చేసిన స్థానం పనివారి మ్యాచింగ్‌కు సహాయపడుతుంది."
+                    },
+                    {
+                        title: "Labour Finding ఉపయోగించండి",
+                        detail: "అందుబాటులో ఉన్న పనివారిని ఫిల్టర్ చేసి, తేదీ, సమయం, స్థలంతో అవసరం పోస్ట్ చేయండి."
+                    },
+                    {
+                        title: "సిఫార్సులు చూడండి",
+                        detail: "అలర్ట్స్ మరియు సూచించిన చర్యలను చూసి పనివారి ప్లానింగ్ మరియు తదుపరి పనులు నిర్ణయించండి."
+                    },
+                    {
+                        title: "ప్రభుత్వ పథకాలు పరిశీలించండి",
+                        detail: "అర్హత, అవసరమైన పత్రాలు, మీకు సరిపోయే పథకాలను చూడండి."
+                    }
+                ]
+            },
+            bn: {
+                label: "Bengali",
+                speechLang: "bn-IN",
+                recognitionLang: "bn-IN",
+                readyText: "ভয়েস গাইড প্রস্তুত। শুরু করতে Play চাপুন।",
+                steps: [
+                    {
+                        title: "প্রথমে Login বা Register করুন",
+                        detail: "অ্যাকাউন্ট থাকলে Login খুলুন। না থাকলে Register পেজ থেকে নতুন অ্যাকাউন্ট তৈরি করুন।"
+                    },
+                    {
+                        title: "Home-এ কৃষকের তথ্য সেভ করুন",
+                        detail: "নাম, মোবাইল, গ্রাম, ফসল, জমির পরিমাণ দিন। এতে ভালো পরামর্শ পাওয়া যায়।"
+                    },
+                    {
+                        title: "ম্যাপে খামারের অবস্থান বাছুন",
+                        detail: "জায়গা খুঁজুন বা ম্যাপে ক্লিক করুন। সেভ করা লোকেশন শ্রমিক মিলাতে সাহায্য করে।"
+                    },
+                    {
+                        title: "Labour Finding ব্যবহার করুন",
+                        detail: "উপলব্ধ শ্রমিক ফিল্টার করুন এবং তারিখ, সময়, লোকেশনসহ প্রয়োজন পোস্ট করুন।"
+                    },
+                    {
+                        title: "পরামর্শ দেখুন",
+                        detail: "অ্যালার্ট এবং প্রস্তাবিত পদক্ষেপ দেখে শ্রম পরিকল্পনা ও পরের কাজ ঠিক করুন।"
+                    },
+                    {
+                        title: "সরকারি স্কিম দেখুন",
+                        detail: "যোগ্যতা, দরকারি কাগজপত্র এবং আপনার জন্য মানানসই স্কিম দেখুন।"
+                    }
+                ]
+            }
+        };
+
+        let currentStep = 0;
+        let isSequencePlaying = false;
+        let recognition = null;
+        let isListening = false;
+        let activeUtterance = null;
+        let activeLanguage = languageSelect?.value || "en";
+        let availableVoices = [];
+
+        const getGuideModel = () => guideContent[activeLanguage] || guideContent.en;
+
+        const setStatus = (message) => {
+            statusNode.textContent = message;
+        };
+
+        const loadVoices = () => {
+            if (!("speechSynthesis" in window)) {
+                return;
+            }
+
+            availableVoices = window.speechSynthesis.getVoices() || [];
+        };
+
+        const getVoiceForLanguage = (speechLang) => {
+            if (!availableVoices.length) {
+                return null;
+            }
+
+            const normalizedLang = String(speechLang || "").toLowerCase();
+            const primaryCode = normalizedLang.split("-")[0];
+
+            return availableVoices.find((voice) => voice.lang?.toLowerCase() === normalizedLang)
+                || availableVoices.find((voice) => voice.lang?.toLowerCase().startsWith(`${primaryCode}-`))
+                || availableVoices.find((voice) => voice.lang?.toLowerCase().startsWith(primaryCode))
+                || null;
+        };
+
+        const renderSteps = () => {
+            const steps = getGuideModel().steps;
+            stepList.innerHTML = steps.map((step, index) => `
+                <article class="guide-step ${index === currentStep ? "is-active" : ""}">
+                    <span class="guide-step__index">${index + 1}</span>
+                    <div>
+                        <h3>${escapeHtml(step.title)}</h3>
+                        <p>${escapeHtml(step.detail)}</p>
+                    </div>
+                </article>
+            `).join("");
+        };
+
+        const stopVoice = (statusMessage = "Voice playback stopped.") => {
+            isSequencePlaying = false;
+
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            activeUtterance = null;
+            setStatus(statusMessage);
+        };
+
+        const speakCurrentStep = (continueSequence = false) => {
+            const model = getGuideModel();
+            const steps = model.steps;
+
+            if (!("speechSynthesis" in window)) {
+                setStatus("Voice playback is not supported in this browser.");
+                return;
+            }
+
+            const step = steps[currentStep];
+
+            if (!step) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(`Step ${currentStep + 1}. ${step.title}. ${step.detail}`);
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            utterance.lang = model.speechLang;
+
+            const selectedVoice = getVoiceForLanguage(model.speechLang);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            utterance.onend = () => {
+                activeUtterance = null;
+                const activeSteps = getGuideModel().steps;
+
+                if (continueSequence && isSequencePlaying) {
+                    if (currentStep < activeSteps.length - 1) {
+                        currentStep += 1;
+                        renderSteps();
+                        speakCurrentStep(true);
+                    } else {
+                        isSequencePlaying = false;
+                        setStatus("Guide completed. You can replay or say a step number.");
+                    }
+                    return;
+                }
+
+                setStatus(`Finished step ${currentStep + 1}.`);
+            };
+
+            utterance.onerror = () => {
+                isSequencePlaying = false;
+                activeUtterance = null;
+                setStatus("Voice playback failed. Try again.");
+            };
+
+            activeUtterance = utterance;
+            setStatus(`Speaking step ${currentStep + 1}: ${step.title}`);
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const goToStep = (index) => {
+            const activeSteps = getGuideModel().steps;
+
+            if (index < 0 || index >= activeSteps.length) {
+                return;
+            }
+
+            currentStep = index;
+            renderSteps();
+        };
+
+        const parseStepCommand = (text) => {
+            const match = text.match(/(?:step|स्टेप|पायरी|படி|దశ|ধাপ)\s*(\d+)/i);
+
+            if (!match) {
+                return null;
+            }
+
+            const index = Number(match[1]) - 1;
+            return Number.isInteger(index) ? index : null;
+        };
+
+        const runVoiceCommand = (spokenText) => {
+            const command = spokenText.toLowerCase();
+            const compactCommand = command.replace(/\s+/g, " ");
+            const stepIndex = parseStepCommand(command);
+            const activeSteps = getGuideModel().steps;
+
+            if (compactCommand.includes("next") || compactCommand.includes("अगला") || compactCommand.includes("पुढ") || compactCommand.includes("తర్వాత") || compactCommand.includes("পরের") || compactCommand.includes("அடுத்து")) {
+                goToStep(Math.min(activeSteps.length - 1, currentStep + 1));
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("previous") || compactCommand.includes("back") || compactCommand.includes("पिछला") || compactCommand.includes("मागील") || compactCommand.includes("ముందు") || compactCommand.includes("আগের") || compactCommand.includes("முந்தைய")) {
+                goToStep(Math.max(0, currentStep - 1));
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("repeat") || compactCommand.includes("दुबारा") || compactCommand.includes("पुन्हा") || compactCommand.includes("మళ్లీ") || compactCommand.includes("আবার") || compactCommand.includes("மீண்டும்")) {
+                speakCurrentStep(false);
+                return;
+            }
+
+            if (compactCommand.includes("play") || compactCommand.includes("चलाओ") || compactCommand.includes("सुरू") || compactCommand.includes("ప్రారంభ") || compactCommand.includes("চালু") || compactCommand.includes("தொடங்கு")) {
+                isSequencePlaying = true;
+                speakCurrentStep(true);
+                return;
+            }
+
+            if (compactCommand.includes("stop") || compactCommand.includes("रुको") || compactCommand.includes("थांब") || compactCommand.includes("ఆపు") || compactCommand.includes("বন্ধ") || compactCommand.includes("நிறுத்து")) {
+                stopVoice("Voice playback stopped by command.");
+                return;
+            }
+
+            if (stepIndex !== null) {
+                goToStep(Math.max(0, Math.min(activeSteps.length - 1, stepIndex)));
+                speakCurrentStep(false);
+                return;
+            }
+
+            setStatus("Command not recognized. Try: next, previous, repeat, play, stop, or step number.");
+        };
+
+        const setupVoiceRecognition = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition || !listenButton) {
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = getGuideModel().recognitionLang;
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const latest = event.results[event.results.length - 1];
+
+                if (!latest || !latest[0]) {
+                    return;
+                }
+
+                const transcript = latest[0].transcript.trim();
+                setStatus(`Heard: ${transcript}`);
+                runVoiceCommand(transcript);
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    try {
+                        recognition.lang = getGuideModel().recognitionLang;
+                        recognition.start();
+                    } catch {
+                        isListening = false;
+                        listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+                        setStatus("Voice command listening stopped.");
+                    }
+                }
+            };
+
+            recognition.onerror = () => {
+                setStatus("Voice commands are temporarily unavailable.");
+            };
+        };
+
+        renderSteps();
+        setupVoiceRecognition();
+        setStatus(getGuideModel().readyText);
+
+        loadVoices();
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        openGuideButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                openModal("guide-tutorial");
+            });
+        });
+
+        languageSelect?.addEventListener("change", () => {
+            activeLanguage = languageSelect.value in guideContent ? languageSelect.value : "en";
+            currentStep = 0;
+            isSequencePlaying = false;
+            stopVoice(getGuideModel().readyText);
+
+            if (recognition) {
+                recognition.lang = getGuideModel().recognitionLang;
+            }
+
+            renderSteps();
+        });
+
+        playButton?.addEventListener("click", () => {
+            isSequencePlaying = true;
+            speakCurrentStep(true);
+        });
+
+        repeatButton?.addEventListener("click", () => {
+            isSequencePlaying = false;
+            speakCurrentStep(false);
+        });
+
+        stopButton?.addEventListener("click", () => {
+            stopVoice();
+        });
+
+        listenButton?.addEventListener("click", () => {
+            if (!recognition) {
+                setStatus("Voice commands are not supported in this browser.");
+                return;
+            }
+
+            if (!isListening) {
+                isListening = true;
+                listenButton.innerHTML = "<i class=\"ri-mic-off-line\" aria-hidden=\"true\"></i>Stop Listening";
+
+                try {
+                    recognition.start();
+                    setStatus("Listening for commands. Try: next, repeat, stop, or step number.");
+                } catch {
+                    isListening = false;
+                    listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+                    setStatus("Unable to start voice commands.");
+                }
+
+                return;
+            }
+
+            isListening = false;
+            listenButton.innerHTML = "<i class=\"ri-mic-line\" aria-hidden=\"true\"></i>Voice Commands";
+            recognition.stop();
+            setStatus("Voice command listening stopped.");
+        });
+
+        stepList.addEventListener("click", (event) => {
+            const stepCard = event.target.closest(".guide-step");
+
+            if (!stepCard) {
+                return;
+            }
+
+            const stepCards = Array.from(stepList.querySelectorAll(".guide-step"));
+            const stepIndex = stepCards.indexOf(stepCard);
+
+            if (stepIndex < 0) {
+                return;
+            }
+
+            goToStep(stepIndex);
+            isSequencePlaying = false;
+            speakCurrentStep(false);
+        });
+    }
+
+    function bindGuideOnboarding() {
+        const openGuideButton = document.getElementById("open-guide-now");
+        const skipGuideButton = document.getElementById("skip-guide-now");
+        const hasSeenOnboarding = getUserStoredValue(USER_STORAGE_KEYS.guideOnboardingSeen, false);
+
+        openGuideButton?.addEventListener("click", () => {
+            closeModal("guide-welcome");
+            openModal("guide-tutorial");
+        });
+
+        skipGuideButton?.addEventListener("click", () => {
+            closeModal("guide-welcome");
+        });
+
+        if (!hasSeenOnboarding) {
+            setUserStoredValue(USER_STORAGE_KEYS.guideOnboardingSeen, true);
+            openModal("guide-welcome");
+        }
     }
 
     function bindSidebar() {
@@ -463,33 +992,6 @@
         renderPostedLabourRequirements();
     }
 
-    function bindChatSection() {
-        const chatForm = document.getElementById("chat-form");
-        const chatInput = document.getElementById("chat-input");
-        const chipButtons = document.querySelectorAll("[data-chat-chip]");
-
-        chipButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-                sendChatMessage(button.dataset.chatChip);
-            });
-        });
-
-        chatForm?.addEventListener("submit", (event) => {
-            event.preventDefault();
-
-            const message = cleanText(chatInput.value);
-
-            if (!message) {
-                return;
-            }
-
-            sendChatMessage(message);
-            chatInput.value = "";
-        });
-
-        renderChatHistory();
-    }
-
     function bindSchemesSection() {
         const filterButtons = document.querySelectorAll("[data-scheme-filter]");
 
@@ -596,7 +1098,7 @@
             setText("[data-home-next-detail]", recommendations[0].reason);
         } else {
             setText("[data-home-next-step]", "Save the farmer details and pick the farm location.");
-            setText("[data-home-next-detail]", "The dashboard will use this saved profile to prepare labour, AI, and scheme suggestions in the next steps.");
+            setText("[data-home-next-detail]", "The dashboard will use this saved profile to prepare labour and scheme suggestions in the next steps.");
         }
     }
 
@@ -680,6 +1182,11 @@
 
         container.querySelectorAll("[data-jump-view]").forEach((button) => {
             button.addEventListener("click", () => {
+                if (button.dataset.jumpView === "guide-tutorial") {
+                    openModal("guide-tutorial");
+                    return;
+                }
+
                 setActiveView(button.dataset.jumpView);
             });
         });
@@ -837,43 +1344,6 @@
         `;
     }
 
-    function renderChatHistory() {
-        const container = document.getElementById("chat-window");
-
-        if (!container) {
-            return;
-        }
-
-        container.innerHTML = state.chatHistory.map((item) => `
-            <article class="chat-bubble chat-bubble--${escapeHtml(item.role)}">
-                <div class="chat-bubble__meta">${item.role === "bot" ? "AgriShield Bot" : "You"}</div>
-                <p>${escapeHtml(item.text)}</p>
-            </article>
-        `).join("");
-
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function sendChatMessage(message) {
-        const userMessage = {
-            role: "user",
-            text: message
-        };
-        const botReply = getGeminiResponse(message, state.profile) || getMockChatbotResponse(message, state.profile);
-        const botMessage = {
-            role: "bot",
-            text: botReply
-        };
-
-        state.chatHistory.push(userMessage, botMessage);
-        setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
-        renderChatHistory();
-    }
-
-    function getGeminiResponse() {
-        return null;
-    }
-
     function renderSchemesView() {
         const summary = document.querySelector("[data-scheme-summary]");
         const container = document.getElementById("scheme-card-grid");
@@ -969,13 +1439,13 @@
                 view: "labour"
             },
             {
-                label: "AI Chatbot",
-                title: "Get guidance from the AI assistant",
+                label: "Tutorial / Guide",
+                title: "Use guided steps and voice help",
                 reason: landArea >= 2 || LABOUR_HEAVY_CROPS.includes(crop)
-                    ? "This farm profile suggests labour-heavy work, so AI guidance can help plan worker needs and crop tasks."
-                    : "After saving the profile, AI can help with crop guidance, labour planning, and farmer questions.",
-                icon: "ri-message-3-line",
-                view: "chatbot"
+                    ? "This farm profile suggests labour-heavy work. Open the tutorial for step-by-step labour planning support."
+                    : "Open the tutorial to follow setup steps and use multilingual voice guidance.",
+                icon: "ri-book-open-line",
+                view: "guide-tutorial"
             },
             {
                 label: "Government Schemes",
@@ -1011,85 +1481,6 @@
             { label: "Farming Type", value: profile.farmingType || "Not provided" },
             { label: "Map Location", value: profile.latitude && profile.longitude ? "Selected" : "Not selected" }
         ];
-    }
-
-    function getMockChatbotResponse(message, profile) {
-        const prompt = message.toLowerCase();
-        const landArea = Number(profile?.landArea || 0);
-        const crop = (profile?.mainCrop || "").toLowerCase();
-        const topSchemes = getRelevantSchemes(profile).slice(0, 2).map((scheme) => scheme.name);
-
-        if (prompt.includes("labour advice")) {
-            return "For labour advice, start by selecting the work type on Labour Finding, check nearby group availability, and post the requirement with date, time, and location.";
-        }
-
-        if (prompt.includes("crop help")) {
-            return crop
-                ? `${profile.mainCrop} work often needs planning by stage. Use Labour Finding to search workers by task and post labour needs before the peak farm window.`
-                : "Save the main crop on Home first so I can give more crop-specific labour guidance.";
-        }
-
-        if (prompt.includes("scheme help")) {
-            return topSchemes.length
-                ? `Based on this profile, start with ${topSchemes.join(" and ")}. Open Government Schemes to see benefits, documents, and eligibility.`
-                : "Save land area, crop, and farming type on Home first so I can suggest better scheme matches.";
-        }
-
-        if (prompt.includes("worker shortage")) {
-            return "If workers are unavailable, widen the labour search, prefer group labour for urgent farm work, and post the requirement early with clear timing and location.";
-        }
-
-        if (prompt.includes("small farmer support")) {
-            return topSchemes.length
-                ? `For small farmer support, start with ${topSchemes[0]}. It is a strong match for this saved farmer profile.`
-                : "Save land area and farming type on Home first so I can suggest better support for a small farmer profile.";
-        }
-
-        if (prompt.includes("farm planning")) {
-            return "For farm planning, save the farmer profile, post labour needs early, and use the chatbot before harvesting or transplanting weeks.";
-        }
-
-        if (prompt.includes("how many labourers") && prompt.includes("2 acres")) {
-            return "For 2 acres, labour need depends on crop and urgency, but for manual harvesting you can start by planning 6 to 10 workers and then adjust by field condition.";
-        }
-
-        if (prompt.includes("sugarcane")) {
-            return "Sugarcane cutting usually needs experienced group labour because cutting, bundling, and loading are labour-intensive and time-sensitive.";
-        }
-
-        if (prompt.includes("labour shortage") || prompt.includes("workers are unavailable")) {
-            return "If workers are unavailable, post the requirement early, widen the location filter, consider group labour, and check labour-support or equipment subsidy schemes.";
-        }
-
-        if (prompt.includes("small farmers") || prompt.includes("small farmer")) {
-            return topSchemes.length
-                ? `For a small farmer profile, ${topSchemes[0]} is a strong starting point. You may also check labour-support schemes if wage pressure is high.`
-                : "PM-KISAN, seasonal working capital support, and crop insurance are common starting points for small farmers.";
-        }
-
-        if (prompt.includes("labour")) {
-            return "Open Labour Finding to filter by work type, choose between individual or group workers, and post the labour request with time and location.";
-        }
-
-        if (prompt.includes("scheme") || prompt.includes("government")) {
-            return topSchemes.length
-                ? `Based on this profile, look at ${topSchemes.join(" and ")} first. The scheme page will explain benefits, documents, and why they were suggested.`
-                : "Save the farmer profile first so I can rank relevant schemes more accurately.";
-        }
-
-        if (prompt.includes("crop")) {
-            return crop
-                ? `${profile.mainCrop} work should be planned with labour availability in mind. Use AI for task planning and Labour Finding to search by the work type you need.`
-                : "Save the main crop on Home and then ask again for more specific crop guidance.";
-        }
-
-        if (prompt.includes("plan")) {
-            return landArea
-                ? `For ${landArea} acres, start by estimating peak labour days, then post the request early and keep one backup labour group shortlisted.`
-                : "For better planning, save land area on Home first and then ask again.";
-        }
-
-        return "I can help with labour planning, labour shortage decisions, crop work guidance, and scheme support. Try a more specific farmer question.";
     }
 
     function getRelevantSchemes(profile) {

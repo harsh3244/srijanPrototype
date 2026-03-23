@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Login and Registration</title>
+    <meta
+        name="description"
+        content="Create an AgriShield account or login with password-based access and human verification. No OTP required."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body data-page="auth">
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="index.html" aria-label="AgriShield home">
+                <span class="brand-mark">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span class="brand-copy">
+                    <strong>AgriShield</strong>
+                    <small>Simple AI for safer farming</small>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                <a data-page-link="home" href="index.html"><i class="ri-home-5-line" aria-hidden="true"></i><span>Home</span></a>
+                <a data-page-link="fraud" href="fraud-detection.html"><i class="ri-shield-check-line" aria-hidden="true"></i><span>Fraud Check</span></a>
+                <a data-page-link="schemes" href="gov-schemes.html"><i class="ri-file-list-3-line" aria-hidden="true"></i><span>Scheme Guide</span></a>
+                <a data-page-link="irrigation" href="irrigation.html"><i class="ri-drop-line" aria-hidden="true"></i><span>Irrigation</span></a>
+                <a data-page-link="crop" href="crop-analyzer.html"><i class="ri-seedling-line" aria-hidden="true"></i><span>Crop Analyzer</span></a>
+                <a data-page-link="languages" href="languages.html"><i class="ri-volume-up-line" aria-hidden="true"></i><span>Languages</span></a>
+                <a data-page-link="labs" href="agri-labs.html"><i class="ri-map-pin-range-line" aria-hidden="true"></i><span>Agri Labs</span></a>
+                <a data-page-link="auth" href="auth.html"><i class="ri-user-3-line" aria-hidden="true"></i><span>Login</span></a>
+            </nav>
+
+            <div class="sidebar-help">
+                <strong>Easy Use</strong>
+                <p>Choose one tool, read the short answer, and take the next safe step.</p>
+            </div>
+
+            <a class="header-cta" href="fraud-detection.html">Quick Fraud Check</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <div data-reveal>
+                <span class="eyebrow">Secure Access / Password Login / No OTP</span>
+                <h1><i class="ri-user-3-line" aria-hidden="true"></i><span>Create an account or login with password and human verification.</span></h1>
+                <p>
+                    This auth flow is built for simple rural access: register with name, email, phone, and password.
+                    Before each login or registration, the user solves a small captcha challenge instead of using OTP.
+                </p>
+            </div>
+
+            <div class="panel" data-reveal="scale">
+                <span class="section-kicker">Auth Setup</span>
+                <h2>What this version includes</h2>
+                <ul class="simple-list">
+                    <li><i class="ri-check-line"></i><span>Password-based login and registration</span></li>
+                    <li><i class="ri-check-line"></i><span>Captcha challenge for human verification</span></li>
+                    <li><i class="ri-check-line"></i><span>MySQL-backed user and session storage</span></li>
+                    <li><i class="ri-check-line"></i><span>No OTP dependency</span></li>
+                </ul>
+                <p class="helper-note">Use your MySQL URL or separate host, port, username, password, and database values in the backend env file.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="auth-layout">
+                <article class="panel auth-guide" data-reveal>
+                    <span class="section-kicker">MySQL Link Shape</span>
+                    <h2>Your connection string format</h2>
+                    <div class="auth-code-block">
+                        mysql://root:YOUR_PASSWORD@127.0.0.1:3306/agrishield
+                    </div>
+                    <p>
+                        From your screenshot, these values are already clear: host is <strong>127.0.0.1</strong>,
+                        port is <strong>3306</strong>, and username is <strong>root</strong>. The two missing values
+                        are the real password and the database name. This implementation uses <strong>agrishield</strong>
+                        as the default database name.
+                    </p>
+                    <div class="profile-list">
+                        <div class="profile-row">
+                            <span>Hostname</span>
+                            <strong>127.0.0.1</strong>
+                        </div>
+                        <div class="profile-row">
+                            <span>Port</span>
+                            <strong>3306</strong>
+                        </div>
+                        <div class="profile-row">
+                            <span>Username</span>
+                            <strong>root</strong>
+                        </div>
+                        <div class="profile-row">
+                            <span>Database</span>
+                            <strong>agrishield</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <section class="panel auth-card" data-reveal="scale" data-auth-root>
+                    <div class="auth-tabs" role="tablist" aria-label="Login or register">
+                        <button class="auth-tab is-active" type="button" data-auth-tab="login" role="tab" aria-selected="true">
+                            Login
+                        </button>
+                        <button class="auth-tab" type="button" data-auth-tab="register" role="tab" aria-selected="false">
+                            Register
+                        </button>
+                    </div>
+
+                    <div class="auth-message is-hidden" data-auth-message role="status" aria-live="polite"></div>
+
+                    <form class="auth-form" data-auth-form="login">
+                        <div class="input-grid">
+                            <label class="input-field">
+                                <span>Email address</span>
+                                <input type="email" name="email" placeholder="farmer@example.com" required>
+                            </label>
+                            <label class="input-field">
+                                <span>Password</span>
+                                <input type="password" name="password" placeholder="Enter your password" required minlength="8">
+                            </label>
+                        </div>
+
+                        <div class="captcha-box">
+                            <div class="captcha-row">
+                                <div>
+                                    <span class="mini-label">Human verification</span>
+                                    <strong class="captcha-prompt" data-captcha-prompt>Loading challenge...</strong>
+                                </div>
+                                <button class="inline-button" type="button" data-refresh-captcha>New captcha</button>
+                            </div>
+
+                            <label class="input-field">
+                                <span>Captcha answer</span>
+                                <input type="text" name="captchaAnswer" inputmode="numeric" placeholder="Type the answer" required>
+                            </label>
+                            <input type="hidden" name="captchaToken">
+                        </div>
+
+                        <button class="btn btn--primary auth-submit" type="submit">Login Securely</button>
+                    </form>
+
+                    <form class="auth-form auth-form--hidden" data-auth-form="register">
+                        <div class="input-grid input-grid--two">
+                            <label class="input-field">
+                                <span>Full name</span>
+                                <input type="text" name="fullName" placeholder="Farmer full name" required>
+                            </label>
+                            <label class="input-field">
+                                <span>Phone number</span>
+                                <input type="tel" name="phone" placeholder="+91 98765 43210">
+                            </label>
+                            <label class="input-field">
+                                <span>Email address</span>
+                                <input type="email" name="email" placeholder="farmer@example.com" required>
+                            </label>
+                            <label class="input-field">
+                                <span>Password</span>
+                                <input type="password" name="password" placeholder="Create a password" required minlength="8">
+                            </label>
+                            <label class="input-field">
+                                <span>Confirm password</span>
+                                <input type="password" name="confirmPassword" placeholder="Repeat the password" required minlength="8">
+                            </label>
+                        </div>
+
+                        <div class="captcha-box">
+                            <div class="captcha-row">
+                                <div>
+                                    <span class="mini-label">Human verification</span>
+                                    <strong class="captcha-prompt" data-captcha-prompt>Loading challenge...</strong>
+                                </div>
+                                <button class="inline-button" type="button" data-refresh-captcha>New captcha</button>
+                            </div>
+
+                            <label class="input-field">
+                                <span>Captcha answer</span>
+                                <input type="text" name="captchaAnswer" inputmode="numeric" placeholder="Type the answer" required>
+                            </label>
+                            <input type="hidden" name="captchaToken">
+                        </div>
+
+                        <button class="btn btn--primary auth-submit" type="submit">Create Account</button>
+                    </form>
+                </section>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="panel auth-session" data-reveal data-auth-session>
+                <div class="card-row">
+                    <div>
+                        <span class="section-kicker">Current Session</span>
+                        <h2>See who is logged in on this browser.</h2>
+                    </div>
+                    <button class="btn btn--secondary" type="button" data-auth-logout>Logout</button>
+                </div>
+
+                <div class="profile-list">
+                    <div class="profile-row">
+                        <span>Status</span>
+                        <strong data-session-status>Not logged in</strong>
+                    </div>
+                    <div class="profile-row">
+                        <span>Name</span>
+                        <strong data-session-name>-</strong>
+                    </div>
+                    <div class="profile-row">
+                        <span>Email</span>
+                        <strong data-session-email>-</strong>
+                    </div>
+                    <div class="profile-row">
+                        <span>Phone</span>
+                        <strong data-session-phone>-</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div class="footer-brand">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span class="brand-copy">
+                        <strong>AgriShield</strong>
+                        <small>Safer farming through simple AI</small>
+                    </span>
+                </a>
+                <p>Hackathon prototype focused on fraud prevention, crop intelligence, village-friendly access, and now secure password-based login.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="fraud-detection.html">Fraud Check</a>
+                <a href="gov-schemes.html">Gov Schemes</a>
+                <a href="crop-analyzer.html">Crop Analyzer</a>
+                <a href="irrigation.html">Irrigation</a>
+                <a href="languages.html">Languages</a>
+                <a href="agri-labs.html">Agri Labs</a>
+            </div>
+
+            <div class="footer-meta">
+                <span>&copy; <span class="js-year"></span> AgriShield</span>
+                <span>Password auth with captcha and MySQL</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

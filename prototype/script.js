@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initCounters(prefersReducedMotion);
     initFraudDemo();
     initLanguageDemo();
+    initAuthPage();
     updateFooterYear();
 });
 
@@ -344,6 +345,247 @@ function initLanguageDemo() {
     });
 
     applyLanguage(buttons[0]);
+}
+
+function initAuthPage() {
+    const authRoot = document.querySelector("[data-auth-root]");
+
+    if (!authRoot) {
+        return;
+    }
+
+    const authMessage = document.querySelector("[data-auth-message]");
+    const authTabs = document.querySelectorAll("[data-auth-tab]");
+    const authForms = document.querySelectorAll("[data-auth-form]");
+    const logoutButton = document.querySelector("[data-auth-logout]");
+    const sessionStatus = document.querySelector("[data-session-status]");
+    const sessionName = document.querySelector("[data-session-name]");
+    const sessionEmail = document.querySelector("[data-session-email]");
+    const sessionPhone = document.querySelector("[data-session-phone]");
+
+    const showMessage = (type, text) => {
+        if (!authMessage) {
+            return;
+        }
+
+        authMessage.className = `auth-message auth-message--${type}`;
+        authMessage.textContent = text;
+    };
+
+    const clearMessage = () => {
+        if (!authMessage) {
+            return;
+        }
+
+        authMessage.className = "auth-message is-hidden";
+        authMessage.textContent = "";
+    };
+
+    const updateSessionView = (user) => {
+        if (!sessionStatus || !sessionName || !sessionEmail || !sessionPhone) {
+            return;
+        }
+
+        if (!user) {
+            sessionStatus.textContent = "Not logged in";
+            sessionName.textContent = "-";
+            sessionEmail.textContent = "-";
+            sessionPhone.textContent = "-";
+            return;
+        }
+
+        sessionStatus.textContent = "Logged in";
+        sessionName.textContent = user.fullName || "-";
+        sessionEmail.textContent = user.email || "-";
+        sessionPhone.textContent = user.phone || "-";
+    };
+
+    const setActiveTab = (tabKey) => {
+        authTabs.forEach((tab) => {
+            const isActive = tab.dataset.authTab === tabKey;
+            tab.classList.toggle("is-active", isActive);
+            tab.setAttribute("aria-selected", String(isActive));
+        });
+
+        authForms.forEach((form) => {
+            const isActive = form.dataset.authForm === tabKey;
+            form.classList.toggle("auth-form--hidden", !isActive);
+        });
+
+        clearMessage();
+    };
+
+    const requestJson = async (url, options = {}) => {
+        const response = await fetch(url, {
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            },
+            ...options
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Request failed.");
+        }
+
+        return data;
+    };
+
+    const refreshCaptcha = async (form) => {
+        const prompt = form.querySelector("[data-captcha-prompt]");
+        const tokenInput = form.querySelector('input[name="captchaToken"]');
+        const answerInput = form.querySelector('input[name="captchaAnswer"]');
+
+        if (!prompt || !tokenInput || !answerInput) {
+            return;
+        }
+
+        const data = await requestJson("/api/auth/captcha", {
+            method: "GET"
+        });
+
+        prompt.textContent = data.captcha.prompt;
+        tokenInput.value = data.captcha.token;
+        answerInput.value = "";
+    };
+
+    const loadSession = async () => {
+        try {
+            const data = await requestJson("/api/auth/me", {
+                method: "GET"
+            });
+
+            updateSessionView(data.user);
+        } catch {
+            updateSessionView(null);
+            showMessage("info", "Start the local backend server to use login and registration.");
+        }
+    };
+
+    authTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            setActiveTab(tab.dataset.authTab);
+        });
+    });
+
+    authForms.forEach((form) => {
+        const refreshButton = form.querySelector("[data-refresh-captcha]");
+
+        refreshButton?.addEventListener("click", async () => {
+            clearMessage();
+
+            try {
+                await refreshCaptcha(form);
+            } catch {
+                showMessage("error", "Captcha could not be loaded. Check that the backend server is running.");
+            }
+        });
+    });
+
+    const loginForm = document.querySelector('[data-auth-form="login"]');
+    const registerForm = document.querySelector('[data-auth-form="register"]');
+
+    loginForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage();
+
+        const formData = new FormData(loginForm);
+        const payload = {
+            email: String(formData.get("email") || ""),
+            password: String(formData.get("password") || ""),
+            captchaAnswer: String(formData.get("captchaAnswer") || ""),
+            captchaToken: String(formData.get("captchaToken") || "")
+        };
+
+        try {
+            const data = await requestJson("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+
+            showMessage("success", data.message || "Login successful.");
+            loginForm.reset();
+            await refreshCaptcha(loginForm);
+            updateSessionView(data.user);
+        } catch (error) {
+            showMessage("error", error.message);
+
+            try {
+                await refreshCaptcha(loginForm);
+            } catch {
+                // Ignore secondary refresh failure.
+            }
+        }
+    });
+
+    registerForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage();
+
+        const formData = new FormData(registerForm);
+        const password = String(formData.get("password") || "");
+        const confirmPassword = String(formData.get("confirmPassword") || "");
+
+        if (password !== confirmPassword) {
+            showMessage("error", "Passwords do not match.");
+            return;
+        }
+
+        const payload = {
+            fullName: String(formData.get("fullName") || ""),
+            phone: String(formData.get("phone") || ""),
+            email: String(formData.get("email") || ""),
+            password,
+            captchaAnswer: String(formData.get("captchaAnswer") || ""),
+            captchaToken: String(formData.get("captchaToken") || "")
+        };
+
+        try {
+            const data = await requestJson("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+
+            showMessage("success", data.message || "Registration successful.");
+            registerForm.reset();
+            await refreshCaptcha(registerForm);
+            updateSessionView(data.user);
+        } catch (error) {
+            showMessage("error", error.message);
+
+            try {
+                await refreshCaptcha(registerForm);
+            } catch {
+                // Ignore secondary refresh failure.
+            }
+        }
+    });
+
+    logoutButton?.addEventListener("click", async () => {
+        clearMessage();
+
+        try {
+            const data = await requestJson("/api/auth/logout", {
+                method: "POST",
+                body: JSON.stringify({})
+            });
+
+            updateSessionView(null);
+            showMessage("success", data.message || "Logged out.");
+        } catch (error) {
+            showMessage("error", error.message);
+        }
+    });
+
+    setActiveTab("login");
+    loadSession();
+
+    authForms.forEach((form) => {
+        refreshCaptcha(form).catch(() => {
+            showMessage("info", "Start the local backend server to use login and registration.");
+        });
+    });
 }
 
 function updateFooterYear() {

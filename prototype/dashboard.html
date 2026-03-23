@@ -463,13 +463,13 @@
                     </article>
 
                     <article class="panel-card">
-                        <div class="section-head"><div><span class="section-kicker">Available matches</span><h3>Results</h3></div></div>
-                        <div id="labour-cards" class="card-grid"></div>
+                        <div class="section-head"><div><span class="section-kicker">Matched Suggestions</span><h3>Likely labour matches</h3></div></div>
+                        <div id="matched-labour-list"></div>
                     </article>
 
                     <article class="panel-card">
-                        <div class="section-head"><div><span class="section-kicker">Post Labour Requirement</span><h3>Tell workers what you need</h3></div></div>
-                        <p>Requests are stored locally in the browser so they remain available during the demo.</p>
+                        <div class="section-head"><div><span class="section-kicker">Labour Filters</span><h3>Filter workers by need and availability</h3></div></div>
+                        <p>Use these filters to quickly narrow labour options.</p>
                         <form id="labour-need-form" class="form-grid form-grid--single">
                             <label class="field">
                                 <span>Work Type</span>
@@ -493,7 +493,7 @@
                             </label>
                             <label class="field">
                                 <span>Location</span>
-                                <input type="text" id="labour-filter-location" placeholder="Search location">
+                                <input type="text" id="labour-filter-location" name="location" placeholder="Search location">
                             </label>
                             <label class="field">
                                 <span>Minimum Workers</span>
@@ -519,7 +519,7 @@
                                     Reset Filters
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </article>
 
                     <div class="dashboard-grid dashboard-grid--split">
@@ -551,6 +551,10 @@
                             <div class="card-grid card-grid--scheme" id="labour-scheme-card-grid"></div>
                         </article>
                     </div>
+
+                    <article class="panel-card">
+                        <div id="posted-labour-list"></div>
+                    </article>
                 </section>
 
                 <section class="view-section" data-view="schemes">

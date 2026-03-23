@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Labour Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<style>
+    /* Left section background */
+    .login-story {
+        background-color: #ffffff !important;
+        color: #000000;
+    }
+
+    /* Headings black */
+    .login-story h1,
+    .login-story h2,
+    .login-story strong {
+        color: #000000 !important;
+    }
+
+    /* Paragraph readability */
+    .login-story p {
+        color: #ffffff;
+    }
+
+    /* Icons */
+    .login-story i {
+        color: #000;
+    }
+</style>
+
+
+<body data-page="labour-register">
+    <div class="login-shell">
+        <section class="login-story">
+            <a class="brand-badge" href="dashboard.html" aria-label="AgriShield labour registration">
+                <span class="brand-badge__icon">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span                                                                                                                                                                                                                                                           >
+                    <strong>AgriShield</strong>
+                    <small>Labour support assistant</small>
+                </span>
+            </a>
+
+            <div class="login-story__copy">
+                <span class="eyebrow eyebrow--light">Register Labour</span>
+                <h1>Self or Group labour onboarding with Aadhar attachments.</h1>
+                <p>
+                    Choose Self for individual workers or Group for a team with a head member. Upload front and back Aadhar images for manual review.
+                </p>
+            </div>
+
+            <div class="story-grid">
+                <article class="story-card">
+                    <i class="ri-user-follow-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Self Registration</strong>
+                        <p>Capture name, contact, address, Aadhar, username, and password.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-group-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Group Registration</strong>
+                        <p>One head member verified by Aadhar, plus up to 25 members with contacts.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-file-image-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Aadhar Attachments</strong>
+                        <p>Upload clear front and back photos; verification is manual (no AI prompt).</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="section-head section-head--tight">
+                    <span class="eyebrow">Labour Registration</span>
+                    <h2>Self or Group</h2>
+                    <p>Pick a mode, complete the details, run the Aadhar check, and submit.</p>
+                </div>
+
+                <div class="pill-switch" id="labour-mode-switch">
+                    <button class="pill-switch__btn is-active" type="button" data-mode="self">Self</button>
+                    <button class="pill-switch__btn" type="button" data-mode="group">Group</button>
+                </div>
+
+                <form id="labour-register-form" class="form-grid form-grid--single" novalidate>
+                    <input type="hidden" name="registrationType" value="self">
+
+                    <label class="field">
+                        <span>Head / Worker Name</span>
+                        <input type="text" name="headName" placeholder="Enter full name" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Contact Number</span>
+                        <input type="tel" name="contactNumber" inputmode="numeric" placeholder="10-digit mobile" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Address</span>
+                        <input type="text" name="address" placeholder="Village / Town, District">
+                    </label>
+
+                    <label class="field">
+                        <span>UIDAI Aadhar Number</span>
+                        <input type="text" name="aadharNumber" maxlength="12" inputmode="numeric" placeholder="Enter 12-digit Aadhar" required>
+                    </label>
+
+                    <div class="field field--wide">
+                        <span>UIDAI Aadhar Attachments</span>
+                        <div class="field">
+                            <span>Front Side</span>
+                            <input type="file" name="aadharFileFront" accept="image/*" required>
+                            <small>Upload a clear front-side image.</small>
+                        </div>
+                        <div class="field">
+                            <span>Back Side</span>
+                            <input type="file" name="aadharFileBack" accept="image/*" required>
+                            <small>Upload the back side image.</small>
+                        </div>
+                    </div>
+
+                    <label class="field">
+                        <span>Username</span>
+                        <input type="text" name="username" placeholder="Create a username" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Password</span>
+                        <input type="password" name="password" placeholder="Create a password" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Confirm Password</span>
+                        <input type="password" name="confirmPassword" placeholder="Re-enter password" required>
+                    </label>
+
+                    <div class="group-only" hidden>
+                        <div class="section-head section-head--tight">
+                            <span class="section-kicker">Group Members</span>
+                            <h3>Add up to 25 members</h3>
+                            <p>The head member manages this list.</p>
+                        </div>
+                        <div id="member-list" class="stack"></div>
+                        <button class="btn btn--ghost" type="button" id="add-member-button">
+                            <i class="ri-user-add-line" aria-hidden="true"></i>
+                            Add Member
+                        </button>
+                    </div>
+
+                    <!-- Consent checkbox removed as AI verification is no longer used. -->
+
+                    <div id="labour-register-feedback" class="auth-feedback" hidden></div>
+
+                     <label class="field field--checkbox">
+                        <input type="checkbox" name="aadharConsent" required>
+                        <span>By continuing, I agree that AgriShield checks are used to verify the uploaded Aadhar image and this is not an official UIDAI verification.</span>
+                    </label>
+
+                    <div id="register-feedback" class="auth-feedback" hidden></div>
+
+                    
+                    <button class="btn btn--primary btn--wide" type="submit">
+                        <i class="ri-check-line" aria-hidden="true"></i>
+                        Submit Registration
+                    </button>
+                </form>
+
+                <p class="auth-switch">
+                    Go back to the <a href="login.html">login.</a>.
+                </p>
+            </div>
+        </section>
+
+        <!-- Aadhar verification modal removed; users must attach front and back images. -->
+    </div>
+
+    <div class="toast" data-toast aria-live="polite"></div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

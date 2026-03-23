@@ -1,15 +1,33 @@
 (function () {
-    const STORAGE_KEYS = {
-        users: "agrishield_auth_users",
-        session: "agrishield_auth_session"
+    const API_BASE = getApiBase();
+    const DEMO_USER = {
+        username: "demo_farmer",
+        password: "demo1234",
+        mobile: "9876543210"
     };
-
-    const USER_STORAGE_KEYS = {
-        profile: "agrishield_labour_profile",
-        labourPosts: "agrishield_labour_posts",
-        chatHistory: "agrishield_labour_chat_history",
-        activeView: "agrishield_labour_active_view"
+    const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
+    const DEFAULT_CHAT_GREETING = {
+        role: "bot",
+        text: "Namaste. I can help with labour planning, crop work, worker shortage handling, and scheme support. Ask me a question or tap a quick prompt."
     };
+    const state = {
+        session: null,
+        profile: {},
+        labourProfile: null,
+        labourPosts: [],
+        labourMarketPosts: [],
+        roles: ["farmer"],
+        chatHistory: [],
+        activeView: "home",
+        activeSchemeFilter: "all"
+    };
+    const mapState = {
+        instance: null,
+        marker: null,
+        form: null,
+        searchResults: []
+    };
+    const page = document.body.dataset.page;
 
     const VIEW_META = {
         home: {
@@ -19,6 +37,10 @@
         labour: {
             title: "Labour Finding",
             subtitle: "Browse available labour, use filters, and post labour requirements."
+        },
+        requests: {
+            title: "Farmer Requests",
+            subtitle: "Browse farmer labour needs and apply as a labour user."
         },
         chatbot: {
             title: "AI Chatbot",
@@ -30,74 +52,214 @@
         }
     };
 
-    const DEMO_USER = {
-        username: "demo_farmer",
-        mobile: "9876543210",
-        password: "demo1234"
-    };
+    function getApiBase() {
+        const { port } = window.location;
+        return port === "3000" ? "" : "http://localhost:3000";
+    }
 
-    const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
-    const DEFAULT_CHAT_GREETING = {
-        role: "bot",
-        text: "Namaste. I can help with labour planning, crop work, labour shortage handling, and useful farmer schemes. Ask me a question or tap a quick prompt."
-    };
+    async function apiRequest(path, options = {}) {
+        const { method = "GET", body } = options;
+        const fetchOptions = {
+            method,
+            credentials: "include",
+            headers: { "Content-Type": "application/json" }
+        };
 
-    const state = {
-        session: null,
-        profile: null,
-        labourPosts: [],
-        chatHistory: [],
-        activeView: "home",
-        activeSchemeFilter: "all"
-    };
-    const mapState = {
-        instance: null,
-        marker: null,
-        form: null,
-        searchResults: []
-    };
+        if (body !== undefined) {
+            fetchOptions.body = JSON.stringify(body);
+        }
 
-    const page = document.body.dataset.page;
+        const response = await fetch(`${API_BASE}${path}`, fetchOptions);
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || data.ok === false) {
+            const message = data.message || `Request to ${path} failed`;
+            throw new Error(message);
+        }
+
+        return data;
+    }
+
+    async function fetchSessionUser() {
+        try {
+            const data = await apiRequest("/api/auth/me");
+            return data.authenticated ? data.user : null;
+        } catch {
+            return null;
+        }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         if (page === "login") {
-            initLoginPage();
+            void initLoginPage();
         }
 
         if (page === "register") {
-            initRegisterPage();
+            void initRegisterPage();
         }
 
         if (page === "dashboard") {
-            initDashboardPage();
+            void initDashboardPage();
+        }
+
+        if (page === "labour-register") {
+            void initLabourRegisterPage();
         }
     });
 
-    function initLoginPage() {
-        if (hasActiveSession()) {
+    async function initDashboardPage() {
+        const sessionUser = await fetchSessionUser();
+
+        if (!sessionUser) {
+            window.location.replace("login.html");
+            return;
+        }
+
+        state.session = sessionUser;
+        state.roles = Array.isArray(sessionUser.roles) && sessionUser.roles.length ? sessionUser.roles : ["farmer"];
+        state.labourProfile = sessionUser.labourProfile || null;
+
+        await Promise.all([
+            loadProfileFromApi(),
+            loadLabourPostsFromApi(),
+            loadLabourMarketFromApi(),
+            loadChatHistoryFromApi()
+        ]);
+
+        if (!state.chatHistory.length) {
+            state.chatHistory.push(DEFAULT_CHAT_GREETING);
+        }
+
+        refreshGlobalUI();
+        bindSidebar();
+        bindTopbar();
+        bindHomeSection();
+        bindLabourSection();
+        bindRequestsSection();
+        bindChatSection();
+        bindSchemesSection();
+
+        setActiveView(state.activeView || "home");
+    }
+
+    async function loadProfileFromApi() {
+        try {
+            const data = await apiRequest("/api/profile");
+            state.profile = normalizeProfileFromApi(data.profile);
+        } catch {
+            state.profile = {};
+        }
+    }
+
+    async function saveProfileToApi(profile) {
+        await apiRequest("/api/profile", {
+            method: "POST",
+            body: profile
+        });
+
+        state.profile = profile;
+    }
+
+    function normalizeProfileFromApi(profile) {
+        if (!profile) {
+            return {};
+        }
+
+        return {
+            farmerName: profile.farmer_name || profile.farmerName || "",
+            mobileNumber: profile.mobile_number || profile.mobileNumber || "",
+            village: profile.village || "",
+            taluka: profile.taluka || "",
+            district: profile.district || "",
+            state: profile.state || "",
+            fullAddress: profile.full_address || profile.fullAddress || "",
+            landArea: profile.land_area ? String(profile.land_area) : profile.landArea || "",
+            mainCrop: profile.main_crop || profile.mainCrop || "",
+            farmingType: profile.farming_type || profile.farmingType || "",
+            latitude: profile.latitude ? String(profile.latitude) : profile.lat || "",
+            longitude: profile.longitude ? String(profile.longitude) : profile.lng || ""
+        };
+    }
+
+    async function loadLabourPostsFromApi() {
+        try {
+            const data = await apiRequest("/api/labour/posts");
+            state.labourPosts = Array.isArray(data.posts) ? data.posts : [];
+        } catch {
+            state.labourPosts = [];
+        }
+    }
+
+    async function loadLabourMarketFromApi() {
+        try {
+            const data = await apiRequest("/api/labour/market");
+            state.labourMarketPosts = Array.isArray(data.posts) ? data.posts : [];
+        } catch {
+            state.labourMarketPosts = [];
+        }
+    }
+
+    async function createLabourPost(post) {
+        await apiRequest("/api/labour/posts", {
+            method: "POST",
+            body: post
+        });
+
+        await loadLabourPostsFromApi();
+    }
+
+    async function applyToLabourPost(postId, message) {
+        await apiRequest("/api/labour/apply", {
+            method: "POST",
+            body: { postId, message }
+        });
+    }
+
+    async function loadChatHistoryFromApi() {
+        try {
+            const data = await apiRequest("/api/chat/history");
+            state.chatHistory = Array.isArray(data.messages)
+                ? data.messages.map((item) => ({ role: item.role, text: item.message }))
+                : [];
+        } catch {
+            state.chatHistory = [];
+        }
+    }
+
+    async function sendChatToApi(message, botReply) {
+        await apiRequest("/api/chat/send", {
+            method: "POST",
+            body: { message, botReply }
+        });
+    }
+
+    async function initLoginPage() {
+        const existingUser = await fetchSessionUser();
+
+        if (existingUser) {
             window.location.replace("dashboard.html");
             return;
         }
 
         const loginForm = document.getElementById("login-form");
+        const feedback = document.getElementById("login-feedback");
         const demoLoginButton = document.getElementById("demo-login-button");
         const captchaRefreshButton = document.getElementById("captcha-refresh");
-        const feedback = document.getElementById("login-feedback");
 
         if (!loginForm) {
             return;
         }
 
         generateCaptcha(loginForm);
-        clearAuthFeedback(feedback);
+        attachAuthFieldListeners(loginForm, feedback);
 
         captchaRefreshButton?.addEventListener("click", () => {
             generateCaptcha(loginForm);
             loginForm.elements.captchaAnswer.value = "";
+            clearAuthFeedback(feedback);
         });
 
         demoLoginButton?.addEventListener("click", () => {
-            ensureDemoUser();
             loginForm.elements.username.value = DEMO_USER.username;
             loginForm.elements.password.value = DEMO_USER.password;
             loginForm.elements.captchaAnswer.value = loginForm.dataset.captchaAnswer || "";
@@ -105,177 +267,567 @@
             showToast("Demo login details added.");
         });
 
-        attachAuthFieldListeners(loginForm, feedback);
-
-        loginForm.addEventListener("submit", (event) => {
+        loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const formData = new FormData(loginForm);
-            const username = cleanText(formData.get("username"));
-            const password = String(formData.get("password") || "");
-            const captchaAnswer = cleanText(formData.get("captchaAnswer"));
-            const expectedCaptcha = loginForm.dataset.captchaAnswer || "";
+            const username = cleanText(loginForm.elements.username.value);
+            const password = String(loginForm.elements.password.value || "");
+            const captchaAnswer = cleanText(loginForm.elements.captchaAnswer.value);
 
             if (!username || !password || !captchaAnswer) {
-                setAuthFeedback(feedback, "error", "Fill username, password, and CAPTCHA.");
-                showToast("Fill all login fields.");
+                setAuthFeedback(feedback, "error", "Username, password, and CAPTCHA are required.");
                 return;
             }
 
-            if (captchaAnswer !== expectedCaptcha) {
-                setAuthFeedback(feedback, "error", "CAPTCHA answer is incorrect. Try again.");
+            if (captchaAnswer !== String(loginForm.dataset.captchaAnswer || "")) {
+                setAuthFeedback(feedback, "error", "Incorrect CAPTCHA. Try again.");
                 loginForm.elements.captchaAnswer.value = "";
                 generateCaptcha(loginForm);
-                showToast("Incorrect CAPTCHA.");
                 return;
             }
 
-            const user = findUserByUsername(username);
+            try {
+                await ensureDemoUser();
+                await apiRequest("/api/auth/simple-login", {
+                    method: "POST",
+                    body: { username, password }
+                });
 
-            if (!user || user.password !== password) {
-                setAuthFeedback(feedback, "error", "Username or password is incorrect.");
-                loginForm.elements.password.value = "";
-                loginForm.elements.captchaAnswer.value = "";
+                setAuthFeedback(feedback, "success", "Login successful. Redirecting...");
+                showToast("Login successful.");
+                window.setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 400);
+            } catch (error) {
+                setAuthFeedback(feedback, "error", error.message || "Unable to log in.");
                 generateCaptcha(loginForm);
-                showToast("Invalid login credentials.");
-                return;
+                loginForm.elements.captchaAnswer.value = "";
             }
-
-            const session = {
-                isLoggedIn: true,
-                username: user.username,
-                mobile: user.mobile,
-                loginAt: new Date().toISOString()
-            };
-
-            setStoredValue(STORAGE_KEYS.session, session);
-            setStoredValue(getUserStorageKey(USER_STORAGE_KEYS.activeView, user.username), "home");
-            clearAuthFeedback(feedback);
-            setAuthFeedback(feedback, "success", "Login successful. Redirecting to dashboard...");
-            showToast("Login successful.");
-
-            window.setTimeout(() => {
-                window.location.href = "dashboard.html";
-            }, 500);
         });
     }
 
-    function initRegisterPage() {
-        if (hasActiveSession()) {
+    async function initRegisterPage() {
+        const existingUser = await fetchSessionUser();
+
+        if (existingUser) {
             window.location.replace("dashboard.html");
             return;
         }
 
         const registerForm = document.getElementById("register-form");
-        const demoRegisterButton = document.getElementById("demo-register-button");
         const feedback = document.getElementById("register-feedback");
+        const aadharFeedback = document.getElementById("aadhar-feedback");
 
         if (!registerForm) {
             return;
         }
 
-        clearAuthFeedback(feedback);
-
-        demoRegisterButton?.addEventListener("click", () => {
-            registerForm.elements.username.value = DEMO_USER.username;
-            registerForm.elements.mobile.value = DEMO_USER.mobile;
-            registerForm.elements.password.value = DEMO_USER.password;
-            registerForm.elements.confirmPassword.value = DEMO_USER.password;
-            clearAuthFeedback(feedback);
-            showToast("Demo registration details added.");
-        });
+        const aadharController = {
+            getVerifiedPayload: () => ({
+                status: "review",
+                summary: "Aadhar images attached for manual review.",
+                aadharNumber: cleanNumber(registerForm.elements.aadharNumber.value).slice(0, 12),
+                verificationToken: null
+            }),
+            reset: () => {}
+        };
 
         attachAuthFieldListeners(registerForm, feedback);
 
-        registerForm.addEventListener("submit", (event) => {
+        registerForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const formData = new FormData(registerForm);
-            const username = cleanText(formData.get("username"));
-            const mobile = cleanNumber(formData.get("mobile"));
-            const password = String(formData.get("password") || "");
-            const confirmPassword = String(formData.get("confirmPassword") || "");
+            const fullName = cleanText(registerForm.elements.fullName.value);
+            const mobile = cleanNumber(registerForm.elements.mobile.value);
+            const username = cleanText(registerForm.elements.username.value);
+            const password = String(registerForm.elements.password.value || "");
+            const confirmPassword = String(registerForm.elements.confirmPassword.value || "");
+            const consentChecked = registerForm.elements.aadharConsent?.checked ?? true;
+            const aadharData = aadharController.getVerifiedPayload();
+            const aadharFront = registerForm.elements.aadharFileFront?.files?.[0];
+            const aadharBack = registerForm.elements.aadharFileBack?.files?.[0];
 
-            if (!username || !mobile || !password || !confirmPassword) {
+            if (!fullName || !mobile || !username || !password || !confirmPassword) {
                 setAuthFeedback(feedback, "error", "All registration fields are required.");
-                showToast("Fill all registration fields.");
+                return;
+            }
+
+            if (mobile.length !== 10) {
+                setAuthFeedback(feedback, "error", "Enter a valid 10-digit mobile number.");
                 return;
             }
 
             if (username.length < 3) {
                 setAuthFeedback(feedback, "error", "Username should be at least 3 characters.");
-                showToast("Invalid username.");
                 return;
             }
 
-            if (mobile.length < 10) {
-                setAuthFeedback(feedback, "error", "Enter a valid mobile number.");
-                showToast("Invalid mobile number.");
+            if (password.length < 4) {
+                setAuthFeedback(feedback, "error", "Password should be at least 4 characters.");
                 return;
             }
 
             if (password !== confirmPassword) {
                 setAuthFeedback(feedback, "error", "Password and confirm password do not match.");
                 registerForm.elements.confirmPassword.value = "";
-                showToast("Passwords do not match.");
                 return;
             }
 
-            if (findUserByUsername(username)) {
-                setAuthFeedback(feedback, "error", "This username is already registered. Use another one.");
-                showToast("Username already exists.");
+            if (!aadharFront || !aadharBack) {
+                setAuthFeedback(feedback, "error", "Attach both front and back Aadhar images.");
                 return;
             }
 
-            const users = getUsers();
+            try {
+                await apiRequest("/api/auth/simple-register", {
+                    method: "POST",
+                    body: {
+                        fullName,
+                        username,
+                        mobile,
+                        password,
+                        aadharNumber: aadharData.aadharNumber,
+                        aadharConsent: consentChecked,
+                        aadharVerificationToken: aadharData.verificationToken
+                    }
+                });
 
-            users.push({
-                username,
-                usernameKey: normalizeUsername(username),
-                mobile,
-                password,
-                createdAt: new Date().toISOString()
-            });
+                registerForm.reset();
+                aadharController.reset();
+                setAuthFeedback(feedback, "success", "Registration successful. Redirecting to login...");
+                showToast("Registration successful.");
 
-            setStoredValue(STORAGE_KEYS.users, users);
-            registerForm.reset();
-            setAuthFeedback(feedback, "success", "Registration successful. Redirecting to login...");
-            showToast("Registration successful.");
-
-            window.setTimeout(() => {
-                window.location.href = "login.html";
-            }, 700);
+                window.setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 700);
+            } catch (error) {
+                setAuthFeedback(feedback, "error", error.message || "Registration failed.");
+                showToast(error.message || "Unable to register.");
+            }
         });
     }
 
-    function initDashboardPage() {
-        const session = getStoredValue(STORAGE_KEYS.session, null);
+    async function initLabourRegisterPage() {
+        const form = document.getElementById("labour-register-form");
+        const feedback = document.getElementById("labour-register-feedback");
+        const aadharFeedback = document.getElementById("labour-aadhar-feedback");
+        const modeSwitch = document.getElementById("labour-mode-switch");
+        const memberList = document.getElementById("member-list");
+        const addMemberButton = document.getElementById("add-member-button");
+        const groupOnlyBlock = document.querySelector(".group-only");
 
-        if (!session?.isLoggedIn) {
-            window.location.replace("login.html");
+        if (!form) {
             return;
         }
 
-        state.session = session;
-        state.profile = getUserStoredValue(USER_STORAGE_KEYS.profile, {});
-        state.labourPosts = getUserStoredValue(USER_STORAGE_KEYS.labourPosts, []);
-        state.chatHistory = getUserStoredValue(USER_STORAGE_KEYS.chatHistory, []);
-        state.activeView = getUserStoredValue(USER_STORAGE_KEYS.activeView, "home");
+        const aadharController = {
+            getVerifiedPayload: () => ({
+                status: "review",
+                summary: "Aadhar images attached for manual review.",
+                aadharNumber: cleanNumber(form.elements.aadharNumber?.value).slice(0, 12),
+                verificationToken: null
+            }),
+            reset: () => {}
+        };
 
-        if (!state.chatHistory.length) {
-            state.chatHistory = [DEFAULT_CHAT_GREETING];
-            setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
+        attachAuthFieldListeners(form, feedback);
+
+        const setMode = (mode) => {
+            const normalized = mode === "group" ? "group" : "self";
+            form.elements.registrationType.value = normalized;
+            modeSwitch?.querySelectorAll("button").forEach((item) => {
+                item.classList.toggle("is-active", item.dataset.mode === normalized);
+            });
+
+            if (groupOnlyBlock) {
+                if (normalized === "group") {
+                    groupOnlyBlock.removeAttribute("hidden");
+                    groupOnlyBlock.style.display = "grid";
+                } else {
+                    groupOnlyBlock.setAttribute("hidden", "true");
+                    groupOnlyBlock.style.display = "none";
+                }
+            }
+        };
+
+        modeSwitch?.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-mode]");
+            if (!button) {
+                return;
+            }
+
+            setMode(button.dataset.mode);
+        });
+
+        // Ensure default state (self) hides the group block on load.
+        setMode(form.elements.registrationType.value || "self");
+
+        addMemberButton?.addEventListener("click", () => {
+            if (!memberList) {
+                return;
+            }
+
+            if (memberList.children.length >= 25) {
+                showToast("Maximum 25 members allowed.");
+                return;
+            }
+
+            const row = document.createElement("div");
+            row.className = "member-row";
+            row.innerHTML = `
+                <div class="field">
+                    <span>Member Name</span>
+                    <input type="text" name="memberName" placeholder="Full name">
+                </div>
+                <div class="field">
+                    <span>Contact</span>
+                    <input type="tel" name="memberContact" inputmode="numeric" placeholder="Mobile">
+                </div>
+                <button class="icon-button" type="button" aria-label="Remove member">
+                    <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                </button>
+            `;
+
+            row.querySelector(".icon-button")?.addEventListener("click", () => {
+                row.remove();
+            });
+
+            memberList.appendChild(row);
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const registrationType = form.elements.registrationType.value === "group" ? "group" : "self";
+            const headName = cleanText(form.elements.headName.value);
+            const contactNumber = cleanNumber(form.elements.contactNumber.value);
+            const address = cleanText(form.elements.address.value);
+            const username = cleanText(form.elements.username.value);
+            const password = String(form.elements.password.value || "");
+            const confirmPassword = String(form.elements.confirmPassword.value || "");
+            const aadharData = aadharController.getVerifiedPayload();
+            const aadharFront = form.elements.aadharFileFront?.files?.[0];
+            const aadharBack = form.elements.aadharFileBack?.files?.[0];
+            const members = [];
+
+            if (!headName || !contactNumber || !username || !password || !confirmPassword) {
+                setAuthFeedback(feedback, "error", "All required fields must be filled.");
+                return;
+            }
+
+            if (contactNumber.length !== 10) {
+                setAuthFeedback(feedback, "error", "Enter a valid 10-digit contact number.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                setAuthFeedback(feedback, "error", "Passwords do not match.");
+                return;
+            }
+
+            if (!aadharFront || !aadharBack) {
+                setAuthFeedback(feedback, "error", "Attach both front and back Aadhar images.");
+                return;
+            }
+
+            if (registrationType === "group") {
+                memberList?.querySelectorAll(".member-row").forEach((row) => {
+                    const name = cleanText(row.querySelector("input[name='memberName']")?.value);
+                    const contact = cleanNumber(row.querySelector("input[name='memberContact']")?.value);
+
+                    if (name) {
+                        members.push({ name, contact });
+                    }
+                });
+
+                if (members.length > 25) {
+                    setAuthFeedback(feedback, "error", "Maximum 25 members allowed.");
+                    return;
+                }
+            }
+
+            try {
+                setAuthFeedback(feedback, "success", "Submitting registration...");
+
+                const aadharImage = await optimizeImageForVerification(aadharFront);
+
+                await apiRequest("/api/labour/register", {
+                    method: "POST",
+                    body: {
+                        registrationType,
+                        headName,
+                        contactNumber,
+                        address,
+                        username,
+                        password,
+                        members,
+                        aadharNumber: aadharData.aadharNumber,
+                        aadharImage,
+                        aadharStatus: aadharData.status,
+                        aadharSummary: aadharData.summary
+                    }
+                });
+
+                setAuthFeedback(feedback, "success", "Registration submitted successfully.");
+                showToast("Labour registration submitted.");
+                form.reset();
+                memberList.innerHTML = "";
+                aadharController.reset();
+
+                if (groupOnlyBlock) {
+                    groupOnlyBlock.setAttribute("hidden", "true");
+                }
+            } catch (error) {
+                setAuthFeedback(feedback, "error", error.message || "Registration failed.");
+                showToast(error.message || "Registration failed.");
+            }
+        });
+    }
+
+    function createAadharVerificationController(options) {
+        const {
+            feedbackNode,
+            holderSourceInput,
+            openButton,
+            modal,
+            closeButtons = [],
+            verifyButton,
+            holderMirrorInput,
+            aadharInput,
+            fileInput,
+            statusPills = [],
+            statusTexts = [],
+            summaryNodes = []
+        } = options;
+        const state = {
+            status: "pending",
+            aadharNumber: "",
+            verificationToken: "",
+            verifiedHolderName: "",
+            summary: ""
+        };
+
+        const statusMap = {
+            pending: {
+                label: "Pending",
+                className: "status-pill--soft"
+            },
+            processing: {
+                label: "Processing",
+                className: "status-pill--info"
+            },
+            review: {
+                label: "Needs Review",
+                className: "status-pill--warning"
+            },
+            verified: {
+                label: "Verified",
+                className: "status-pill--success"
+            },
+            failed: {
+                label: "Failed",
+                className: "status-pill--error"
+            }
+        };
+
+        renderStatus("pending", "No Aadhar verification has been completed yet.", "Only masked Aadhar details are kept after verification.");
+
+        holderSourceInput?.addEventListener("input", () => {
+            syncHolderName();
+
+            if (state.verificationToken && cleanText(holderSourceInput.value) !== state.verifiedHolderName) {
+                reset("pending", "Holder name changed. Verify Aadhar again.", "The previous verification token was cleared.");
+            }
+        });
+
+        aadharInput?.addEventListener("input", () => {
+            const digits = cleanNumber(aadharInput.value).slice(0, 12);
+            aadharInput.value = formatAadharDigits(digits);
+
+            if (state.verificationToken && digits !== state.aadharNumber) {
+                reset("pending", "Aadhar number changed. Verify Aadhar again.", "The previous verification token was cleared.");
+            }
+        });
+
+        fileInput?.addEventListener("change", () => {
+            clearAuthFeedback(feedbackNode);
+
+            if (state.verificationToken) {
+                reset("pending", "A new Aadhar image was selected. Verify Aadhar again.", "The previous verification token was cleared.");
+            }
+        });
+
+        openButton?.addEventListener("click", () => {
+            syncHolderName();
+            toggleModal(true);
+        });
+
+        closeButtons.forEach((button) => {
+            button?.addEventListener("click", () => {
+                toggleModal(false);
+            });
+        });
+
+        modal?.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                toggleModal(false);
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && modal && !modal.hidden) {
+                toggleModal(false);
+            }
+        });
+
+        verifyButton?.addEventListener("click", async () => {
+            const holderName = cleanText(holderSourceInput?.value);
+            const aadharNumber = cleanNumber(aadharInput?.value).slice(0, 12);
+            const file = fileInput?.files?.[0];
+            const validationMessage = getAadharValidationMessage({ holderName, aadharNumber, file });
+
+            clearAuthFeedback(feedbackNode);
+
+            if (validationMessage) {
+                renderStatus("failed", "Verification could not start.", validationMessage);
+                setAuthFeedback(feedbackNode, "error", validationMessage);
+                return;
+            }
+
+            renderStatus("processing", "Gemini verification is running.", "Processing the uploaded Aadhar image.");
+
+            try {
+                const imageBase64 = await optimizeImageForVerification(file);
+                const result = await apiRequest("/api/aadhar/verify", {
+                    method: "POST",
+                    body: {
+                        holderName,
+                        aadharNumber,
+                        imageBase64
+                    }
+                });
+
+                if ((result.status === "verified" || result.status === "review") && result.verificationToken) {
+                    state.status = result.status;
+                    state.aadharNumber = aadharNumber;
+                    state.verificationToken = result.verificationToken;
+                    state.verifiedHolderName = holderName;
+                    state.summary = result.summary || "";
+
+                    renderStatus(
+                        result.status,
+                        result.status === "verified"
+                            ? `Verified ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
+                            : `Marked for review ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`,
+                        result.summary || (result.status === "verified"
+                            ? "Aadhar details matched successfully."
+                            : "Aadhar details were saved for manual review.")
+                    );
+                    setAuthFeedback(
+                        feedbackNode,
+                        "success",
+                        result.status === "verified"
+                            ? `Aadhar verified for ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
+                            : `Aadhar moved to review for ${result.maskedNumber || maskAadharNumber(aadharNumber)}.`
+                    );
+                    showToast(result.status === "verified" ? "Aadhar verified." : "Aadhar moved to review.");
+                    if (fileInput) {
+                        fileInput.value = "";
+                    }
+                    window.setTimeout(() => toggleModal(false), 350);
+                    return;
+                }
+
+                reset(
+                    "failed",
+                    "Verification failed.",
+                    result.summary || "The Aadhar details could not be verified. Check the image and try again."
+                );
+                setAuthFeedback(feedbackNode, "error", result.summary || "Aadhar verification failed.");
+                showToast("Aadhar verification failed.");
+            } catch (error) {
+                reset("failed", "Verification failed.", error.message || "Aadhar verification failed.");
+                setAuthFeedback(feedbackNode, "error", error.message || "Aadhar verification failed.");
+                showToast(error.message || "Aadhar verification failed.");
+            }
+        });
+
+        function syncHolderName() {
+            if (holderMirrorInput) {
+                holderMirrorInput.value = cleanText(holderSourceInput?.value);
+            }
         }
 
-        bindSidebar();
-        bindTopbar();
-        bindHomeSection();
-        bindLabourSection();
-        bindChatSection();
-        bindSchemesSection();
+        function toggleModal(visible) {
+            if (!modal) {
+                return;
+            }
 
-        refreshGlobalUI();
-        setActiveView(state.activeView);
+            modal.hidden = !visible;
+            document.body.classList.toggle("modal-open", visible);
+
+            if (visible) {
+                syncHolderName();
+            }
+        }
+
+        function renderStatus(status, text, summary) {
+            const config = statusMap[status] || statusMap.pending;
+
+            statusPills.forEach((node) => {
+                if (!node) {
+                    return;
+                }
+
+                node.textContent = config.label;
+                node.classList.remove("status-pill--soft", "status-pill--info", "status-pill--success", "status-pill--warning", "status-pill--error");
+                node.classList.add(config.className);
+            });
+
+            statusTexts.forEach((node) => {
+                if (node) {
+                    node.textContent = text;
+                }
+            });
+
+            summaryNodes.forEach((node) => {
+                if (node) {
+                    node.textContent = summary;
+                }
+            });
+        }
+
+        function reset(status = "pending", text = "No Aadhar verification has been completed yet.", summary = "Only masked Aadhar details are kept after verification.", clearInputs = false) {
+            state.status = status;
+            state.aadharNumber = "";
+            state.verificationToken = "";
+            state.verifiedHolderName = "";
+            state.summary = "";
+            clearAuthFeedback(feedbackNode);
+            if (clearInputs) {
+                if (aadharInput) {
+                    aadharInput.value = "";
+                }
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+            }
+            renderStatus(status, text, summary);
+        }
+
+        return {
+            getVerifiedPayload() {
+                if (state.status !== "verified" || !state.verificationToken) {
+                    return null;
+                }
+
+                return {
+                    aadharNumber: state.aadharNumber,
+                    verificationToken: state.verificationToken
+                };
+            },
+            reset
+        };
     }
 
     function bindSidebar() {
@@ -316,8 +868,13 @@
     function bindTopbar() {
         const logoutButton = document.getElementById("logout-button");
 
-        logoutButton?.addEventListener("click", () => {
-            localStorage.removeItem(STORAGE_KEYS.session);
+        logoutButton?.addEventListener("click", async () => {
+            try {
+                await apiRequest("/api/auth/logout", { method: "POST" });
+            } catch {
+                // Ignore errors and still redirect
+            }
+
             showToast("Logged out successfully.");
             window.setTimeout(() => {
                 window.location.href = "login.html";
@@ -337,7 +894,7 @@
         initLocationPicker(form);
         bindLocationSearch(form);
 
-        form.addEventListener("submit", (event) => {
+        form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
             const profile = readProfileFromForm(form);
@@ -352,15 +909,18 @@
                 return;
             }
 
-            state.profile = profile;
-            setUserStoredValue(USER_STORAGE_KEYS.profile, profile);
-            refreshGlobalUI();
-            syncMapSelectionFromProfile(profile);
-            renderLabourCards();
-            renderMatchedLabourSuggestions();
-            renderSchemesView();
-            prefillLabourFormDefaults(document.getElementById("labour-need-form"));
-            showToast("Farmer details saved successfully.");
+            try {
+                await saveProfileToApi(profile);
+                refreshGlobalUI();
+                syncMapSelectionFromProfile(profile);
+                renderLabourCards();
+                renderMatchedLabourSuggestions();
+                renderSchemesView();
+                prefillLabourFormDefaults(document.getElementById("labour-need-form"));
+                showToast("Farmer details saved successfully.");
+            } catch (error) {
+                showToast(error.message || "Unable to save farmer details.");
+            }
         });
 
         refreshHomeSection();
@@ -419,19 +979,17 @@
             renderMatchedLabourSuggestions(postForm.elements.workType.value);
         });
 
-        postForm?.addEventListener("submit", (event) => {
+        postForm?.addEventListener("submit", async (event) => {
             event.preventDefault();
 
             const formData = new FormData(postForm);
             const requirement = {
-                id: `post-${Date.now()}`,
                 workType: cleanText(formData.get("workType")),
                 labourCount: cleanText(formData.get("labourCount")),
                 requiredDate: cleanText(formData.get("requiredDate")),
                 requiredTime: cleanText(formData.get("requiredTime")),
                 location: cleanText(formData.get("location")),
-                notes: cleanText(formData.get("notes")),
-                createdAt: new Date().toLocaleDateString("en-IN")
+                notes: cleanText(formData.get("notes"))
             };
 
             if (!requirement.workType || !requirement.labourCount || !requirement.requiredDate || !requirement.location) {
@@ -439,20 +997,81 @@
                 return;
             }
 
-            state.labourPosts.unshift(requirement);
-            setUserStoredValue(USER_STORAGE_KEYS.labourPosts, state.labourPosts);
-            postForm.reset();
-            prefillLabourFormDefaults(postForm);
-            renderMatchedLabourSuggestions();
-            renderPostedLabourRequirements();
-            refreshAlertCount();
-            refreshHomeSection();
-            showToast("Labour request posted successfully.");
+            try {
+                await createLabourPost(requirement);
+                postForm.reset();
+                prefillLabourFormDefaults(postForm);
+                renderMatchedLabourSuggestions();
+                renderPostedLabourRequirements();
+                refreshAlertCount();
+                refreshHomeSection();
+                showToast("Labour request posted successfully.");
+            } catch (error) {
+                showToast(error.message || "Unable to post labour request.");
+            }
         });
 
         renderLabourCards();
         renderMatchedLabourSuggestions();
         renderPostedLabourRequirements();
+    }
+
+    function bindRequestsSection() {
+        const resetButton = document.getElementById("market-reset-button");
+        const filterElements = [
+            document.getElementById("market-filter-work"),
+            document.getElementById("market-filter-location"),
+            document.getElementById("market-filter-date")
+        ];
+        const marketList = document.getElementById("labour-market-list");
+
+        filterElements.forEach((element) => {
+            element?.addEventListener("input", renderLabourMarketCards);
+            element?.addEventListener("change", renderLabourMarketCards);
+        });
+
+        resetButton?.addEventListener("click", () => {
+            filterElements.forEach((element) => {
+                if (!element) {
+                    return;
+                }
+
+                if (element.tagName === "SELECT" || element.type === "date") {
+                    element.value = "";
+                } else {
+                    element.value = "";
+                }
+            });
+
+            renderLabourMarketCards();
+        });
+
+        marketList?.addEventListener("click", async (event) => {
+            const applyButton = event.target.closest("[data-apply-id]");
+
+            if (!applyButton) {
+                return;
+            }
+
+            const postId = Number(applyButton.dataset.applyId || 0);
+            const card = applyButton.closest("[data-apply-card]");
+            const messageInput = card?.querySelector("[data-apply-message]");
+            const message = cleanText(messageInput?.value) || "Interested in this labour requirement.";
+
+            if (!postId) {
+                showToast("Unable to apply. Invalid request.");
+                return;
+            }
+
+            try {
+                await applyToLabourPost(postId, message);
+                showToast("Application sent to farmer.");
+            } catch (error) {
+                showToast(error.message || "Unable to apply.");
+            }
+        });
+
+        renderLabourMarketCards();
     }
 
     function bindChatSection() {
@@ -462,7 +1081,7 @@
 
         chipButtons.forEach((button) => {
             button.addEventListener("click", () => {
-                sendChatMessage(button.dataset.chatChip);
+                void sendChatMessage(button.dataset.chatChip);
             });
         });
 
@@ -475,7 +1094,7 @@
                 return;
             }
 
-            sendChatMessage(message);
+            void sendChatMessage(message);
             chatInput.value = "";
         });
 
@@ -530,7 +1149,6 @@
 
     function setActiveView(viewKey) {
         state.activeView = VIEW_META[viewKey] ? viewKey : "home";
-        setUserStoredValue(USER_STORAGE_KEYS.activeView, state.activeView);
 
         document.querySelectorAll("[data-nav]").forEach((button) => {
             button.classList.toggle("is-active", button.dataset.nav === state.activeView);
@@ -552,6 +1170,10 @@
         if (state.activeView === "labour") {
             renderLabourCards();
             renderMatchedLabourSuggestions();
+        }
+
+        if (state.activeView === "requests") {
+            void loadLabourMarketFromApi().then(renderLabourMarketCards).catch(renderLabourMarketCards);
         }
 
         if (state.activeView === "schemes") {
@@ -738,6 +1360,66 @@
         `).join("");
     }
 
+    function renderLabourMarketCards() {
+        const cardsContainer = document.getElementById("labour-market-list");
+        const meta = document.getElementById("market-result-meta");
+
+        if (!cardsContainer || !meta) {
+            return;
+        }
+
+        const workType = cleanText(document.getElementById("market-filter-work")?.value).toLowerCase();
+        const location = cleanText(document.getElementById("market-filter-location")?.value).toLowerCase();
+        const dateFilter = cleanText(document.getElementById("market-filter-date")?.value);
+        const canApply = Boolean(state.labourProfile);
+
+        const filtered = state.labourMarketPosts
+            .filter((post) => {
+                const matchesWork = !workType || post.workType?.toLowerCase() === workType;
+                const locationText = `${post.location || ""} ${post.district || ""} ${post.state || ""}`.toLowerCase();
+                const matchesLocation = !location || locationText.includes(location);
+                const matchesDate = !dateFilter || String(post.requiredDate || "").startsWith(dateFilter);
+                return matchesWork && matchesLocation && matchesDate;
+            })
+            .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+        const roleHint = canApply ? "" : " (register labour to apply)";
+        meta.textContent = `${filtered.length} farmer requests match${roleHint}.`;
+
+        if (!filtered.length) {
+            cardsContainer.innerHTML = `
+                <div class="empty-state empty-state--wide">
+                    <i class="ri-briefcase-4-line" aria-hidden="true"></i>
+                    <strong>No matching farmer requests right now.</strong>
+                    <p>Adjust filters or check again later. ${canApply ? "" : "Complete labour registration to apply."}</p>
+                </div>
+            `;
+            return;
+        }
+
+        cardsContainer.innerHTML = filtered.map((post) => {
+            const contact = cleanText(post.farmerMobile);
+            const applyCta = canApply ? "Apply to request" : "Register labour to apply";
+            const locationLabel = [post.location, post.district, post.state].filter(Boolean).join(", ");
+
+            return `
+                <article class="posted-card" data-apply-card>
+                    <div class="card-topline">
+                        <strong>${escapeHtml(post.workType || "Labour work")}</strong>
+                        <span>${escapeHtml(post.requiredDate || "Date soon")} ${escapeHtml(post.requiredTime || "")}</span>
+                    </div>
+                    <p>${escapeHtml(String(post.labourCount || "?"))} workers needed at ${escapeHtml(locationLabel || "location shared")}</p>
+                    <small>Farmer: ${escapeHtml(post.farmerName || "Profile pending")}${post.state ? ` • ${escapeHtml(post.state)}` : ""}</small>
+                    <textarea rows="2" class="field" data-apply-message placeholder="Short message to farmer (optional)"></textarea>
+                    <div class="card-actions">
+                        <button class="btn ${canApply ? "btn--primary" : "btn--secondary"} btn--compact" type="button" data-apply-id="${escapeHtml(String(post.id))}" ${canApply ? "" : "disabled"}>${escapeHtml(applyCta)}</button>
+                        ${contact ? `<a class="btn btn--ghost btn--compact" href="tel:${escapeHtml(contact)}">Call farmer</a>` : ""}
+                    </div>
+                </article>
+            `;
+        }).join("");
+    }
+
     function renderMatchedLabourSuggestions(selectedWorkType) {
         const container = document.getElementById("matched-labour-list");
         const preferredWorkType = cleanText(selectedWorkType || document.querySelector("#labour-need-form select[name='workType']")?.value);
@@ -846,7 +1528,7 @@
         container.scrollTop = container.scrollHeight;
     }
 
-    function sendChatMessage(message) {
+    async function sendChatMessage(message) {
         const userMessage = {
             role: "user",
             text: message
@@ -858,8 +1540,13 @@
         };
 
         state.chatHistory.push(userMessage, botMessage);
-        setUserStoredValue(USER_STORAGE_KEYS.chatHistory, state.chatHistory);
         renderChatHistory();
+
+        try {
+            await sendChatToApi(userMessage.text, botMessage.text);
+        } catch (error) {
+            showToast(error.message || "Unable to save chat message.");
+        }
     }
 
     function getGeminiResponse() {
@@ -1607,25 +2294,12 @@
         }
     }
 
-    function ensureDemoUser() {
-        const users = getUsers();
-        const existing = users.find((user) => user.usernameKey === normalizeUsername(DEMO_USER.username));
-
-        if (existing) {
-            return existing;
+    async function ensureDemoUser() {
+        try {
+            await apiRequest("/api/auth/bootstrap-demo", { method: "POST" });
+        } catch {
+            // Ignore errors (user may already exist)
         }
-
-        const demoRecord = {
-            username: DEMO_USER.username,
-            usernameKey: normalizeUsername(DEMO_USER.username),
-            mobile: DEMO_USER.mobile,
-            password: DEMO_USER.password,
-            createdAt: new Date().toISOString()
-        };
-
-        users.push(demoRecord);
-        setStoredValue(STORAGE_KEYS.users, users);
-        return demoRecord;
     }
 
     function generateCaptcha(loginForm) {
@@ -1672,51 +2346,11 @@
         node.classList.remove("is-error", "is-success");
     }
 
-    function hasActiveSession() {
-        const session = getStoredValue(STORAGE_KEYS.session, null);
-        return Boolean(session?.isLoggedIn);
-    }
-
-    function getUsers() {
-        return getStoredValue(STORAGE_KEYS.users, []);
-    }
-
-    function findUserByUsername(username) {
-        const usernameKey = normalizeUsername(username);
-        return getUsers().find((user) => user.usernameKey === usernameKey);
-    }
-
-    function getUserStorageKey(baseKey, username = state.session?.username) {
-        const usernameKey = normalizeUsername(username);
-        return usernameKey ? `${baseKey}_${usernameKey}` : baseKey;
-    }
-
-    function getUserStoredValue(baseKey, fallbackValue) {
-        return getStoredValue(getUserStorageKey(baseKey), fallbackValue);
-    }
-
-    function setUserStoredValue(baseKey, value) {
-        setStoredValue(getUserStorageKey(baseKey), value);
-    }
-
     function formatCategoryLabel(value) {
         return value
             .split("-")
             .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
             .join(" ");
-    }
-
-    function getStoredValue(key, fallbackValue) {
-        try {
-            const rawValue = localStorage.getItem(key);
-            return rawValue ? JSON.parse(rawValue) : fallbackValue;
-        } catch {
-            return fallbackValue;
-        }
-    }
-
-    function setStoredValue(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
     }
 
     function cleanText(value) {
@@ -1725,6 +2359,47 @@
 
     function cleanNumber(value) {
         return String(value || "").replace(/[^\d]/g, "");
+    }
+
+    function formatAadharDigits(value) {
+        return cleanNumber(value)
+            .slice(0, 12)
+            .replace(/(\d{4})(?=\d)/g, "$1 ")
+            .trim();
+    }
+
+    function maskAadharNumber(value) {
+        const digits = cleanNumber(value);
+
+        if (digits.length < 4) {
+            return "";
+        }
+
+        return `XXXX XXXX ${digits.slice(-4)}`;
+    }
+
+    function getAadharValidationMessage({ holderName, aadharNumber, file }) {
+        if (holderName.length < 2) {
+            return "Enter the holder name in the main form first.";
+        }
+
+        if (aadharNumber.length !== 12) {
+            return "Enter a valid 12-digit Aadhar number.";
+        }
+
+        if (!file) {
+            return "Upload the front-side Aadhar image.";
+        }
+
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            return "Only PNG, JPG, or WEBP Aadhar images are supported.";
+        }
+
+        if (file.size > 4 * 1024 * 1024) {
+            return "Use an Aadhar image smaller than 4 MB.";
+        }
+
+        return "";
     }
 
     function normalizeUsername(value) {
@@ -1775,5 +2450,54 @@
         showToast.timeoutId = window.setTimeout(() => {
             toast.classList.remove("is-visible");
         }, 2600);
+    }
+
+    function readFileAsBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Unable to read file."));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function optimizeImageForVerification(file) {
+        const originalDataUrl = await readFileAsBase64(file);
+
+        if (!file.type.startsWith("image/")) {
+            return originalDataUrl;
+        }
+
+        try {
+            const image = await loadImage(originalDataUrl);
+            const maxDimension = 1280;
+            const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
+            const targetWidth = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+            const targetHeight = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            if (!context) {
+                return originalDataUrl;
+            }
+
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+            // Shrink document uploads before sending to Gemini to reduce quota pressure.
+            return canvas.toDataURL("image/jpeg", 0.82);
+        } catch {
+            return originalDataUrl;
+        }
+    }
+
+    function loadImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error("Unable to process image."));
+            image.src = dataUrl;
+        });
     }
 })();

@@ -19,6 +19,7 @@
         href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
     >
     <link rel="stylesheet" href="css/style.css">
+
 </head>
 <style>
     /* Left section background */
@@ -63,7 +64,7 @@
                 <h1>Simple login for a farmer-first labour support dashboard.</h1>
                 <p>
                     Registered users can sign in with a username, password, and a small math CAPTCHA.
-                    This keeps the prototype easy to demo without adding any backend and opens the Home, Labour Finding, AI Chatbot, and Government Schemes dashboard.
+                    Authentication now uses the API-backed session so you can move into Home, Labour Finding, AI Chatbot, and Government Schemes with real data.
                 </p>
             </div>
 
@@ -71,8 +72,8 @@
                 <article class="story-card">
                     <i class="ri-shield-check-line" aria-hidden="true"></i>
                     <div>
-                        <strong>Prototype Auth</strong>
-                        <p>Frontend-only registration and login stored in localStorage.</p>
+                        <strong>API Auth</strong>
+                        <p>Registration and login use the backend API with secure session cookies.</p>
                     </div>
                 </article>
                 <article class="story-card">
@@ -96,7 +97,7 @@
                     <span class="story-panel__label">Demo Ready</span>
                     <strong>Fast to explain and easy to use</strong>
                 </div>
-                <p>No OTP, no backend, no complex setup. The auth flow is minimal but realistic enough for a hackathon demo.</p>
+                <p>API sessions, simple CAPTCHA, and no OTP to keep the demo fast while using the real backend.</p>
             </div>
         </section>
 
@@ -143,20 +144,19 @@
                     </button>
                 </form>
 
-                <button class="btn btn--secondary btn--wide" type="button" id="demo-login-button">
-                    <i class="ri-flashlight-line" aria-hidden="true"></i>
-                    Fill Demo Login
-                </button>
+              
 
                 <p class="auth-switch">
                     Don’t have an account?
                     <a href="register.html">Register here</a>
                 </p>
 
-                <div class="login-note">
-                    <i class="ri-information-line" aria-hidden="true"></i>
-                    <p>User data is stored only in localStorage for the prototype. No backend or encryption is used.</p>
-                </div>
+                <p class="auth-switch">
+                    Labourer?
+                    <a href="labour-register.html">Register here</a>
+                </p>
+
+                
             </div>
         </section>
     </div>

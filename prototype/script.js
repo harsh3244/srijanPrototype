@@ -199,7 +199,7 @@ function initFraudDemo() {
             scoreLabel: "62 / 100",
             meterWidth: "62%",
             meterBackground: "linear-gradient(90deg, #ffcb63, #ff9f6c)",
-            text: "KCC loan agent says: Send Aadhaar and INR 750 file charge on WhatsApp today to approve your farm loan fast.",
+            text: "KCC loan agent says: Send Aadhar and INR 750 file charge on WhatsApp today to approve your farm loan fast.",
             title: "This loan offer needs careful verification before you share anything.",
             explain: "The request may be fake because the agent is asking for documents and money over WhatsApp before official bank verification.",
             findings: [

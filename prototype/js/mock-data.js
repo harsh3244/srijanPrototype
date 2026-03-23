@@ -105,7 +105,7 @@ window.AgriMockData = {
             description: "Direct income support for eligible landholding farmer families.",
             eligibility: "Small and marginal farmers with valid land records.",
             benefits: "INR 6,000 per year in installments.",
-            documents: ["Aadhaar", "Bank passbook", "Land record"],
+            documents: ["Aadhar", "Bank passbook", "Land record"],
             cta: "Learn More",
             landMax: 2.5,
             cropTags: []
@@ -117,7 +117,7 @@ window.AgriMockData = {
             description: "Crop insurance support against yield loss, weather damage, and seasonal risk.",
             eligibility: "Farmers growing notified crops in notified areas.",
             benefits: "Premium support and financial protection against crop loss.",
-            documents: ["Aadhaar", "Bank account", "Sowing proof"],
+            documents: ["Aadhar", "Bank account", "Sowing proof"],
             cta: "Apply",
             cropTags: ["rice", "wheat", "cotton", "maize", "soybean", "tomato", "onion", "sugarcane"]
         },
@@ -128,7 +128,7 @@ window.AgriMockData = {
             description: "Subsidy support for farm machines that reduce labour burden during peak work.",
             eligibility: "Farmers or groups purchasing approved farm equipment.",
             benefits: "Support on machines and tools that reduce dependency on manual labour.",
-            documents: ["Aadhaar", "Quotation", "Bank details", "Land proof"],
+            documents: ["Aadhar", "Quotation", "Bank details", "Land proof"],
             cta: "Apply",
             landMin: 1
         },
@@ -150,7 +150,7 @@ window.AgriMockData = {
             description: "Short-term credit support for seasonal farm expenses including wages and inputs.",
             eligibility: "Farmers needing timely working capital for field operations.",
             benefits: "Flexible credit support for labour payments and input purchase.",
-            documents: ["Aadhaar", "Bank account", "Land details"],
+            documents: ["Aadhar", "Bank account", "Land details"],
             cta: "Apply",
             landMax: 5
         },
@@ -161,7 +161,7 @@ window.AgriMockData = {
             description: "Support for high-value crop growers such as vegetables and horticulture farms.",
             eligibility: "Farmers growing vegetables, fruit crops, or intensive horticulture crops.",
             benefits: "Input support and crop development assistance for horticulture-based farming.",
-            documents: ["Aadhaar", "Crop details", "Land proof", "Bank details"],
+            documents: ["Aadhar", "Crop details", "Land proof", "Bank details"],
             cta: "Learn More",
             cropTags: ["tomato", "onion"],
             farmingTypeTags: ["horticulture"]
@@ -173,7 +173,7 @@ window.AgriMockData = {
             description: "Support for small farmers joining a group model to reduce peak-season labour pressure.",
             eligibility: "Small farmers or farmer groups facing labour shortage during sowing, weeding, or harvest.",
             benefits: "Shared hiring support, labour pooling, and access to coordinated seasonal workforce planning.",
-            documents: ["Aadhaar", "Farmer registration", "Land proof", "Group details"],
+            documents: ["Aadhar", "Farmer registration", "Land proof", "Group details"],
             cta: "Learn More",
             landMax: 4
         }

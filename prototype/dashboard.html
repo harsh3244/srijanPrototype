@@ -53,6 +53,10 @@
                     <i class="ri-team-line" aria-hidden="true"></i>
                     <span>Labour Finding</span>
                 </button>
+                <button class="sidebar-link" type="button" data-nav="requests">
+                    <i class="ri-briefcase-4-line" aria-hidden="true"></i>
+                    <span>Farmer Requests</span>
+                </button>
                 <button class="sidebar-link" type="button" data-nav="chatbot">
                     <i class="ri-message-3-line" aria-hidden="true"></i>
                     <span>AI Chatbot</span>
@@ -438,6 +442,59 @@
                             <div class="posted-list" id="posted-labour-list"></div>
                         </article>
                     </div>
+                </section>
+
+                <section class="view-section" data-view="requests">
+                    <div class="section-banner section-banner--soft">
+                        <div>
+                            <span class="eyebrow">Farmer Requests</span>
+                            <h2>Browse farmer labour requirements and apply as a labour user.</h2>
+                        </div>
+                        <p>Use filters to see nearby work, then apply or reach out directly.</p>
+                    </div>
+
+                    <article class="panel-card">
+                        <div class="filters-grid">
+                            <label class="field">
+                                <span>Work Type</span>
+                                <select id="market-filter-work">
+                                    <option value="">All work types</option>
+                                    <option>Harvesting</option>
+                                    <option>Sugarcane Cutting</option>
+                                    <option>Weeding</option>
+                                    <option>Transplanting</option>
+                                    <option>Spraying</option>
+                                    <option>Loading</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Location</span>
+                                <input type="text" id="market-filter-location" placeholder="District / state / village">
+                            </label>
+                            <label class="field">
+                                <span>Date Needed</span>
+                                <input type="date" id="market-filter-date">
+                            </label>
+                            <div class="form-actions">
+                                <button class="btn btn--secondary" type="button" id="market-reset-button">
+                                    <i class="ri-refresh-line" aria-hidden="true"></i>
+                                    Reset Filters
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="panel-card">
+                        <div class="section-head">
+                            <div>
+                                <span class="section-kicker">Live Requests</span>
+                                <h3>Farmer labour needs you can apply to</h3>
+                            </div>
+                            <p id="market-result-meta">Loading farmer requests...</p>
+                        </div>
+
+                        <div class="card-grid" id="labour-market-list"></div>
+                    </article>
                 </section>
 
                 <section class="view-section" data-view="chatbot">

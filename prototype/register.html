@@ -19,6 +19,7 @@
         href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
     >
     <link rel="stylesheet" href="css/style.css">
+
 <style>
     /* Left section background */
     .login-story {
@@ -44,7 +45,6 @@
     }
 </style>
 
-
 </head>
 <body data-page="register">
     <div class="login-shell">
@@ -63,8 +63,8 @@
                 <span class="eyebrow eyebrow--light">Best Labour Support</span>
                 <h1>Create a simple account and enter the farmer labour support platform.</h1>
                 <p>
-                    Registration is helps us to understand your problems. After that, the farmer
-                    can log in, save farm details, and use Home, Labour Finding, AI Chatbot, and Government Schemes.
+                    Registration helps us understand your needs. After that, the farmer
+                    can log in, save farm details, and use Home, Labour Finding, AI Chatbot, and Government Schemes with API-backed data.
                 </p>
             </div>
 
@@ -73,14 +73,14 @@
                     <i class="ri-user-add-line" aria-hidden="true"></i>
                     <div>
                         <strong>Register Fast</strong>
-                        <p>Create a demo account with username, mobile number, and password.</p>
+                        <p>Create an account with Aadhar-backed verification, mobile, and password.</p>
                     </div>
                 </article>
                 <article class="story-card">
                     <i class="ri-lock-password-line" aria-hidden="true"></i>
                     <div>
-                        <strong>Basic Validation</strong>
-                        <p>Password match and required field checks keep the auth flow realistic.</p>
+                        <strong>Aadhar + Password</strong>
+                        <p>AI-assisted Aadhar check plus password and required field validations.</p>
                     </div>
                 </article>
                 <article class="story-card">
@@ -100,14 +100,13 @@
                 <div class="section-head section-head--tight">
                     <span class="eyebrow">Register</span>
                     <h2>Create your account</h2>
-                    <p>Fill the fields below and save the user in localStorage for this prototype.</p>
+                    <p>Fill the fields below, verify Aadhar, and create your dashboard login.</p>
                 </div>
 
                 <form id="register-form" class="form-grid form-grid--single" novalidate>
-                    
                     <label class="field">
-                        <span>Name</span>
-                        <input type="text" name="username" placeholder="Enter your name" required>
+                        <span>Full Name</span>
+                        <input type="text" name="fullName" placeholder="Enter your full name" required>
                     </label>
 
                     <label class="field">
@@ -115,9 +114,39 @@
                         <input type="tel" name="mobile" inputmode="numeric" placeholder="10-digit mobile number" required>
                     </label>
 
+                   <label class="field field--wide">
+                        <span>Address</span>
+                        <input id="address" type="text" name="address" placeholder="Enter your farm location (village, district)">
+                        <small>No map preview shown—enter the location text directly.</small>
+                    </label>
+
+                    <div class="field field--wide">
+                        <span>UIDAI Aadhar Details</span>
+                        <div class="field">
+                            
+                        
+                        <div class="aadhar-card">
+                            
+                                <strong>Attach Aadhar</strong>
+                    
+                            </div>
+                        </div>
+                            <div class="field">
+                                <span>Front Side</span>
+                                <input type="file" name="aadharFileFront" accept="image/*" required>
+                                <small>Upload a clear front-side photo or scan.</small>
+                            </div>
+
+                            <div class="field">
+                                <span>Back Side</span>
+                                <input type="file" name="aadharFileBack" accept="image/*" required>
+                                <small>Upload the back side as well. Both images are required.</small>
+                            </div>
+                    </div>
+                     
                     <label class="field">
                         <span>Username</span>
-                        <input type="text" name="username" placeholder="Create a username" required>
+                         <input type="text" name="username" placeholder="Create a username" required>
                     </label>
                      
                     <label class="field">
@@ -130,6 +159,11 @@
                         <input type="password" name="confirmPassword" placeholder="Re-enter password" required>
                     </label>
 
+                    <label class="field field--checkbox">
+                        <input type="checkbox" name="aadharConsent" required>
+                        <span>By continuing, I agree that AgriShield checks are used to verify the uploaded Aadhar image and this is not an official UIDAI verification.</span>
+                    </label>
+
                     <div id="register-feedback" class="auth-feedback" hidden></div>
 
                     <button class="btn btn--primary btn--wide" type="submit">
@@ -140,14 +174,16 @@
 
                 
 
-                <p class="auth-switch">
+                 <p class="auth-switch">
                     Already have an account?
                     <a href="login.html">Login here</a>
                 </p>
-
-                
+                 <p class="auth-switch">
+                    Registered as a labourer?
+                    <a href="labour-login.html">Login here</a>
+                </p>
             </div>
-        </section>
+        </div>
     </div>
 
     <div class="toast" data-toast aria-live="polite"></div>

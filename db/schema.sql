@@ -6,14 +6,20 @@ USE agrishield;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    username VARCHAR(80) DEFAULT NULL,
     full_name VARCHAR(80) NOT NULL,
     email VARCHAR(120) NOT NULL,
     phone VARCHAR(20) DEFAULT NULL,
     password_hash CHAR(128) NOT NULL,
     password_salt CHAR(32) NOT NULL,
+    aadhar_number VARCHAR(20) DEFAULT NULL,
+    aadhar_status ENUM('pending','verified','review','failed') NOT NULL DEFAULT 'pending',
+    aadhar_summary TEXT DEFAULT NULL,
+    aadhar_verified_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY users_email_unique (email)
+    UNIQUE KEY users_email_unique (email),
+    UNIQUE KEY users_username_unique (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS user_sessions (
@@ -82,5 +88,40 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     KEY chat_messages_user_id_index (user_id),
     CONSTRAINT chat_messages_user_fk
         FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS labour_registrations (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED DEFAULT NULL,
+    registration_type ENUM('self','group') NOT NULL,
+    head_name VARCHAR(120) NOT NULL,
+    contact_number VARCHAR(20) NOT NULL,
+    address VARCHAR(255) DEFAULT NULL,
+    aadhar_number VARCHAR(20) DEFAULT NULL,
+    aadhar_status ENUM('pending','verified','review','failed') NOT NULL DEFAULT 'pending',
+    aadhar_summary TEXT DEFAULT NULL,
+    username VARCHAR(80) NOT NULL,
+    password_hash CHAR(128) NOT NULL,
+    password_salt CHAR(32) NOT NULL,
+    verification_note VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY labour_registrations_user_id_index (user_id),
+    CONSTRAINT labour_registrations_user_fk
+        FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS labour_group_members (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    labour_registration_id BIGINT UNSIGNED NOT NULL,
+    member_name VARCHAR(120) NOT NULL,
+    contact_number VARCHAR(20) DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY labour_group_members_registration_index (labour_registration_id),
+    CONSTRAINT labour_group_members_fk
+        FOREIGN KEY (labour_registration_id) REFERENCES labour_registrations (id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

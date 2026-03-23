@@ -64,7 +64,7 @@
                 <h1>Create a simple account and enter the farmer labour support platform.</h1>
                 <p>
                     Registration is helps us to understand your problems. After that, the farmer
-                    can log in, save farm details, and use Home, Labour Finding, AI Chatbot, and Government Schemes.
+                    or labour user can log in, save profile details, and use Home, Labour Finding, Tutorial, and Government Schemes.
                 </p>
             </div>
 
@@ -87,7 +87,7 @@
                     <i class="ri-dashboard-line" aria-hidden="true"></i>
                     <div>
                         <strong>Dashboard Ready</strong>
-                        <p>After login, the user can directly explore Home, labour finding, AI help, and schemes.</p>
+                        <p>After login, the user can directly explore Home, labour finding, tutorial guidance, and schemes.</p>
                     </div>
                 </article>
             </div>
@@ -103,11 +103,20 @@
                     <p>Fill the fields below and save the user in localStorage for this prototype.</p>
                 </div>
 
+                <div class="global-language-row">
+                    <label class="global-language-label" for="ui-language-select-register">Language</label>
+                    <select id="ui-language-select-register" class="global-language-select" data-ui-language-select>
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                    </select>
+                </div>
+
                 <form id="register-form" class="form-grid form-grid--single" novalidate>
                     
                     <label class="field">
-                        <span>Name</span>
-                        <input type="text" name="username" placeholder="Enter your name" required>
+                        <span>Full Name</span>
+                        <input type="text" name="fullName" placeholder="Enter your full name" required>
                     </label>
 
                     <label class="field">

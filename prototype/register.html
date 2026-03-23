@@ -34,10 +34,10 @@
             </a>
 
             <div class="login-story__copy">
-                <span class="eyebrow eyebrow--light">Hackathon Prototype</span>
+                <span class="eyebrow eyebrow--light">Best Labour Support</span>
                 <h1>Create a simple account and enter the farmer labour support platform.</h1>
                 <p>
-                    Registration is frontend-only and stores the user in localStorage. After that, the farmer
+                    Registration is helps us to understand your problems. After that, the farmer
                     can log in, save farm details, and use Home, Labour Finding, AI Chatbot, and Government Schemes.
                 </p>
             </div>
@@ -66,13 +66,7 @@
                 </article>
             </div>
 
-            <div class="story-panel">
-                <div>
-                    <span class="story-panel__label">Prototype Scope</span>
-                    <strong>No backend, just a clean demo flow</strong>
-                </div>
-                <p>This registration page is only meant for hackathon presentation and UI flow validation.</p>
-            </div>
+            
         </section>
 
         <section class="login-panel">
@@ -84,9 +78,10 @@
                 </div>
 
                 <form id="register-form" class="form-grid form-grid--single" novalidate>
+                    
                     <label class="field">
-                        <span>Username</span>
-                        <input type="text" name="username" placeholder="Create a username" required>
+                        <span>Name</span>
+                        <input type="text" name="username" placeholder="Enter your name" required>
                     </label>
 
                     <label class="field">
@@ -94,6 +89,11 @@
                         <input type="tel" name="mobile" inputmode="numeric" placeholder="10-digit mobile number" required>
                     </label>
 
+                    <label class="field">
+                        <span>Username</span>
+                        <input type="text" name="username" placeholder="Create a username" required>
+                    </label>
+                     
                     <label class="field">
                         <span>Password</span>
                         <input type="password" name="password" placeholder="Create a password" required>
@@ -112,20 +112,14 @@
                     </button>
                 </form>
 
-                <button class="btn btn--secondary btn--wide" type="button" id="demo-register-button">
-                    <i class="ri-flashlight-line" aria-hidden="true"></i>
-                    Fill Demo Registration
-                </button>
+                
 
                 <p class="auth-switch">
                     Already have an account?
                     <a href="login.html">Login here</a>
                 </p>
 
-                <div class="login-note">
-                    <i class="ri-information-line" aria-hidden="true"></i>
-                    <p>This prototype stores registered users in localStorage only. Do not use real production credentials here.</p>
-                </div>
+                
             </div>
         </section>
     </div>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Fraud Check for Loans and Govt Schemes</title>
+    <meta
+        name="description"
+        content="Check loan offers, government scheme messages, links, and portals in simple words using AgriShield's AI fraud detection page."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body data-page="fraud">
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="index.html" aria-label="AgriShield home">
+                <span class="brand-mark">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span class="brand-copy">
+                    <strong>AgriShield</strong>
+                    <small>Simple AI for safer farming</small>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                <a data-page-link="home" href="index.html">Home</a>
+                <a data-page-link="fraud" href="fraud-detection.html">Fraud Check</a>
+                <a data-page-link="schemes" href="gov-schemes.html">Scheme Guide</a>
+                <a data-page-link="irrigation" href="irrigation.html">Irrigation</a>
+                <a data-page-link="crop" href="crop-analyzer.html">Crop Analyzer</a>
+                <a data-page-link="languages" href="languages.html">Languages</a>
+                <a data-page-link="labs" href="agri-labs.html">Agri Labs</a>
+            </nav>
+
+            <a class="header-cta" href="gov-schemes.html">Scheme Guide</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <!-- Fraud page hero -->
+        <section class="page-hero">
+            <div data-reveal>
+                <span class="eyebrow">Fraud Protection / Loans / Government Schemes</span>
+                <h1>AI fraud check made clean and easy to understand.</h1>
+                <p>
+                    This page is built for one job: tell the farmer whether a loan or government scheme message
+                    looks safe, risky, or fake. The answer uses simple words and clear next steps.
+                </p>
+            </div>
+
+            <div class="panel" data-reveal="scale">
+                <span class="section-kicker">Simple Result</span>
+                <h2>Only three answers appear</h2>
+                <div class="status-legend">
+                    <span class="status-pill status-pill--safe">Safe / सुरक्षित</span>
+                    <span class="status-pill status-pill--warning">Check Carefully / ध्यान से देखें</span>
+                    <span class="status-pill status-pill--danger">Stop / रुकें</span>
+                </div>
+                <p class="helper-note">No complex technical words. The farmer sees what to do next immediately.</p>
+            </div>
+        </section>
+
+        <!-- Interactive demo -->
+        <section class="section">
+            <div class="panel-grid">
+                <article class="demo-panel" data-reveal>
+                    <span class="section-kicker">Step 1</span>
+                    <h2>Choose what you want to check</h2>
+                    <p>Tap one example below to see how the fraud result changes.</p>
+
+                    <div class="choice-list">
+                        <button class="choice-button is-active" type="button" data-fraud-case="scheme">Govt scheme SMS</button>
+                        <button class="choice-button" type="button" data-fraud-case="loan">Loan agent request</button>
+                        <button class="choice-button" type="button" data-fraud-case="portal">Official portal example</button>
+                    </div>
+
+                    <div class="demo-input">
+                        <label>Message, link, or text to check</label>
+                        <div class="demo-text" data-fraud-text>
+                            PM-KISAN update: Pay INR 1,999 processing fee today to receive next installment.
+                        </div>
+                    </div>
+
+                    <p class="micro-note">Village-friendly flow: paste message, scan link, speak it aloud, or ask a helper to enter it.</p>
+                </article>
+
+                <article class="result-card" data-reveal="scale">
+                    <div class="result-top">
+                        <span class="verdict-banner verdict-banner--danger" data-fraud-verdict>Stop / रुकें</span>
+                        <div class="score-box">Risk score: <strong data-fraud-score>88 / 100</strong></div>
+                    </div>
+
+                    <div class="meter">
+                        <span class="meter__fill" data-fraud-meter></span>
+                    </div>
+
+                    <div>
+                        <span class="mini-label">What this means</span>
+                        <h2 data-fraud-title>This looks like a fake government scheme message.</h2>
+                        <p data-fraud-explain>
+                            The link is not an official government domain and the message asks for a processing fee.
+                        </p>
+                    </div>
+
+                    <div>
+                        <span class="mini-label">What AI found</span>
+                        <ul class="check-list" data-fraud-findings></ul>
+                    </div>
+
+                    <div>
+                        <span class="mini-label">What farmer should do now</span>
+                        <ul class="action-list" data-fraud-actions></ul>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="section">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">How It Works</span>
+                <h2>Three small steps, then a clear answer</h2>
+                <p>The page avoids clutter. The farmer should be able to finish the task in less than a minute.</p>
+            </div>
+
+            <div class="step-grid">
+                <article class="panel step-card" data-reveal>
+                    <span class="step-number">1</span>
+                    <h3>Enter details</h3>
+                    <p>Paste a link, type a scheme name, or add the message received on phone or WhatsApp.</p>
+                </article>
+                <article class="panel step-card" data-reveal>
+                    <span class="step-number">2</span>
+                    <h3>AI checks trust signals</h3>
+                    <p>AgriShield reviews official domains, fee demands, agent proof, and document requests.</p>
+                </article>
+                <article class="panel step-card" data-reveal>
+                    <span class="step-number">3</span>
+                    <h3>Get simple guidance</h3>
+                    <p>The screen says Safe, Check Carefully, or Stop, and also tells the farmer what to do next.</p>
+                </article>
+                <article class="panel step-card" data-reveal>
+                    <span class="step-number">4</span>
+                    <h3>Escalate if needed</h3>
+                    <p>If the case looks risky, the user can move to official contacts, scheme pages, or local support.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- What AI checks -->
+        <section class="section">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">What AI Checks</span>
+                <h2>Clean signals a farmer can understand</h2>
+                <p>These checks are shown in plain language instead of technical fraud-scoring terms.</p>
+            </div>
+
+            <div class="check-grid">
+                <article class="panel check-item" data-reveal>
+                    <h3>Official website or not</h3>
+                    <p>Checks if the portal uses a real government or bank domain instead of a copy link.</p>
+                </article>
+                <article class="panel check-item" data-reveal>
+                    <h3>Fee demand</h3>
+                    <p>Flags unexpected registration fees, file charges, or fast approval payments.</p>
+                </article>
+                <article class="panel check-item" data-reveal>
+                    <h3>Document pressure</h3>
+                    <p>Warns when Aadhaar, bank passbook, or OTP is requested too early or in unsafe channels.</p>
+                </article>
+                <article class="panel check-item" data-reveal>
+                    <h3>Agent and contact proof</h3>
+                    <p>Looks for branch name, official number, valid office, and verifiable identity details.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Warnings and safe actions -->
+        <section class="section">
+            <div class="panel-grid">
+                <article class="notice-box notice-box--danger" data-reveal>
+                    <span class="section-kicker">Common Scam Signs</span>
+                    <ul class="simple-list">
+                        <li><i class="ri-close-circle-line"></i><span>Pay money first, then approval later.</span></li>
+                        <li><i class="ri-close-circle-line"></i><span>Send Aadhaar, OTP, or bank details on WhatsApp.</span></li>
+                        <li><i class="ri-close-circle-line"></i><span>Use of urgent words like "today only" or "account blocked".</span></li>
+                        <li><i class="ri-close-circle-line"></i><span>Website link that looks similar, but not exactly official.</span></li>
+                    </ul>
+                </article>
+
+                <article class="notice-box notice-box--safe" data-reveal="scale">
+                    <span class="section-kicker">Safe Next Steps</span>
+                    <ul class="simple-list">
+                        <li><i class="ri-check-line"></i><span>Open only official portals or visit the bank/office directly.</span></li>
+                        <li><i class="ri-check-line"></i><span>Ask for branch name, officer name, and written proof.</span></li>
+                        <li><i class="ri-check-line"></i><span>Never share OTP, PIN, or UPI approval blindly.</span></li>
+                        <li><i class="ri-check-line"></i><span>Use AgriShield again if a message looks confusing.</span></li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div class="footer-brand">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span class="brand-copy">
+                        <strong>AgriShield</strong>
+                        <small>Safer farming through simple AI</small>
+                    </span>
+                </a>
+                <p>Fraud check page focused on loans, government schemes, and clear farmer action.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="fraud-detection.html">Fraud Check</a>
+                <a href="gov-schemes.html">Gov Schemes</a>
+                <a href="crop-analyzer.html">Crop Analyzer</a>
+                <a href="irrigation.html">Irrigation</a>
+                <a href="languages.html">Languages</a>
+                <a href="agri-labs.html">Agri Labs</a>
+            </div>
+
+            <div class="footer-meta">
+                <span>&copy; <span class="js-year"></span> AgriShield</span>
+                <span>Use official bank and government contacts for final confirmation</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

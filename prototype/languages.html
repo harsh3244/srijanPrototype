@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Multilingual Voice Support</title>
+    <meta
+        name="description"
+        content="Preview AgriShield's multilingual voice support for Indian farmers across major languages and simple voice-first guidance."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body data-page="languages">
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="index.html" aria-label="AgriShield home">
+                <span class="brand-mark">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span class="brand-copy">
+                    <strong>AgriShield</strong>
+                    <small>Simple AI for safer farming</small>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                <a data-page-link="home" href="index.html">Home</a>
+                <a data-page-link="fraud" href="fraud-detection.html">Fraud Check</a>
+                <a data-page-link="schemes" href="gov-schemes.html">Scheme Guide</a>
+                <a data-page-link="irrigation" href="irrigation.html">Irrigation</a>
+                <a data-page-link="crop" href="crop-analyzer.html">Crop Analyzer</a>
+                <a data-page-link="languages" href="languages.html">Languages</a>
+                <a data-page-link="labs" href="agri-labs.html">Agri Labs</a>
+            </nav>
+
+            <a class="header-cta" href="agri-labs.html">Agri Labs</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <div data-reveal>
+                <span class="eyebrow">Voice AI / Multilingual / Village Accessibility</span>
+                <h1>Talk to AgriShield in your own language.</h1>
+                <p>
+                    Many farmers prefer speaking over typing. This page shows how AgriShield can respond
+                    in major Indian languages with short, useful guidance.
+                </p>
+            </div>
+
+            <div class="voice-box" data-reveal="scale">
+                <span class="section-kicker">Now Speaking In</span>
+                <h3><span data-language-native>हिन्दी</span> / <span data-language-english>Hindi</span></h3>
+                <p class="helper-note" data-language-speakers>Large speaker base across India</p>
+                <div class="voice-preview">
+                    <span class="voice-preview__native" data-language-sample-native>
+                        किसान भाई, इस लिंक पर पैसा मत भेजिए। पहले इसे जांच लीजिए।
+                    </span>
+                    <span class="voice-preview__english" data-language-sample-english>
+                        Farmer friend, do not send money to this link. Check it first.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">Tap a Language</span>
+                <h2>Preview voice support</h2>
+                <p>Use one tap to switch the language preview. This keeps the page easy and direct.</p>
+            </div>
+
+            <div class="language-grid">
+                <button
+                    class="language-button is-active"
+                    type="button"
+                    data-language-button
+                    data-native="हिन्दी"
+                    data-english="Hindi"
+                    data-speakers="Widely used across many states"
+                    data-sample-native="किसान भाई, इस लिंक पर पैसा मत भेजिए। पहले इसे जांच लीजिए।"
+                    data-sample-english="Farmer friend, do not send money to this link. Check it first."
+                >
+                    Hindi
+                </button>
+                <button
+                    class="language-button"
+                    type="button"
+                    data-language-button
+                    data-native="मराठी"
+                    data-english="Marathi"
+                    data-speakers="Useful across Maharashtra"
+                    data-sample-native="पैसे पाठवण्यापूर्वी ही योजना खरी आहे का ते तपासा."
+                    data-sample-english="Before sending money, check whether this scheme is real."
+                >
+                    Marathi
+                </button>
+                <button
+                    class="language-button"
+                    type="button"
+                    data-language-button
+                    data-native="தமிழ்"
+                    data-english="Tamil"
+                    data-speakers="Useful across Tamil Nadu"
+                    data-sample-native="இந்த இணைப்பை திறக்கும் முன் அது அரசு தளமா என்று பாருங்கள்."
+                    data-sample-english="Before opening this link, confirm that it is an official government site."
+                >
+                    Tamil
+                </button>
+                <button
+                    class="language-button"
+                    type="button"
+                    data-language-button
+                    data-native="తెలుగు"
+                    data-english="Telugu"
+                    data-speakers="Useful across Telugu-speaking regions"
+                    data-sample-native="ముందుగా ఈ రుణ సందేశం నిజమా కాదా చూసి తర్వాతే పత్రాలు పంపండి."
+                    data-sample-english="First check whether this loan message is genuine, then send documents."
+                >
+                    Telugu
+                </button>
+                <button
+                    class="language-button"
+                    type="button"
+                    data-language-button
+                    data-native="ਪੰਜਾਬੀ"
+                    data-english="Punjabi"
+                    data-speakers="Useful across Punjab and surrounding regions"
+                    data-sample-native="ਪੈਸੇ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਇਹ ਪਤਾ ਕਰੋ ਕਿ ਸੰਦੇਸ਼ ਅਸਲੀ ਹੈ ਜਾਂ ਨਹੀਂ।"
+                    data-sample-english="Before sending money, find out whether the message is genuine."
+                >
+                    Punjabi
+                </button>
+                <button
+                    class="language-button"
+                    type="button"
+                    data-language-button
+                    data-native="বাংলা"
+                    data-english="Bengali"
+                    data-speakers="Useful across West Bengal and beyond"
+                    data-sample-native="ওটিপি কাউকে বলবেন না। আগে সরকারি সাইট দেখুন।"
+                    data-sample-english="Do not share your OTP with anyone. Check the official site first."
+                >
+                    Bengali
+                </button>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="support-grid">
+                <article class="helper-card" data-reveal>
+                    <span class="section-kicker">Why It Matters</span>
+                    <h3>Better understanding</h3>
+                    <p>Important warnings are easier to trust when they come in the user's own language.</p>
+                </article>
+                <article class="helper-card" data-reveal>
+                    <span class="section-kicker">Why It Matters</span>
+                    <h3>Faster action</h3>
+                    <p>Voice guidance reduces the time spent typing or trying to translate a technical screen.</p>
+                </article>
+                <article class="helper-card" data-reveal>
+                    <span class="section-kicker">Why It Matters</span>
+                    <h3>Useful for elders too</h3>
+                    <p>Older family members can listen to guidance instead of depending only on reading.</p>
+                </article>
+                <article class="helper-card" data-reveal>
+                    <span class="section-kicker">Coverage</span>
+                    <h3>27 official Indian languages</h3>
+                    <p>The system is designed around full official language coverage, not just a few common options.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div class="footer-brand">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span class="brand-copy">
+                        <strong>AgriShield</strong>
+                        <small>Safer farming through simple AI</small>
+                    </span>
+                </a>
+                <p>Multilingual voice support page built to make AI understandable for more farmers.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="fraud-detection.html">Fraud Check</a>
+                <a href="gov-schemes.html">Gov Schemes</a>
+                <a href="crop-analyzer.html">Crop Analyzer</a>
+                <a href="irrigation.html">Irrigation</a>
+                <a href="languages.html">Languages</a>
+                <a href="agri-labs.html">Agri Labs</a>
+            </div>
+
+            <div class="footer-meta">
+                <span>&copy; <span class="js-year"></span> AgriShield</span>
+                <span>Language accessibility for rural users</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

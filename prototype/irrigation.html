@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Smart Irrigation</title>
+    <meta
+        name="description"
+        content="Smart irrigation page with simple water-saving recommendations, rainfall checks, and easy field-level decisions."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body data-page="irrigation">
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="index.html" aria-label="AgriShield home">
+                <span class="brand-mark">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span class="brand-copy">
+                    <strong>AgriShield</strong>
+                    <small>Simple AI for safer farming</small>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                <a data-page-link="home" href="index.html">Home</a>
+                <a data-page-link="fraud" href="fraud-detection.html">Fraud Check</a>
+                <a data-page-link="schemes" href="gov-schemes.html">Scheme Guide</a>
+                <a data-page-link="irrigation" href="irrigation.html">Irrigation</a>
+                <a data-page-link="crop" href="crop-analyzer.html">Crop Analyzer</a>
+                <a data-page-link="languages" href="languages.html">Languages</a>
+                <a data-page-link="labs" href="agri-labs.html">Agri Labs</a>
+            </nav>
+
+            <a class="header-cta" href="crop-analyzer.html">Crop Analyzer</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <div data-reveal>
+                <span class="eyebrow">Irrigation AI / Water Saving / Field Advice</span>
+                <h1>Know when to irrigate and when to wait.</h1>
+                <p>
+                    AgriShield keeps irrigation advice easy: water now, wait for rain, or monitor the field.
+                    That keeps the page useful for real field decisions.
+                </p>
+            </div>
+
+            <div class="panel" data-reveal="scale">
+                <span class="section-kicker">Today's Snapshot</span>
+                <div class="mini-stats">
+                    <div class="mini-stat"><span>Soil moisture</span><strong>42%</strong></div>
+                    <div class="mini-stat"><span>Rain expected</span><strong>12 mm tomorrow</strong></div>
+                    <div class="mini-stat"><span>Water saving</span><strong>38% this week</strong></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="field-grid">
+                <article class="field-card" data-reveal>
+                    <span class="small-pill small-pill--warning">Irrigate Now</span>
+                    <h3>Field B / Zone 3</h3>
+                    <p>Moisture is low. Start a 45-minute drip cycle before evening heat.</p>
+                </article>
+                <article class="field-card" data-reveal>
+                    <span class="small-pill small-pill--safe">Wait</span>
+                    <h3>Field A</h3>
+                    <p>Rain is likely before morning. Skip irrigation and review soil again tomorrow.</p>
+                </article>
+                <article class="field-card" data-reveal>
+                    <span class="small-pill small-pill--warning">Monitor</span>
+                    <h3>Field C</h3>
+                    <p>Still acceptable, but moisture is dropping. Check again in 12 hours.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="guide-grid">
+                <article class="guide-card" data-reveal>
+                    <span class="section-kicker">Easy Rule</span>
+                    <h3>Water only where needed</h3>
+                    <p>AgriShield reduces the habit of watering every field the same way.</p>
+                </article>
+                <article class="guide-card" data-reveal>
+                    <span class="section-kicker">Easy Rule</span>
+                    <h3>Check rain first</h3>
+                    <p>If rain is likely soon, avoid unnecessary watering and save money and effort.</p>
+                </article>
+                <article class="guide-card" data-reveal>
+                    <span class="section-kicker">Easy Rule</span>
+                    <h3>See one clear action</h3>
+                    <p>The farmer should not have to read complex graphs before acting.</p>
+                </article>
+                <article class="guide-card" data-reveal>
+                    <span class="section-kicker">Easy Rule</span>
+                    <h3>Review every day</h3>
+                    <p>Short daily checks are better than overwatering after guessing wrong.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div class="footer-brand">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span class="brand-copy">
+                        <strong>AgriShield</strong>
+                        <small>Safer farming through simple AI</small>
+                    </span>
+                </a>
+                <p>Smart irrigation page focused on easy water decisions for village users.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="fraud-detection.html">Fraud Check</a>
+                <a href="gov-schemes.html">Gov Schemes</a>
+                <a href="crop-analyzer.html">Crop Analyzer</a>
+                <a href="irrigation.html">Irrigation</a>
+                <a href="languages.html">Languages</a>
+                <a href="agri-labs.html">Agri Labs</a>
+            </div>
+
+            <div class="footer-meta">
+                <span>&copy; <span class="js-year"></span> AgriShield</span>
+                <span>Smart irrigation prototype for daily use</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

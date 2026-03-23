@@ -245,8 +245,18 @@ button {
     display: grid;
 }
 
+.guide-shell {
+    min-height: 100vh;
+    display: grid;
+}
+
 .login-story,
 .login-panel {
+    padding: 1.35rem;
+}
+
+.guide-story,
+.guide-panel {
     padding: 1.35rem;
 }
 
@@ -259,6 +269,16 @@ button {
         linear-gradient(180deg, rgba(9, 35, 23, 0.28), rgba(13, 50, 35, 0.8)),
         url("../assests/bg1.jpg") center / cover no-repeat;
 }
+
+    .guide-story {
+        display: grid;
+        gap: 1.3rem;
+        align-content: start;
+        color: #eafff0;
+        background:
+        linear-gradient(180deg, rgba(9, 35, 23, 0.38), rgba(13, 50, 35, 0.84)),
+        url("../assests/bg1.jpg") center / cover no-repeat;
+    }
 
 .login-story__copy h1,
 .section-head h2,
@@ -283,6 +303,20 @@ button {
     font-size: 1.06rem;
     line-height: 1.8;
     color: rgba(234, 255, 240, 0.86);
+}
+
+.guide-story__copy h1 {
+    color: #fff;
+    font-size: clamp(2.2rem, 6vw, 4.1rem);
+    line-height: 1.03;
+    max-width: 12ch;
+}
+
+.guide-story__copy p {
+    max-width: 38rem;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    color: rgba(234, 255, 240, 0.88);
 }
 
 .story-grid {
@@ -404,10 +438,148 @@ button {
     place-items: center;
 }
 
+.guide-panel {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+}
+
 .login-card {
     width: min(32rem, 100%);
     padding: 1.45rem;
     background: rgba(255, 255, 255, 0.86);
+}
+
+.guide-card-main {
+    padding: 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(18px);
+}
+
+.guide-card-main--voice {
+    background: linear-gradient(180deg, rgba(201, 243, 218, 0.18), rgba(255, 255, 255, 0.92));
+}
+
+.guide-step-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.guide-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.9);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.guide-step:hover {
+    transform: translateY(-1px);
+}
+
+.guide-step.is-active {
+    border-color: rgba(42, 173, 95, 0.42);
+    box-shadow: 0 12px 26px rgba(42, 173, 95, 0.12);
+    background: rgba(232, 248, 238, 0.9);
+}
+
+.guide-step__index {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--green-600), var(--teal-500));
+}
+
+.guide-step h3 {
+    margin: 0;
+    color: var(--text-strong);
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+
+.guide-step p {
+    margin: 0.35rem 0 0;
+    color: var(--text-base);
+    line-height: 1.6;
+}
+
+.guide-links-row {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.guide-language-row {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+}
+
+.guide-language-label {
+    color: var(--text-strong);
+    font-weight: 700;
+}
+
+.guide-language-select {
+    width: 100%;
+    min-height: 3.1rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text-strong);
+}
+
+.guide-language-select:focus {
+    outline: none;
+    border-color: rgba(42, 173, 95, 0.28);
+    box-shadow: 0 0 0 4px rgba(42, 173, 95, 0.09);
+}
+
+.voice-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.guide-voice-status {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(235, 247, 239, 0.84), rgba(255, 255, 255, 0.96));
+    color: var(--text-strong);
+    font-weight: 700;
+}
+
+.guide-command-list {
+    margin-top: 0.9rem;
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.guide-command-chip {
+    min-height: 2.6rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.7rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.78);
+    color: var(--text-strong);
+    font-weight: 700;
 }
 
 .section-head {
@@ -1731,6 +1903,10 @@ button {
 }
 
 @media (min-width: 700px) {
+    .guide-command-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .form-grid--double,
     .filters-grid,
     .labour-options-grid,
@@ -1750,6 +1926,15 @@ button {
 }
 
 @media (min-width: 1024px) {
+    .guide-shell {
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    }
+
+    .guide-story,
+    .guide-panel {
+        padding: 2rem;
+    }
+
     .login-shell {
         grid-template-columns: minmax(0, 1.12fr) minmax(24rem, 0.88fr);
     }

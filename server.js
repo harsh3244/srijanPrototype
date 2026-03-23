@@ -404,6 +404,185 @@ async function handleApiRequest(req, res, requestUrl) {
         return;
     }
 
+    if (requestUrl.pathname === "/api/profile") {
+        const session = await getSessionUser(req);
+
+        if (!session) {
+            sendJson(res, 401, { ok: false, message: "Not authenticated." });
+            return;
+        }
+
+        if (req.method === "GET") {
+            const [rows] = await pool.query(
+                "SELECT * FROM farmer_profiles WHERE user_id = ? LIMIT 1",
+                [session.user.id]
+            );
+
+            sendJson(res, 200, {
+                ok: true,
+                profile: rows[0] || null
+            });
+            return;
+        }
+
+        if (req.method === "POST") {
+            const payload = await readJsonBody(req);
+            const profile = sanitizeProfilePayload(payload);
+
+            await pool.query(
+                `
+                INSERT INTO farmer_profiles (
+                    user_id, farmer_name, mobile_number, village, taluka, district, state,
+                    full_address, land_area, main_crop, farming_type, latitude, longitude
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    farmer_name = VALUES(farmer_name),
+                    mobile_number = VALUES(mobile_number),
+                    village = VALUES(village),
+                    taluka = VALUES(taluka),
+                    district = VALUES(district),
+                    state = VALUES(state),
+                    full_address = VALUES(full_address),
+                    land_area = VALUES(land_area),
+                    main_crop = VALUES(main_crop),
+                    farming_type = VALUES(farming_type),
+                    latitude = VALUES(latitude),
+                    longitude = VALUES(longitude),
+                    updated_at = CURRENT_TIMESTAMP
+                `,
+                [
+                    session.user.id,
+                    profile.farmerName,
+                    profile.mobileNumber,
+                    profile.village,
+                    profile.taluka,
+                    profile.district,
+                    profile.state,
+                    profile.fullAddress,
+                    profile.landArea || null,
+                    profile.mainCrop,
+                    profile.farmingType,
+                    profile.latitude || null,
+                    profile.longitude || null
+                ]
+            );
+
+            sendJson(res, 200, { ok: true, profile });
+            return;
+        }
+    }
+
+    if (requestUrl.pathname === "/api/labour/posts") {
+        const session = await getSessionUser(req);
+
+        if (!session) {
+            sendJson(res, 401, { ok: false, message: "Not authenticated." });
+            return;
+        }
+
+        if (req.method === "GET") {
+            const [rows] = await pool.query(
+                `
+                SELECT id, work_type AS workType, labour_count AS labourCount, required_date AS requiredDate,
+                       required_time AS requiredTime, location, notes, created_at AS createdAt
+                FROM labour_posts
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+                `,
+                [session.user.id]
+            );
+
+            sendJson(res, 200, { ok: true, posts: rows });
+            return;
+        }
+
+        if (req.method === "POST") {
+            const payload = await readJsonBody(req);
+            const post = sanitizeLabourPost(payload);
+
+            if (!post.workType || !post.labourCount || !post.requiredDate || !post.requiredTime || !post.location) {
+                sendJson(res, 400, { ok: false, message: "Missing required fields." });
+                return;
+            }
+
+            await pool.query(
+                `
+                INSERT INTO labour_posts (
+                    user_id, work_type, labour_count, required_date, required_time, location, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    session.user.id,
+                    post.workType,
+                    post.labourCount,
+                    post.requiredDate,
+                    post.requiredTime,
+                    post.location,
+                    post.notes || null
+                ]
+            );
+
+            sendJson(res, 201, { ok: true });
+            return;
+        }
+    }
+
+    if (requestUrl.pathname === "/api/chat/history") {
+        const session = await getSessionUser(req);
+
+        if (!session) {
+            sendJson(res, 401, { ok: false, message: "Not authenticated." });
+            return;
+        }
+
+        const [rows] = await pool.query(
+            `
+            SELECT role, message, created_at AS createdAt
+            FROM chat_messages
+            WHERE user_id = ?
+            ORDER BY created_at ASC
+            LIMIT 200
+            `,
+            [session.user.id]
+        );
+
+        sendJson(res, 200, { ok: true, messages: rows });
+        return;
+    }
+
+    if (requestUrl.pathname === "/api/chat/send" && req.method === "POST") {
+        const session = await getSessionUser(req);
+
+        if (!session) {
+            sendJson(res, 401, { ok: false, message: "Not authenticated." });
+            return;
+        }
+
+        const payload = await readJsonBody(req);
+        const message = cleanText(payload.message, 2000);
+        const botReply = cleanText(payload.botReply, 2000);
+
+        if (!message) {
+            sendJson(res, 400, { ok: false, message: "Message is required." });
+            return;
+        }
+
+        await pool.query(
+            "INSERT INTO chat_messages (user_id, role, message) VALUES (?, 'user', ?)",
+            [session.user.id, message]
+        );
+
+        if (botReply) {
+            await pool.query(
+                "INSERT INTO chat_messages (user_id, role, message) VALUES (?, 'bot', ?)",
+                [session.user.id, botReply]
+            );
+        }
+
+        sendJson(res, 201, { ok: true });
+        return;
+    }
+
     sendJson(res, 404, {
         ok: false,
         message: "API route not found."
@@ -687,6 +866,7 @@ async function getSessionUser(req) {
         SELECT
             user_sessions.id AS sessionId,
             users.id,
+            users.username,
             users.full_name AS fullName,
             users.email,
             users.phone
@@ -707,6 +887,7 @@ async function getSessionUser(req) {
         sessionId: rows[0].sessionId,
         user: {
             id: rows[0].id,
+            username: rows[0].username,
             fullName: rows[0].fullName,
             email: rows[0].email,
             phone: rows[0].phone

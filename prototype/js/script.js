@@ -1,7 +1,8 @@
 (function () {
     const STORAGE_KEYS = {
         users: "agrishield_auth_users",
-        session: "agrishield_auth_session"
+        session: "agrishield_auth_session",
+        uiLanguage: "agrishield_ui_language"
     };
 
     const USER_STORAGE_KEYS = {
@@ -13,30 +14,177 @@
         guideOnboardingSeen: "agrishield_guide_onboarding_seen"
     };
 
-    const VIEW_META = {
-        home: {
-            title: "Home",
-            subtitle: "Save farmer details and unlock labour and scheme recommendations."
+    const SUPPORTED_UI_LANGUAGES = ["en", "hi", "mr"];
+
+    const VIEW_META_BY_LANGUAGE = {
+        en: {
+            home: {
+                title: "Home",
+                subtitle: "Save farmer details and unlock labour and scheme recommendations."
+            },
+            labour: {
+                title: "Labour Finding",
+                subtitle: "Browse available labour, use filters, and post labour requirements."
+            },
+            schemes: {
+                title: "Government Schemes",
+                subtitle: "Review scheme matches based on land size, crop type, and farmer profile."
+            }
         },
-        labour: {
-            title: "Labour Finding",
-            subtitle: "Browse available labour, use filters, and post labour requirements."
+        hi: {
+            home: {
+                title: "होम",
+                subtitle: "किसान विवरण सेव करें और लेबर व योजना सुझाव प्राप्त करें।"
+            },
+            labour: {
+                title: "लेबर खोज",
+                subtitle: "उपलब्ध लेबर देखें, फिल्टर लगाएं और अपनी जरूरत पोस्ट करें।"
+            },
+            schemes: {
+                title: "सरकारी योजनाएं",
+                subtitle: "जमीन, फसल और प्रोफाइल के आधार पर योजना मिलान देखें।"
+            }
         },
-        schemes: {
-            title: "Government Schemes",
-            subtitle: "Review scheme matches based on land size, crop type, and farmer profile."
+        mr: {
+            home: {
+                title: "मुख्यपृष्ठ",
+                subtitle: "शेतकरी माहिती जतन करा आणि मजूर व योजना सूचना मिळवा."
+            },
+            labour: {
+                title: "मजूर शोध",
+                subtitle: "उपलब्ध मजूर पहा, फिल्टर वापरा आणि गरज पोस्ट करा."
+            },
+            schemes: {
+                title: "शासकीय योजना",
+                subtitle: "जमीन, पीक आणि प्रोफाइलनुसार योजना जुळणी पहा."
+            }
+        }
+    };
+
+    const UI_COPY = {
+        en: {
+            common: {
+                languageLabel: "Language"
+            },
+            login: {
+                storyTagline: "Labour support assistant",
+                storyEyebrow: "Best Labour Support",
+                storyTitle: "Simple login for a farmer-first labour support dashboard.",
+                storyDesc: "Registered users can sign in with a username, password, and a small math CAPTCHA. This keeps the prototype easy to demo without adding any backend and opens role-based Home, Labour Finding, Tutorial, and Government Schemes dashboard.",
+                sectionEyebrow: "Login",
+                sectionTitle: "Enter your dashboard",
+                sectionDesc: "Use your registered username and password, then solve the CAPTCHA to continue."
+            },
+            register: {
+                storyTagline: "Labour support assistant",
+                storyEyebrow: "Best Labour Support",
+                storyTitle: "Create a simple account and enter the farmer labour support platform.",
+                storyDesc: "Registration helps us understand your needs. After that, farmer or labour users can log in, save profile details, and use Home, Labour Finding, Tutorial, and Government Schemes.",
+                sectionEyebrow: "Register",
+                sectionTitle: "Create your account",
+                sectionDesc: "Fill the fields below and save the user in localStorage for this prototype."
+            },
+            dashboard: {
+                topbarKicker: "Farmer Labour Support Platform",
+                sidebarTagline: "Farmer support dashboard",
+                navHome: "Home",
+                navLabour: "Labour Finding",
+                navSchemes: "Government Schemes",
+                navGuide: "App Guide",
+                guideButton: "Guide",
+                logoutButton: "Logout",
+                homeHeroLead: "Save farmer details first, choose the farm location using search or the map, and then use the dashboard for labour support, guided tutorial help, and scheme discovery.",
+                heroExplore: "Explore Labour",
+                heroSchemes: "View Schemes"
+            }
+        },
+        hi: {
+            common: {
+                languageLabel: "भाषा"
+            },
+            login: {
+                storyTagline: "लेबर सहायता सहायक",
+                storyEyebrow: "बेहतर लेबर सहायता",
+                storyTitle: "किसान-प्रथम लेबर सपोर्ट डैशबोर्ड के लिए सरल लॉगिन।",
+                storyDesc: "रजिस्टर्ड उपयोगकर्ता यूज़रनेम, पासवर्ड और छोटे गणित CAPTCHA से लॉगिन कर सकते हैं। इससे बिना बैकएंड के डेमो आसान रहता है और होम, लेबर फाइंडिंग, ट्यूटोरियल और सरकारी योजनाएं खुलती हैं।",
+                sectionEyebrow: "लॉगिन",
+                sectionTitle: "डैशबोर्ड में प्रवेश करें",
+                sectionDesc: "अपना यूज़रनेम और पासवर्ड दर्ज करें, फिर CAPTCHA हल करें।"
+            },
+            register: {
+                storyTagline: "लेबर सहायता सहायक",
+                storyEyebrow: "बेहतर लेबर सहायता",
+                storyTitle: "सरल अकाउंट बनाएं और किसान-लेबर प्लेटफॉर्म में प्रवेश करें।",
+                storyDesc: "रजिस्ट्रेशन से आपकी जरूरत समझने में मदद मिलती है। उसके बाद किसान या लेबर उपयोगकर्ता लॉगिन करके प्रोफाइल सेव कर सकते हैं और सभी सेक्शन उपयोग कर सकते हैं।",
+                sectionEyebrow: "रजिस्टर",
+                sectionTitle: "अपना खाता बनाएं",
+                sectionDesc: "नीचे की जानकारी भरें और इस प्रोटोटाइप के लिए यूज़र सेव करें।"
+            },
+            dashboard: {
+                topbarKicker: "किसान लेबर सहायता प्लेटफॉर्म",
+                sidebarTagline: "किसान सहायता डैशबोर्ड",
+                navHome: "होम",
+                navLabour: "लेबर खोज",
+                navSchemes: "सरकारी योजनाएं",
+                navGuide: "ऐप गाइड",
+                guideButton: "गाइड",
+                logoutButton: "लॉगआउट",
+                homeHeroLead: "पहले किसान विवरण सेव करें, खोज या मैप से लोकेशन चुनें, फिर लेबर सहायता, ट्यूटोरियल और योजना खोज का उपयोग करें।",
+                heroExplore: "लेबर देखें",
+                heroSchemes: "योजनाएं देखें"
+            }
+        },
+        mr: {
+            common: {
+                languageLabel: "भाषा"
+            },
+            login: {
+                storyTagline: "मजूर सहाय्य सहाय्यक",
+                storyEyebrow: "उत्तम मजूर सहाय्य",
+                storyTitle: "शेतकरी-केंद्रित मजूर सहाय्य डॅशबोर्डसाठी सोपे लॉगिन.",
+                storyDesc: "नोंदणीकृत वापरकर्ते युजरनेम, पासवर्ड आणि छोट्या CAPTCHAने लॉगिन करू शकतात. त्यामुळे बॅकएंडशिवाय डेमो सोपा राहतो आणि होम, मजूर शोध, ट्यूटोरियल आणि शासकीय योजना खुलतात.",
+                sectionEyebrow: "लॉगिन",
+                sectionTitle: "डॅशबोर्डमध्ये प्रवेश करा",
+                sectionDesc: "नोंदणीकृत युजरनेम आणि पासवर्ड वापरा, नंतर CAPTCHA सोडवा."
+            },
+            register: {
+                storyTagline: "मजूर सहाय्य सहाय्यक",
+                storyEyebrow: "उत्तम मजूर सहाय्य",
+                storyTitle: "सोपे खाते तयार करा आणि शेतकरी-मजूर प्लॅटफॉर्ममध्ये प्रवेश करा.",
+                storyDesc: "नोंदणीमुळे तुमच्या गरजा समजतात. त्यानंतर शेतकरी किंवा मजूर वापरकर्ते लॉगिन करून प्रोफाइल जतन करू शकतात आणि सर्व सेक्शन वापरू शकतात.",
+                sectionEyebrow: "नोंदणी",
+                sectionTitle: "तुमचे खाते तयार करा",
+                sectionDesc: "खालील माहिती भरा आणि या प्रोटोटाइपसाठी वापरकर्ता जतन करा."
+            },
+            dashboard: {
+                topbarKicker: "शेतकरी मजूर सहाय्य मंच",
+                sidebarTagline: "शेतकरी सहाय्य डॅशबोर्ड",
+                navHome: "मुख्यपृष्ठ",
+                navLabour: "मजूर शोध",
+                navSchemes: "शासकीय योजना",
+                navGuide: "अॅप मार्गदर्शक",
+                guideButton: "मार्गदर्शक",
+                logoutButton: "बाहेर पडा",
+                homeHeroLead: "प्रथम शेतकरी माहिती जतन करा, शोध किंवा नकाशातून ठिकाण निवडा, आणि नंतर मजूर सहाय्य, ट्यूटोरियल व योजना शोध वापरा.",
+                heroExplore: "मजूर पहा",
+                heroSchemes: "योजना पहा"
+            }
         }
     };
 
     const DEMO_USER = {
+        fullName: "Demo Farmer",
         username: "demo_farmer",
         mobile: "9876543210",
+        role: "farmer",
         password: "demo1234"
     };
 
     const LABOUR_HEAVY_CROPS = ["sugarcane", "rice", "cotton", "tomato", "onion"];
     const state = {
         session: null,
+        userRole: "farmer",
+        uiLanguage: "en",
         profile: null,
         labourPosts: [],
         activeView: "home",
@@ -55,6 +203,10 @@
     const page = document.body.dataset.page;
 
     document.addEventListener("DOMContentLoaded", () => {
+        state.uiLanguage = normalizeUiLanguage(getStoredValue(STORAGE_KEYS.uiLanguage, "en"));
+        initLanguageSelectors();
+        applyPageTranslations();
+
         if (page === "login") {
             initLoginPage();
         }
@@ -68,6 +220,336 @@
         }
 
     });
+
+    function initLanguageSelectors() {
+        const selects = document.querySelectorAll("[data-ui-language-select]");
+
+        if (!selects.length) {
+            return;
+        }
+
+        selects.forEach((select) => {
+            select.value = state.uiLanguage;
+
+            select.addEventListener("change", () => {
+                const nextLanguage = normalizeUiLanguage(select.value);
+
+                state.uiLanguage = nextLanguage;
+                setStoredValue(STORAGE_KEYS.uiLanguage, nextLanguage);
+                selects.forEach((item) => {
+                    item.value = nextLanguage;
+                });
+
+                applyPageTranslations();
+
+                if (page === "dashboard") {
+                    refreshGlobalUI();
+                    setActiveView(state.activeView);
+                }
+            });
+        });
+    }
+
+    function applyPageTranslations() {
+        document.documentElement.lang = state.uiLanguage;
+
+        if (page === "login") {
+            applyLoginPageTranslations();
+            return;
+        }
+
+        if (page === "register") {
+            applyRegisterPageTranslations();
+            return;
+        }
+
+        if (page === "dashboard") {
+            applyDashboardStaticTranslations();
+        }
+    }
+
+    function applyLoginPageTranslations() {
+        const copy = getUiCopy("login");
+        setText(".global-language-label", getUiCopy("common").languageLabel);
+        setText(".login-story .brand-badge small", copy.storyTagline);
+        setText(".login-story__copy .eyebrow", copy.storyEyebrow);
+        setText(".login-story__copy h1", copy.storyTitle);
+        setText(".login-story__copy p", copy.storyDesc);
+        setText(".login-panel .section-head .eyebrow", copy.sectionEyebrow);
+        setText(".login-panel .section-head h2", copy.sectionTitle);
+        setText(".login-panel .section-head p", copy.sectionDesc);
+        setAuthFormLabels("login");
+    }
+
+    function applyRegisterPageTranslations() {
+        const copy = getUiCopy("register");
+        setText(".global-language-label", getUiCopy("common").languageLabel);
+        setText(".login-story .brand-badge small", copy.storyTagline);
+        setText(".login-story__copy .eyebrow", copy.storyEyebrow);
+        setText(".login-story__copy h1", copy.storyTitle);
+        setText(".login-story__copy p", copy.storyDesc);
+        setText(".login-panel .section-head .eyebrow", copy.sectionEyebrow);
+        setText(".login-panel .section-head h2", copy.sectionTitle);
+        setText(".login-panel .section-head p", copy.sectionDesc);
+        setAuthFormLabels("register");
+    }
+
+    function applyDashboardStaticTranslations() {
+        const copy = getUiCopy("dashboard");
+
+        setText(".global-language-row--topbar .global-language-label", getUiCopy("common").languageLabel);
+        setText(".brand-badge--sidebar small", copy.sidebarTagline);
+        setText(".topbar__kicker", copy.topbarKicker);
+        setText('[data-nav="home"] span', copy.navHome);
+        setText('[data-nav="labour"] span', copy.navLabour);
+        setText('[data-nav="schemes"] span', copy.navSchemes);
+        setText("[data-open-guide] span", copy.navGuide);
+
+        const guideButtons = document.querySelectorAll("[data-open-guide]");
+        if (guideButtons.length > 1) {
+            const topGuideLabel = guideButtons[guideButtons.length - 1].querySelector("span");
+            if (topGuideLabel) {
+                topGuideLabel.textContent = copy.guideButton;
+            }
+        }
+
+        setButtonText("#logout-button", copy.logoutButton);
+        setText(".hero-panel__copy > p", copy.homeHeroLead);
+        setButtonText('[data-jump-view="labour"]', copy.heroExplore);
+        setButtonText('[data-jump-view="schemes"]', copy.heroSchemes);
+    }
+
+    function setAuthFormLabels(authPage) {
+        if (authPage === "login") {
+            setFieldLabel("login-form", "role", getUiText("loginLabelRole", "Login As"));
+            setFieldLabel("login-form", "username", getUiText("loginLabelUsername", "Username"));
+            setFieldLabel("login-form", "password", getUiText("loginLabelPassword", "Password"));
+            setFieldLabel("login-form", "captchaAnswer", getUiText("loginLabelCaptchaAnswer", "CAPTCHA Answer"));
+            setText("#login-form .field:nth-of-type(4) > span", getUiText("loginLabelCaptcha", "CAPTCHA"));
+            setOptionLabel("login-form", "role", "", getUiText("rolePlaceholder", "Select role"));
+            setOptionLabel("login-form", "role", "farmer", getUiText("roleFarmer", "Farmer"));
+            setOptionLabel("login-form", "role", "labour", getUiText("roleLabour", "Labour"));
+            setPlaceholder("login-form", "username", getUiText("placeholderUsername", "Enter your username"));
+            setPlaceholder("login-form", "password", getUiText("placeholderPassword", "Enter your password"));
+            setPlaceholder("login-form", "captchaAnswer", getUiText("placeholderCaptcha", "Enter the answer"));
+            setButtonText("#login-form button[type='submit']", getUiText("loginButton", "Login"));
+            setButtonText("#demo-login-button", getUiText("demoLoginButton", "Fill Demo Login"));
+            setButtonText("#captcha-refresh", getUiText("captchaRefreshButton", "Refresh"));
+            setInlineLeadText(".auth-switch", getUiText("loginSwitchLead", "Don’t have an account?"));
+            setText(".auth-switch a", getUiText("loginSwitchLink", "Register here"));
+            setText(".login-note p", getUiText("loginNote", "User data is stored only in localStorage for the prototype. No backend or encryption is used."));
+        }
+
+        if (authPage === "register") {
+            setFieldLabel("register-form", "fullName", getUiText("registerLabelFullName", "Full Name"));
+            setFieldLabel("register-form", "role", getUiText("registerLabelRole", "Register As"));
+            setFieldLabel("register-form", "mobile", getUiText("registerLabelMobile", "Mobile Number"));
+            setFieldLabel("register-form", "username", getUiText("registerLabelUsername", "Username"));
+            setFieldLabel("register-form", "password", getUiText("registerLabelPassword", "Password"));
+            setFieldLabel("register-form", "confirmPassword", getUiText("registerLabelConfirmPassword", "Confirm Password"));
+            setOptionLabel("register-form", "role", "", getUiText("rolePlaceholder", "Select role"));
+            setOptionLabel("register-form", "role", "farmer", getUiText("roleFarmer", "Farmer"));
+            setOptionLabel("register-form", "role", "labour", getUiText("roleLabour", "Labour"));
+            setPlaceholder("register-form", "fullName", getUiText("placeholderFullName", "Enter your full name"));
+            setPlaceholder("register-form", "mobile", getUiText("placeholderMobile", "10-digit mobile number"));
+            setPlaceholder("register-form", "username", getUiText("placeholderCreateUsername", "Create a username"));
+            setPlaceholder("register-form", "password", getUiText("placeholderCreatePassword", "Create a password"));
+            setPlaceholder("register-form", "confirmPassword", getUiText("placeholderConfirmPassword", "Re-enter password"));
+            setButtonText("#register-form button[type='submit']", getUiText("registerButton", "Register"));
+            setInlineLeadText(".auth-switch", getUiText("registerSwitchLead", "Already have an account?"));
+            setText(".auth-switch a", getUiText("registerSwitchLink", "Login here"));
+        }
+    }
+
+    function getUiCopy(section) {
+        const languagePack = UI_COPY[state.uiLanguage] || UI_COPY.en;
+        const defaultPack = UI_COPY.en;
+
+        return {
+            ...(defaultPack[section] || {}),
+            ...(languagePack[section] || {})
+        };
+    }
+
+    function getUiText(key, fallback) {
+        const fallbackByLanguage = {
+            en: {
+                loginLabelRole: "Login As",
+                loginLabelUsername: "Username",
+                loginLabelPassword: "Password",
+                loginLabelCaptchaAnswer: "CAPTCHA Answer",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "Select role",
+                roleFarmer: "Farmer",
+                roleLabour: "Labour",
+                placeholderUsername: "Enter your username",
+                placeholderPassword: "Enter your password",
+                placeholderCaptcha: "Enter the answer",
+                loginButton: "Login",
+                demoLoginButton: "Fill Demo Login",
+                captchaRefreshButton: "Refresh",
+                loginSwitchLead: "Don’t have an account?",
+                loginSwitchLink: "Register here",
+                loginNote: "User data is stored only in localStorage for the prototype. No backend or encryption is used.",
+                registerLabelFullName: "Full Name",
+                registerLabelRole: "Register As",
+                registerLabelMobile: "Mobile Number",
+                registerLabelUsername: "Username",
+                registerLabelPassword: "Password",
+                registerLabelConfirmPassword: "Confirm Password",
+                placeholderFullName: "Enter your full name",
+                placeholderMobile: "10-digit mobile number",
+                placeholderCreateUsername: "Create a username",
+                placeholderCreatePassword: "Create a password",
+                placeholderConfirmPassword: "Re-enter password",
+                registerButton: "Register",
+                registerSwitchLead: "Already have an account?",
+                registerSwitchLink: "Login here"
+            },
+            hi: {
+                loginLabelRole: "लॉगिन प्रकार",
+                loginLabelUsername: "यूज़रनेम",
+                loginLabelPassword: "पासवर्ड",
+                loginLabelCaptchaAnswer: "CAPTCHA उत्तर",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "भूमिका चुनें",
+                roleFarmer: "किसान",
+                roleLabour: "लेबर",
+                placeholderUsername: "अपना यूज़रनेम दर्ज करें",
+                placeholderPassword: "अपना पासवर्ड दर्ज करें",
+                placeholderCaptcha: "उत्तर दर्ज करें",
+                loginButton: "लॉगिन",
+                demoLoginButton: "डेमो लॉगिन भरें",
+                captchaRefreshButton: "रिफ्रेश",
+                loginSwitchLead: "खाता नहीं है?",
+                loginSwitchLink: "यहां रजिस्टर करें",
+                loginNote: "इस प्रोटोटाइप में डेटा केवल localStorage में सेव होता है। कोई बैकएंड या एन्क्रिप्शन उपयोग नहीं है।",
+                registerLabelFullName: "पूरा नाम",
+                registerLabelRole: "रजिस्टर प्रकार",
+                registerLabelMobile: "मोबाइल नंबर",
+                registerLabelUsername: "यूज़रनेम",
+                registerLabelPassword: "पासवर्ड",
+                registerLabelConfirmPassword: "पासवर्ड पुष्टि",
+                placeholderFullName: "अपना पूरा नाम दर्ज करें",
+                placeholderMobile: "10 अंकों का मोबाइल नंबर",
+                placeholderCreateUsername: "यूज़रनेम बनाएं",
+                placeholderCreatePassword: "पासवर्ड बनाएं",
+                placeholderConfirmPassword: "पासवर्ड फिर से दर्ज करें",
+                registerButton: "रजिस्टर",
+                registerSwitchLead: "पहले से खाता है?",
+                registerSwitchLink: "यहां लॉगिन करें"
+            },
+            mr: {
+                loginLabelRole: "लॉगिन प्रकार",
+                loginLabelUsername: "युजरनेम",
+                loginLabelPassword: "पासवर्ड",
+                loginLabelCaptchaAnswer: "CAPTCHA उत्तर",
+                loginLabelCaptcha: "CAPTCHA",
+                rolePlaceholder: "भूमिका निवडा",
+                roleFarmer: "शेतकरी",
+                roleLabour: "मजूर",
+                placeholderUsername: "तुमचा युजरनेम टाका",
+                placeholderPassword: "तुमचा पासवर्ड टाका",
+                placeholderCaptcha: "उत्तर टाका",
+                loginButton: "लॉगिन",
+                demoLoginButton: "डेमो लॉगिन भरा",
+                captchaRefreshButton: "रीफ्रेश",
+                loginSwitchLead: "खाते नाही?",
+                loginSwitchLink: "इथे नोंदणी करा",
+                loginNote: "या प्रोटोटाइपमध्ये डेटा फक्त localStorage मध्ये साठवला जातो. कोणताही बॅकएंड किंवा एन्क्रिप्शन वापरलेले नाही.",
+                registerLabelFullName: "पूर्ण नाव",
+                registerLabelRole: "नोंदणी प्रकार",
+                registerLabelMobile: "मोबाइल नंबर",
+                registerLabelUsername: "युजरनेम",
+                registerLabelPassword: "पासवर्ड",
+                registerLabelConfirmPassword: "पासवर्ड पुष्टी",
+                placeholderFullName: "तुमचे पूर्ण नाव टाका",
+                placeholderMobile: "10 अंकी मोबाइल नंबर",
+                placeholderCreateUsername: "युजरनेम तयार करा",
+                placeholderCreatePassword: "पासवर्ड तयार करा",
+                placeholderConfirmPassword: "पासवर्ड पुन्हा टाका",
+                registerButton: "नोंदणी",
+                registerSwitchLead: "आधीच खाते आहे?",
+                registerSwitchLink: "इथे लॉगिन करा"
+            }
+        };
+
+        const selectedMap = fallbackByLanguage[state.uiLanguage] || fallbackByLanguage.en;
+        return selectedMap[key] || fallbackByLanguage.en[key] || fallback || "";
+    }
+
+    function normalizeUiLanguage(value) {
+        const languageCode = cleanText(value).toLowerCase();
+        return SUPPORTED_UI_LANGUAGES.includes(languageCode) ? languageCode : "en";
+    }
+
+    function setFieldLabel(formId, fieldName, labelText) {
+        const control = document.querySelector(`#${formId} [name='${fieldName}']`);
+        const label = control?.closest("label")?.querySelector("span");
+        if (label) {
+            label.textContent = labelText;
+        }
+    }
+
+    function setPlaceholder(formId, fieldName, placeholderText) {
+        const control = document.querySelector(`#${formId} [name='${fieldName}']`);
+        if (control && "placeholder" in control) {
+            control.placeholder = placeholderText;
+        }
+    }
+
+    function setOptionLabel(formId, fieldName, value, text) {
+        const option = document.querySelector(`#${formId} [name='${fieldName}'] option[value='${value}']`);
+        if (option) {
+            option.textContent = text;
+        }
+    }
+
+    function setButtonText(selector, text) {
+        const button = document.querySelector(selector);
+
+        if (!button) {
+            return;
+        }
+
+        const labelNode = Array.from(button.childNodes)
+            .find((node) => node.nodeType === Node.TEXT_NODE && cleanText(node.textContent));
+
+        if (labelNode) {
+            labelNode.textContent = ` ${text}`;
+            return;
+        }
+
+        const spanNode = button.querySelector("span:not(.icon-badge)");
+        if (spanNode) {
+            spanNode.textContent = text;
+            return;
+        }
+
+        if (button.querySelector("i")) {
+            button.append(document.createTextNode(` ${text}`));
+            return;
+        }
+
+        button.textContent = text;
+    }
+
+    function setInlineLeadText(selector, text) {
+        const node = document.querySelector(selector);
+
+        if (!node) {
+            return;
+        }
+
+        const leadNode = Array.from(node.childNodes)
+            .find((child) => child.nodeType === Node.TEXT_NODE && cleanText(child.textContent));
+
+        if (!leadNode) {
+            return;
+        }
+
+        leadNode.textContent = `\n                    ${text}\n                    `;
+    }
 
     function initLoginPage() {
         if (hasActiveSession()) {
@@ -139,13 +621,15 @@
 
             const session = {
                 isLoggedIn: true,
+                role: "farmer",
+                fullName: user.fullName || user.username,
                 username: user.username,
                 mobile: user.mobile,
                 loginAt: new Date().toISOString()
             };
 
             setStoredValue(STORAGE_KEYS.session, session);
-            setStoredValue(getUserStorageKey(USER_STORAGE_KEYS.activeView, user.username), "home");
+            setStoredValue(getUserStorageKey(USER_STORAGE_KEYS.activeView, user.username, "farmer"), "home");
             clearAuthFeedback(feedback);
             setAuthFeedback(feedback, "success", "Login successful. Redirecting to dashboard...");
             showToast("Login successful.");
@@ -173,6 +657,7 @@
         clearAuthFeedback(feedback);
 
         demoRegisterButton?.addEventListener("click", () => {
+            registerForm.elements.fullName.value = DEMO_USER.fullName;
             registerForm.elements.username.value = DEMO_USER.username;
             registerForm.elements.mobile.value = DEMO_USER.mobile;
             registerForm.elements.password.value = DEMO_USER.password;
@@ -187,12 +672,13 @@
             event.preventDefault();
 
             const formData = new FormData(registerForm);
+            const fullName = cleanText(formData.get("fullName"));
             const username = cleanText(formData.get("username"));
             const mobile = cleanNumber(formData.get("mobile"));
             const password = String(formData.get("password") || "");
             const confirmPassword = String(formData.get("confirmPassword") || "");
 
-            if (!username || !mobile || !password || !confirmPassword) {
+            if (!fullName || !username || !mobile || !password || !confirmPassword) {
                 setAuthFeedback(feedback, "error", "All registration fields are required.");
                 showToast("Fill all registration fields.");
                 return;
@@ -226,6 +712,8 @@
             const users = getUsers();
 
             users.push({
+                fullName,
+                role: "farmer",
                 username,
                 usernameKey: normalizeUsername(username),
                 mobile,
@@ -253,6 +741,7 @@
         }
 
         state.session = session;
+        state.userRole = "farmer";
         state.profile = getUserStoredValue(USER_STORAGE_KEYS.profile, {});
         state.labourPosts = getUserStoredValue(USER_STORAGE_KEYS.labourPosts, []);
         state.activeView = getUserStoredValue(USER_STORAGE_KEYS.activeView, "home");
@@ -863,24 +1352,39 @@
     }
 
     function bindHomeSection() {
-        const form = document.getElementById("farmer-details-form");
+        const farmerForm = document.getElementById("farmer-details-form");
+        const labourForm = document.getElementById("labour-details-form");
+        const activeForm = state.userRole === "labour" ? labourForm : farmerForm;
 
-        if (!form) {
+        if (!activeForm) {
             return;
         }
 
-        fillFormWithProfile(form, state.profile);
-        prefillHomeFormDefaults(form);
-        initLocationPicker(form);
-        bindLocationSearch(form);
+        if (farmerForm) {
+            farmerForm.hidden = state.userRole !== "farmer";
+        }
 
-        form.addEventListener("submit", (event) => {
+        if (labourForm) {
+            labourForm.hidden = state.userRole !== "labour";
+        }
+
+        fillFormWithProfile(activeForm, state.profile);
+        prefillHomeFormDefaults(activeForm);
+
+        if (state.userRole === "farmer") {
+            initLocationPicker(activeForm);
+            bindLocationSearch(activeForm);
+        }
+
+        activeForm.addEventListener("submit", (event) => {
             event.preventDefault();
 
-            const profile = readProfileFromForm(form);
+            const profile = readProfileFromForm(activeForm);
 
-            if (profile.farmerName.length < 2) {
-                showToast("Enter a valid farmer name.");
+            const primaryName = state.userRole === "labour" ? profile.workerName : profile.farmerName;
+
+            if (cleanText(primaryName).length < 2) {
+                showToast(`Enter a valid ${state.userRole === "labour" ? "worker" : "farmer"} name.`);
                 return;
             }
 
@@ -892,12 +1396,14 @@
             state.profile = profile;
             setUserStoredValue(USER_STORAGE_KEYS.profile, profile);
             refreshGlobalUI();
-            syncMapSelectionFromProfile(profile);
+            if (state.userRole === "farmer") {
+                syncMapSelectionFromProfile(profile);
+            }
             renderLabourCards();
             renderMatchedLabourSuggestions();
             renderSchemesView();
             prefillLabourFormDefaults(document.getElementById("labour-need-form"));
-            showToast("Farmer details saved successfully.");
+            showToast(`${state.userRole === "labour" ? "Labour profile" : "Farmer details"} saved successfully.`);
         });
 
         refreshHomeSection();
@@ -1017,18 +1523,22 @@
     }
 
     function refreshTopbarProfile() {
-        const farmerName = state.profile?.farmerName || state.session?.username || "Farmer";
+        const displayName = state.userRole === "labour"
+            ? state.profile?.workerName || state.session?.fullName || state.session?.username || "Labour"
+            : state.profile?.farmerName || state.session?.fullName || state.session?.username || "Farmer";
         const profileMeta = state.profile?.district
             ? `${state.profile.district}${state.profile.state ? `, ${state.profile.state}` : ""}`
+            : state.profile?.currentLocation
+                ? state.profile.currentLocation
             : state.profile?.village
                 ? `${state.profile.village}${state.profile.state ? `, ${state.profile.state}` : ""}`
             : state.session?.mobile
                 ? `Mobile: ${state.session.mobile}`
                 : "Authenticated user";
 
-        setText("[data-topbar-name]", farmerName);
+        setText("[data-topbar-name]", displayName);
         setText("[data-topbar-meta]", profileMeta);
-        setText("[data-profile-avatar]", getInitials(farmerName));
+        setText("[data-profile-avatar]", getInitials(displayName));
     }
 
     function refreshAlertCount() {
@@ -1039,7 +1549,8 @@
     }
 
     function setActiveView(viewKey) {
-        state.activeView = VIEW_META[viewKey] ? viewKey : "home";
+        const viewMetaByLanguage = VIEW_META_BY_LANGUAGE[state.uiLanguage] || VIEW_META_BY_LANGUAGE.en;
+        state.activeView = viewMetaByLanguage[viewKey] ? viewKey : "home";
         setUserStoredValue(USER_STORAGE_KEYS.activeView, state.activeView);
 
         document.querySelectorAll("[data-nav]").forEach((button) => {
@@ -1050,8 +1561,8 @@
             section.classList.toggle("is-active", section.dataset.view === state.activeView);
         });
 
-        setText("[data-page-title]", VIEW_META[state.activeView].title);
-        setText("[data-page-subtitle]", VIEW_META[state.activeView].subtitle);
+        setText("[data-page-title]", viewMetaByLanguage[state.activeView].title);
+        setText("[data-page-subtitle]", viewMetaByLanguage[state.activeView].subtitle);
 
         if (state.activeView === "home" && mapState.instance) {
             window.setTimeout(() => {
@@ -1070,20 +1581,40 @@
     }
 
     function refreshHomeSection() {
-        const name = state.profile?.farmerName || state.session?.username || "Farmer";
-        const recommendations = buildRecommendations(state.profile);
+        const name = state.userRole === "labour"
+            ? state.profile?.workerName || state.session?.fullName || state.session?.username || "Labour"
+            : state.profile?.farmerName || state.session?.fullName || state.session?.username || "Farmer";
+        const isFarmerRole = state.userRole === "farmer";
+        const homeText = getHomeTextPack(isFarmerRole);
+        const recommendations = buildRecommendations(state.profile, state.userRole);
         const relevantSchemes = getRelevantSchemes(state.profile);
         const nearbyLabourers = getNearbyLabourers(state.profile);
         const summaryItems = buildProfileSummary(state.profile);
 
-        setText("[data-home-welcome]", `Welcome ${name}, your farmer setup dashboard is ready.`);
-        setText("[data-stat-name]", state.profile?.farmerName || "Not saved yet");
-        setText("[data-stat-crop]", state.profile?.mainCrop || "Profile needed");
-        setText("[data-stat-land]", state.profile?.landArea ? `${state.profile.landArea} acres` : "Profile needed");
-        setText("[data-stat-schemes]", `${relevantSchemes.length} matches`);
-        setText("[data-profile-state]", state.profile?.farmerName ? "Profile saved on this device" : "Complete the form for personalized help");
+        setText("[data-home-eyebrow]", homeText.homeEyebrow);
+        setText("[data-home-welcome]", homeText.welcomeTemplate.replace("{name}", name));
+        setText("[data-stat-name-label]", homeText.statNameLabel);
+        setText("[data-stat-crop-label]", homeText.statCropLabel);
+        setText("[data-stat-land-label]", homeText.statLandLabel);
+        setText("[data-stat-schemes-label]", homeText.statSchemesLabel);
+        setText("[data-stat-name]", isFarmerRole ? (state.profile?.farmerName || homeText.notSaved) : (state.profile?.workerName || homeText.notSaved));
+        setText("[data-stat-crop]", isFarmerRole ? (state.profile?.mainCrop || homeText.profileNeeded) : (state.profile?.preferredWorkType || homeText.profileNeeded));
+        setText("[data-stat-land]", isFarmerRole
+            ? (state.profile?.landArea ? `${state.profile.landArea} ${homeText.acresUnit}` : homeText.profileNeeded)
+            : (state.profile?.experienceYears ? `${state.profile.experienceYears} ${homeText.yearsUnit}` : homeText.profileNeeded));
+        setText("[data-stat-schemes]", `${relevantSchemes.length} ${homeText.matchesUnit}`);
+        setText("[data-profile-form-kicker]", homeText.profileKicker);
+        setText("[data-profile-form-title]", homeText.profileTitle);
+        setText("[data-profile-form-desc]", homeText.profileDesc);
+        setText("[data-profile-summary-title]", homeText.summaryTitle);
+        setText("[data-recommendations-title]", homeText.recommendationsTitle);
+        setText("[data-recommendations-desc]", homeText.recommendationsDesc);
+        setText("[data-profile-state]", (isFarmerRole ? state.profile?.farmerName : state.profile?.workerName)
+            ? homeText.profileSaved
+            : homeText.completeForm);
 
         renderHomeSummaryStats({
+            isFarmerRole,
             nearbyWorkers: getNearbyWorkerTotal(state.profile),
             nearbyListings: nearbyLabourers.length,
             schemeCount: relevantSchemes.slice(0, 3).length,
@@ -1097,15 +1628,171 @@
             setText("[data-home-next-step]", recommendations[0].title);
             setText("[data-home-next-detail]", recommendations[0].reason);
         } else {
-            setText("[data-home-next-step]", "Save the farmer details and pick the farm location.");
-            setText("[data-home-next-detail]", "The dashboard will use this saved profile to prepare labour and scheme suggestions in the next steps.");
+            setText("[data-home-next-step]", homeText.nextStepTitle);
+            setText("[data-home-next-detail]", homeText.nextStepDetail);
         }
+    }
+
+    function getHomeTextPack(isFarmerRole) {
+        const language = state.uiLanguage;
+
+        const text = {
+            en: {
+                farmer: {
+                    homeEyebrow: "Farmer Home",
+                    welcomeTemplate: "Welcome {name}, your farmer setup dashboard is ready.",
+                    statNameLabel: "Farmer Name",
+                    statCropLabel: "Main Crop",
+                    statLandLabel: "Land Area",
+                    statSchemesLabel: "Suggested Schemes",
+                    profileKicker: "Farmer Profile",
+                    profileTitle: "Farmer Details Form",
+                    profileDesc: "All data is stored in localStorage for this hackathon prototype.",
+                    summaryTitle: "Saved Farmer Summary",
+                    recommendationsTitle: "Personalized actions for this farmer",
+                    recommendationsDesc: "These cards adapt to the saved location, land area, crop, and farming type."
+                },
+                labour: {
+                    homeEyebrow: "Labour Home",
+                    welcomeTemplate: "Welcome {name}, your labour setup dashboard is ready.",
+                    statNameLabel: "Worker Name",
+                    statCropLabel: "Preferred Work",
+                    statLandLabel: "Experience",
+                    statSchemesLabel: "Matched Schemes",
+                    profileKicker: "Labour Profile",
+                    profileTitle: "Labour Details Form",
+                    profileDesc: "Add labour profile details to personalize opportunities and recommendations.",
+                    summaryTitle: "Saved Labour Summary",
+                    recommendationsTitle: "Personalized actions for this labour profile",
+                    recommendationsDesc: "These cards adapt to work preference, location, availability, and saved profile details."
+                },
+                notSaved: "Not saved yet",
+                profileNeeded: "Profile needed",
+                profileSaved: "Profile saved on this device",
+                completeForm: "Complete the form for personalized help",
+                nextStepTitle: "Save the farmer details and pick the farm location.",
+                nextStepDetail: "The dashboard will use this saved profile to prepare labour and scheme suggestions in the next steps.",
+                acresUnit: "acres",
+                yearsUnit: "years",
+                matchesUnit: "matches"
+            },
+            hi: {
+                farmer: {
+                    homeEyebrow: "किसान होम",
+                    welcomeTemplate: "स्वागत है {name}, आपका किसान डैशबोर्ड तैयार है।",
+                    statNameLabel: "किसान नाम",
+                    statCropLabel: "मुख्य फसल",
+                    statLandLabel: "भूमि क्षेत्र",
+                    statSchemesLabel: "सुझाव योजनाएं",
+                    profileKicker: "किसान प्रोफाइल",
+                    profileTitle: "किसान विवरण फॉर्म",
+                    profileDesc: "सारा डेटा इस प्रोटोटाइप में localStorage में सेव होता है।",
+                    summaryTitle: "सेव किसान सारांश",
+                    recommendationsTitle: "इस किसान के लिए निजी सुझाव",
+                    recommendationsDesc: "ये कार्ड लोकेशन, जमीन, फसल और खेती प्रकार के आधार पर बदलते हैं।"
+                },
+                labour: {
+                    homeEyebrow: "लेबर होम",
+                    welcomeTemplate: "स्वागत है {name}, आपका लेबर डैशबोर्ड तैयार है।",
+                    statNameLabel: "वर्कर नाम",
+                    statCropLabel: "पसंदीदा काम",
+                    statLandLabel: "अनुभव",
+                    statSchemesLabel: "मिलान योजनाएं",
+                    profileKicker: "लेबर प्रोफाइल",
+                    profileTitle: "लेबर विवरण फॉर्म",
+                    profileDesc: "लेबर प्रोफाइल सेव करें ताकि अवसर और सुझाव बेहतर हों।",
+                    summaryTitle: "सेव लेबर सारांश",
+                    recommendationsTitle: "इस लेबर प्रोफाइल के लिए निजी सुझाव",
+                    recommendationsDesc: "ये कार्ड काम, लोकेशन, उपलब्धता और प्रोफाइल पर आधारित हैं।"
+                },
+                notSaved: "अभी सेव नहीं",
+                profileNeeded: "प्रोफाइल जरूरी",
+                profileSaved: "प्रोफाइल इस डिवाइस पर सेव है",
+                completeForm: "व्यक्तिगत सहायता के लिए फॉर्म पूरा करें",
+                nextStepTitle: "किसान विवरण सेव करें और खेत की लोकेशन चुनें।",
+                nextStepDetail: "डैशबोर्ड उसी प्रोफाइल से अगली लेबर और योजना सलाह तैयार करेगा।",
+                acresUnit: "एकड़",
+                yearsUnit: "वर्ष",
+                matchesUnit: "मिलान"
+            },
+            mr: {
+                farmer: {
+                    homeEyebrow: "शेतकरी मुख्यपृष्ठ",
+                    welcomeTemplate: "स्वागत {name}, तुमचा शेतकरी डॅशबोर्ड तयार आहे.",
+                    statNameLabel: "शेतकरी नाव",
+                    statCropLabel: "मुख्य पीक",
+                    statLandLabel: "जमीन क्षेत्र",
+                    statSchemesLabel: "सुचवलेल्या योजना",
+                    profileKicker: "शेतकरी प्रोफाइल",
+                    profileTitle: "शेतकरी माहिती फॉर्म",
+                    profileDesc: "हा सर्व डेटा या प्रोटोटाइपमध्ये localStorage मध्ये जतन होतो.",
+                    summaryTitle: "जतन केलेला शेतकरी सारांश",
+                    recommendationsTitle: "या शेतकऱ्यासाठी वैयक्तिक सूचना",
+                    recommendationsDesc: "हे कार्ड लोकेशन, जमीन, पीक आणि शेती प्रकारानुसार बदलतात."
+                },
+                labour: {
+                    homeEyebrow: "मजूर मुख्यपृष्ठ",
+                    welcomeTemplate: "स्वागत {name}, तुमचा मजूर डॅशबोर्ड तयार आहे.",
+                    statNameLabel: "कामगार नाव",
+                    statCropLabel: "पसंतीचे काम",
+                    statLandLabel: "अनुभव",
+                    statSchemesLabel: "जुळणाऱ्या योजना",
+                    profileKicker: "मजूर प्रोफाइल",
+                    profileTitle: "मजूर माहिती फॉर्म",
+                    profileDesc: "मजूर प्रोफाइल जतन करा जेणेकरून सूचना अधिक योग्य मिळतील.",
+                    summaryTitle: "जतन केलेला मजूर सारांश",
+                    recommendationsTitle: "या मजूर प्रोफाइलसाठी वैयक्तिक सूचना",
+                    recommendationsDesc: "हे कार्ड काम, लोकेशन, उपलब्धता आणि प्रोफाइल तपशीलानुसार बदलतात."
+                },
+                notSaved: "अजून जतन नाही",
+                profileNeeded: "प्रोफाइल आवश्यक",
+                profileSaved: "प्रोफाइल या डिव्हाइसवर जतन आहे",
+                completeForm: "वैयक्तिक मदतीसाठी फॉर्म पूर्ण करा",
+                nextStepTitle: "शेतकरी माहिती जतन करा आणि शेताचे ठिकाण निवडा.",
+                nextStepDetail: "डॅशबोर्ड या प्रोफाइलवरून पुढील मजूर आणि योजना सूचना तयार करेल.",
+                acresUnit: "एकर",
+                yearsUnit: "वर्षे",
+                matchesUnit: "जुळणी"
+            }
+        };
+
+        const languagePack = text[language] || text.en;
+        return {
+            ...languagePack,
+            ...(isFarmerRole ? languagePack.farmer : languagePack.labour)
+        };
     }
 
     function renderHomeSummaryStats(summary) {
         const container = document.getElementById("home-summary-grid");
 
         if (!container) {
+            return;
+        }
+
+        if (!summary.isFarmerRole) {
+            container.innerHTML = `
+                <article class="stat-card stat-card--hero">
+                    <span class="stat-card__label">Nearby labour signals</span>
+                    <strong>${escapeHtml(String(summary.nearbyWorkers || 0))}</strong>
+                    <p>${escapeHtml(String(summary.nearbyListings || 0))} listings are visible for labour matching in this area.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Profile completion</span>
+                    <strong>${escapeHtml(String(summary.completionCount || 0))}/7</strong>
+                    <p>Complete profile details improve matching in Labour Finding.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Suggested schemes</span>
+                    <strong>${escapeHtml(String(summary.schemeCount))}</strong>
+                    <p>Welfare and support schemes are shown using your profile details.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-card__label">Availability status</span>
+                    <strong>${escapeHtml(state.profile?.availability || "Pending")}</strong>
+                    <p>Update availability to help employers see when you can work.</p>
+                </article>
+            `;
             return;
         }
 
@@ -1160,7 +1847,7 @@
                 <div class="empty-state empty-state--wide">
                     <i class="ri-lightbulb-flash-line" aria-hidden="true"></i>
                     <strong>Save farmer details to see personalized recommendations.</strong>
-                    <p>The Home page will recommend labour actions, AI help, and scheme support based on the farmer profile.</p>
+                    <p>The Home page will recommend labour actions, tutorial guidance, and scheme support based on the saved profile.</p>
                 </div>
             `;
             return;
@@ -1415,8 +2102,14 @@
         });
     }
 
-    function buildRecommendations(profile) {
-        if (!profile?.farmerName) {
+    function buildRecommendations(profile, role = state.userRole) {
+        const isFarmerRole = role !== "labour";
+
+        if (isFarmerRole && !profile?.farmerName) {
+            return [];
+        }
+
+        if (!isFarmerRole && !profile?.workerName) {
             return [];
         }
 
@@ -1425,6 +2118,36 @@
         const crop = (profile.mainCrop || "").toLowerCase();
         const relevantSchemes = getRelevantSchemes(profile).slice(0, 3);
         const hasMapLocation = Boolean(profile.latitude && profile.longitude);
+
+        if (!isFarmerRole) {
+            return [
+                {
+                    label: "Labour Finding",
+                    title: "Browse jobs and apply quickly",
+                    reason: profile.preferredWorkType
+                        ? `Use filters for ${profile.preferredWorkType} and location to find relevant work opportunities.`
+                        : "Set preferred work type in your profile, then use filters to find matching jobs.",
+                    icon: "ri-team-line",
+                    view: "labour"
+                },
+                {
+                    label: "Tutorial / Guide",
+                    title: "Use guided steps and voice help",
+                    reason: "Open tutorial to follow the worker flow and multilingual voice instructions.",
+                    icon: "ri-book-open-line",
+                    view: "guide-tutorial"
+                },
+                {
+                    label: "Government Schemes",
+                    title: "Check support schemes",
+                    reason: relevantSchemes.length
+                        ? `${relevantSchemes[0].name} is one of the top matches for this worker profile.`
+                        : "Open Government Schemes to check available support and eligibility.",
+                    icon: "ri-government-line",
+                    view: "schemes"
+                }
+            ];
+        }
 
         return [
             {
@@ -1460,6 +2183,28 @@
     }
 
     function buildProfileSummary(profile) {
+        if (state.userRole === "labour") {
+            if (!profile?.workerName) {
+                return [
+                    { label: "Worker", value: "Not saved" },
+                    { label: "Location", value: "Not saved" },
+                    { label: "Preferred Work", value: "Not saved" },
+                    { label: "Availability", value: "Not saved" }
+                ];
+            }
+
+            return [
+                { label: "Worker", value: profile.workerName },
+                { label: "Mobile", value: profile.mobileNumber || "Not provided" },
+                { label: "Location", value: profile.currentLocation || "Not provided" },
+                { label: "Preferred Work", value: profile.preferredWorkType || "Not provided" },
+                { label: "Experience", value: profile.experienceYears ? `${profile.experienceYears} years` : "Not provided" },
+                { label: "Expected Wage", value: profile.expectedWage ? `Rs. ${profile.expectedWage}/day` : "Not provided" },
+                { label: "Availability", value: profile.availability || "Not provided" },
+                { label: "Skills", value: profile.skillTags || "Not provided" }
+            ];
+        }
+
         if (!profile?.farmerName) {
             return [
                 { label: "Farmer", value: "Not saved" },
@@ -1585,6 +2330,19 @@
     function readProfileFromForm(form) {
         const formData = new FormData(form);
 
+        if (form.dataset.profileType === "labour") {
+            return {
+                workerName: cleanText(formData.get("workerName")),
+                mobileNumber: cleanNumber(formData.get("mobileNumber")),
+                currentLocation: cleanText(formData.get("currentLocation")),
+                preferredWorkType: cleanText(formData.get("preferredWorkType")),
+                experienceYears: cleanText(formData.get("experienceYears")),
+                expectedWage: cleanText(formData.get("expectedWage")),
+                skillTags: cleanText(formData.get("skillTags")),
+                availability: cleanText(formData.get("availability"))
+            };
+        }
+
         return {
             farmerName: cleanText(formData.get("farmerName")),
             mobileNumber: cleanNumber(formData.get("mobileNumber")),
@@ -1618,8 +2376,20 @@
             return;
         }
 
+        if (form.dataset.profileType === "labour") {
+            if (form.elements.workerName && !form.elements.workerName.value) {
+                form.elements.workerName.value = state.session?.fullName || state.session?.username || "";
+            }
+
+            if (form.elements.mobileNumber && !form.elements.mobileNumber.value) {
+                form.elements.mobileNumber.value = state.session?.mobile || "";
+            }
+
+            return;
+        }
+
         if (!form.elements.farmerName.value) {
-            form.elements.farmerName.value = state.session?.username || "";
+            form.elements.farmerName.value = state.session?.fullName || state.session?.username || "";
         }
 
         if (!form.elements.mobileNumber.value) {
@@ -1633,12 +2403,32 @@
         }
 
         if (!form.elements.location.value) {
-            const parts = [state.profile?.fullAddress, state.profile?.village, state.profile?.district, state.profile?.state].filter(Boolean);
+            const parts = [
+                state.profile?.fullAddress,
+                state.profile?.currentLocation,
+                state.profile?.village,
+                state.profile?.district,
+                state.profile?.state
+            ].filter(Boolean);
             form.elements.location.value = parts.join(", ");
         }
     }
 
     function getProfileCompletionCount(profile) {
+        if (state.userRole === "labour") {
+            const fields = [
+                profile?.workerName,
+                profile?.mobileNumber,
+                profile?.currentLocation,
+                profile?.preferredWorkType,
+                profile?.experienceYears,
+                profile?.expectedWage,
+                profile?.availability
+            ];
+
+            return fields.filter((value) => Boolean(cleanText(value))).length;
+        }
+
         const fields = [
             profile?.farmerName,
             profile?.mobileNumber,
@@ -2008,13 +2798,15 @@
 
     function ensureDemoUser() {
         const users = getUsers();
-        const existing = users.find((user) => user.usernameKey === normalizeUsername(DEMO_USER.username));
+        const existing = users.find((user) => user.usernameKey === normalizeUsername(DEMO_USER.username) && user.role === DEMO_USER.role);
 
         if (existing) {
             return existing;
         }
 
         const demoRecord = {
+            fullName: DEMO_USER.fullName,
+            role: DEMO_USER.role,
             username: DEMO_USER.username,
             usernameKey: normalizeUsername(DEMO_USER.username),
             mobile: DEMO_USER.mobile,
@@ -2043,8 +2835,12 @@
     }
 
     function attachAuthFieldListeners(form, feedback) {
-        form.querySelectorAll("input").forEach((input) => {
-            input.addEventListener("input", () => {
+        form.querySelectorAll("input, select").forEach((field) => {
+            field.addEventListener("input", () => {
+                clearAuthFeedback(feedback);
+            });
+
+            field.addEventListener("change", () => {
                 clearAuthFeedback(feedback);
             });
         });
@@ -2085,9 +2881,15 @@
         return getUsers().find((user) => user.usernameKey === usernameKey);
     }
 
-    function getUserStorageKey(baseKey, username = state.session?.username) {
+    function findUserByUsernameAndRole(username, role) {
         const usernameKey = normalizeUsername(username);
-        return usernameKey ? `${baseKey}_${usernameKey}` : baseKey;
+        return getUsers().find((user) => user.usernameKey === usernameKey && user.role === role);
+    }
+
+    function getUserStorageKey(baseKey, username = state.session?.username, role = state.session?.role) {
+        const usernameKey = normalizeUsername(username);
+        const roleKey = cleanText(role).toLowerCase();
+        return usernameKey ? `${baseKey}_${roleKey || "user"}_${usernameKey}` : baseKey;
     }
 
     function getUserStoredValue(baseKey, fallbackValue) {

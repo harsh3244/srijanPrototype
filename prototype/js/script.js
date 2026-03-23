@@ -2629,7 +2629,13 @@
             return;
         }
 
-        if (!form.elements.location.value) {
+        const locationField = form.elements.location || form.querySelector("#labour-filter-location");
+
+        if (!locationField) {
+            return;
+        }
+
+        if (!locationField.value) {
             const parts = [
                 state.profile?.fullAddress,
                 state.profile?.currentLocation,
@@ -2637,7 +2643,7 @@
                 state.profile?.district,
                 state.profile?.state
             ].filter(Boolean);
-            form.elements.location.value = parts.join(", ");
+            locationField.value = parts.join(", ");
         }
     }
 

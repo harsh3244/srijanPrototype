@@ -208,6 +208,7 @@ async function handleApiRequest(req, res, requestUrl) {
     }
 
     if (req.method === "POST" && requestUrl.pathname === "/api/auth/login") {
+        // legacy email-based login kept for compatibility (not used by current frontend)
         const payload = await readJsonBody(req);
         const email = normalizeEmail(payload.email);
         const password = String(payload.password || "");
@@ -228,6 +229,7 @@ async function handleApiRequest(req, res, requestUrl) {
             `
             SELECT
                 id,
+                username,
                 full_name AS fullName,
                 email,
                 phone,
@@ -260,8 +262,119 @@ async function handleApiRequest(req, res, requestUrl) {
             message: "Login successful.",
             user: {
                 id: user.id,
+                username: user.username,
                 fullName: user.fullName,
                 email: user.email,
+                phone: user.phone
+            }
+        }, {
+            "Cache-Control": "no-store",
+            "Set-Cookie": buildSessionCookie(sessionToken)
+        });
+        return;
+    }
+
+    // Simple username-based auth for the prototype (matches frontend math CAPTCHA flow)
+    if (req.method === "POST" && requestUrl.pathname === "/api/auth/simple-register") {
+        const payload = await readJsonBody(req);
+        const username = cleanText(payload.username, 80);
+        const mobile = cleanText(payload.mobile, 20);
+        const password = String(payload.password || "");
+
+        if (username.length < 3) {
+            sendJson(res, 400, { ok: false, message: "Username must be at least 3 characters." });
+            return;
+        }
+
+        if (password.length < 4) {
+            sendJson(res, 400, { ok: false, message: "Password must be at least 4 characters." });
+            return;
+        }
+
+        const [existing] = await pool.query(
+            "SELECT id FROM users WHERE username = ? LIMIT 1",
+            [username]
+        );
+
+        if (existing.length) {
+            sendJson(res, 409, { ok: false, message: "Username already registered." });
+            return;
+        }
+
+        const passwordRecord = hashPassword(password);
+
+        const [result] = await pool.query(
+            `
+            INSERT INTO users (username, full_name, email, phone, password_hash, password_salt)
+            VALUES (?, ?, ?, ?, ?, ?)
+            `,
+            [
+                username,
+                username,
+                `${username}@local.test`,
+                mobile || null,
+                passwordRecord.hash,
+                passwordRecord.salt
+            ]
+        );
+
+        const sessionToken = await createSession(result.insertId);
+
+        sendJson(res, 201, {
+            ok: true,
+            message: "Registration successful.",
+            user: { id: result.insertId, username, mobile }
+        }, {
+            "Cache-Control": "no-store",
+            "Set-Cookie": buildSessionCookie(sessionToken)
+        });
+        return;
+    }
+
+    if (req.method === "POST" && requestUrl.pathname === "/api/auth/simple-login") {
+        const payload = await readJsonBody(req);
+        const username = cleanText(payload.username, 80);
+        const password = String(payload.password || "");
+
+        const [users] = await pool.query(
+            `
+            SELECT
+                id,
+                username,
+                full_name AS fullName,
+                email,
+                phone,
+                password_hash AS passwordHash,
+                password_salt AS passwordSalt
+            FROM users
+            WHERE username = ?
+            LIMIT 1
+            `,
+            [username]
+        );
+
+        if (!users.length) {
+            sendJson(res, 401, { ok: false, message: "Invalid username or password." });
+            return;
+        }
+
+        const user = users[0];
+        const passwordMatches = verifyPassword(password, user.passwordSalt, user.passwordHash);
+
+        if (!passwordMatches) {
+            sendJson(res, 401, { ok: false, message: "Invalid username or password." });
+            return;
+        }
+
+        const sessionToken = await createSession(user.id);
+
+        sendJson(res, 200, {
+            ok: true,
+            message: "Login successful.",
+            user: {
+                id: user.id,
+                username: user.username,
+                fullName: user.fullName,
                 phone: user.phone
             }
         }, {

@@ -872,6 +872,7 @@ button {
     left: 0;
     bottom: 0;
     width: 18.5rem;
+    min-width: 18.5rem;
     padding: 1.2rem;
     display: flex;
     flex-direction: column;
@@ -998,7 +999,10 @@ button {
 
 .app-main {
     margin-left: 18.5rem;
+    width: calc(100% - 18.5rem);
+    max-width: calc(100vw - 18.5rem);
     padding: 1.1rem 1.2rem 2rem;
+    min-width: calc(100% - 18.5rem);
 }
 
 .topbar {
@@ -2068,7 +2072,8 @@ button {
     }
 
     .dashboard-grid--split {
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 1rem;
     }
 
     .dashboard-grid--chat {
@@ -2117,7 +2122,13 @@ button {
 @media (max-width: 1099px) {
     .app-main {
         margin-left: 0;
+        width: 100%;
         padding-top: 1.1rem;
+    }
+
+    .app-sidebar {
+        width: 100%;
+        min-width: 100%;
     }
 
     .topbar {
@@ -2209,5 +2220,285 @@ button {
         animation: none !important;
         transition-duration: 0.01ms !important;
         transition-delay: 0ms !important;
+    }
+}
+
+/**
+ * Voice Input Styles
+ * Mic button styling and animations for speech-to-text input
+ */
+
+/* Wrapper for input + mic button */
+.voice-input-wrapper,
+.field-with-voice {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    position: relative;
+}
+
+.voice-input-wrapper input,
+.field-with-voice .field {
+    flex: 1 1 auto;
+    margin: 0;
+}
+
+.field-with-voice {
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+/* Mic Button Base Styles */
+.voice-mic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--line-strong);
+    background: var(--surface-soft);
+    color: var(--text-base);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.voice-mic-btn:hover:not(:disabled) {
+    border-color: var(--green-500);
+    background: var(--mint-200);
+    color: var(--green-700);
+}
+
+.voice-mic-btn:focus-visible {
+    outline: 2px solid var(--green-500);
+    outline-offset: 2px;
+}
+
+.voice-mic-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Mic Icon */
+.voice-mic-icon {
+    display: inline-flex;
+    font-size: 1.1rem;
+}
+
+/* Status Dot */
+.voice-status-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+/* Listening State - Animated pulse */
+.voice-mic-btn--listening {
+    border-color: var(--warning-500);
+    background: rgba(216, 148, 34, 0.08);
+    color: var(--warning-500);
+    animation: voicePulse 1.5s ease-in-out infinite;
+}
+
+.voice-mic-btn--listening .voice-status-dot {
+    background: var(--warning-500);
+    animation: voiceDotPulse 1.5s ease-in-out infinite;
+}
+
+/* Success State */
+.voice-mic-btn--success {
+    border-color: var(--green-500);
+    background: rgba(42, 173, 95, 0.08);
+    color: var(--green-500);
+    animation: voiceSuccess 0.4s ease;
+}
+
+.voice-mic-btn--success .voice-status-dot {
+    background: var(--green-500);
+    animation: voiceSuccessDot 0.4s ease;
+}
+
+/* Error State */
+.voice-mic-btn--error {
+    border-color: var(--danger-500);
+    background: rgba(223, 111, 88, 0.08);
+    color: var(--danger-500);
+    animation: voiceError 0.3s ease;
+}
+
+.voice-mic-btn--error .voice-status-dot {
+    background: var(--danger-500);
+}
+
+/* Animations */
+
+@keyframes voicePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+@keyframes voiceDotPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 var(--warning-500);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(216, 148, 34, 0.3);
+    }
+}
+
+@keyframes voiceSuccess {
+    0% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes voiceSuccessDot {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes voiceError {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+/* Voice Status Badge (for showing listening/processing status) */
+.voice-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(42, 173, 95, 0.1);
+    border: 1px solid var(--green-400);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--green-700);
+    animation: fadeIn 0.3s ease;
+}
+
+.voice-status-badge.listening {
+    background: rgba(216, 148, 34, 0.1);
+    border-color: var(--warning-500);
+    color: var(--warning-500);
+}
+
+.voice-status-badge.error {
+    background: rgba(223, 111, 88, 0.1);
+    border-color: var(--danger-500);
+    color: var(--danger-500);
+}
+
+.voice-status-badge::before {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: voiceStatusBlink 1.5s ease-in-out infinite;
+}
+
+.voice-status-badge.success::before {
+    animation: none;
+}
+
+@keyframes voiceStatusBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Waveform animation for visual feedback */
+.voice-waveform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    height: 1rem;
+}
+
+.voice-waveform-bar {
+    width: 0.15rem;
+    background: var(--green-500);
+    border-radius: 0.1rem;
+    animation: waveformBar 0.8s ease-in-out infinite;
+}
+
+.voice-waveform-bar:nth-child(1) { animation-delay: 0s; }
+.voice-waveform-bar:nth-child(2) { animation-delay: 0.15s; }
+.voice-waveform-bar:nth-child(3) { animation-delay: 0.3s; }
+.voice-waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+.voice-waveform-bar:nth-child(5) { animation-delay: 0s; }
+
+@keyframes waveformBar {
+    0%, 100% {
+        height: 0.3rem;
+    }
+    50% {
+        height: 1rem;
+    }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .voice-mic-btn {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .voice-mic-icon {
+        font-size: 1rem;
+    }
+
+    .voice-status-dot {
+        width: 0.4rem;
+        height: 0.4rem;
     }
 }

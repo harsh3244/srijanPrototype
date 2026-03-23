@@ -1496,6 +1496,7 @@
         renderLabourCards();
         renderMatchedLabourSuggestions();
         renderPostedLabourRequirements();
+        renderLabourSchemesPanel();
 
         const btnSimpleHire = document.getElementById("btn-simple-hire");
         const btnSimpleWork = document.getElementById("btn-simple-work");
@@ -1768,6 +1769,7 @@
         if (state.activeView === "labour") {
             renderLabourCards();
             renderMatchedLabourSuggestions();
+            renderLabourSchemesPanel();
         }
 
         if (state.activeView === "schemes") {
@@ -2128,7 +2130,7 @@
                 </div>
                 <p>${escapeHtml(labourer.skills.join(", "))}</p>
                 <div class="card-actions">
-                    <a class="btn btn--secondary btn--compact" href="tel:${escapeHtml(labourer.contact)}">Contact</a>
+                    <button class="btn btn--secondary btn--compact" type="button" onclick="searchContactInfo('${escapeHtml(labourer.name)}', '${escapeHtml(labourer.location)}')">Contact</button>
                     <button class="btn btn--ghost btn--compact" type="button" data-labour-details="${escapeHtml(labourer.id)}">View Details</button>
                 </div>
             </article>
@@ -2226,6 +2228,55 @@
         `;
     }
 
+    function renderSchemeCards(schemes, container) {
+        if (!container) {
+            return;
+        }
+
+        if (!schemes.length) {
+            container.innerHTML = `
+                <div class="empty-state empty-state--wide">
+                    <i class="ri-government-line" aria-hidden="true"></i>
+                    <strong>No schemes available.</strong>
+                    <p>Save profile details to see matched schemes.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = schemes.map((scheme) => `
+            <article class="scheme-card scheme-card--dashboard">
+                <div class="card-topline">
+                    <span class="status-pill status-pill--soft">${scheme.categories.slice(0, 2).map(formatCategoryLabel).join(" • ")}</span>
+                    <span class="status-pill status-pill--success">Recommended</span>
+                </div>
+                <h4>${escapeHtml(scheme.name)}</h4>
+                <p>${escapeHtml(scheme.description)}</p>
+                <div class="scheme-detail">
+                    <strong>Eligibility</strong>
+                    <p>${escapeHtml(scheme.eligibility)}</p>
+                </div>
+                <div class="scheme-detail">
+                    <strong>Benefits</strong>
+                    <p>${escapeHtml(scheme.benefits)}</p>
+                </div>
+                <div class="scheme-detail">
+                    <strong>Required documents</strong>
+                    <p>${escapeHtml(scheme.documents.join(", "))}</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn--ghost btn--compact" type="button" data-scheme-name="${escapeHtml(scheme.name)}">Why suggested</button>
+                </div>
+            </article>
+        `).join("");
+
+        container.querySelectorAll("[data-scheme-name]").forEach((button) => {
+            button.addEventListener("click", () => {
+                showToast(`${button.dataset.schemeName} fits land size, crop, or labour needs in this profile.`);
+            });
+        });
+    }
+
     function renderSchemesView() {
         const summary = document.querySelector("[data-scheme-summary]");
         const container = document.getElementById("scheme-card-grid");
@@ -2257,44 +2308,25 @@
             return;
         }
 
-        container.innerHTML = filteredSchemes.map((scheme) => `
-            <article class="scheme-card scheme-card--dashboard">
-                <div class="card-topline">
-                    <span class="status-pill status-pill--soft">${scheme.categories.slice(0, 2).map(formatCategoryLabel).join(" • ")}</span>
-                    <span class="status-pill status-pill--success">Recommended</span>
-                </div>
-                <h4>${escapeHtml(scheme.name)}</h4>
-                <p>${escapeHtml(scheme.description)}</p>
-                <div class="scheme-detail">
-                    <strong>Eligibility</strong>
-                    <p>${escapeHtml(scheme.eligibility)}</p>
-                </div>
-                <div class="scheme-detail">
-                    <strong>Benefits</strong>
-                    <p>${escapeHtml(scheme.benefits)}</p>
-                </div>
-                <div class="scheme-detail">
-                    <strong>Required documents</strong>
-                    <p>${escapeHtml(scheme.documents.join(", "))}</p>
-                </div>
-                <div class="card-actions">
-                    <button class="btn btn--primary btn--compact" type="button" data-scheme-cta="${escapeHtml(scheme.name)}">${escapeHtml(scheme.cta)}</button>
-                    <button class="btn btn--ghost btn--compact" type="button" data-scheme-name="${escapeHtml(scheme.name)}">Why suggested</button>
-                </div>
-            </article>
-        `).join("");
+        renderSchemeCards(filteredSchemes, container);
+    }
 
-        container.querySelectorAll("[data-scheme-cta]").forEach((button) => {
-            button.addEventListener("click", () => {
-                showToast(`${button.dataset.schemeCta} opened as a demo action.`);
-            });
-        });
+    function renderLabourSchemesPanel() {
+        const container = document.getElementById("labour-scheme-card-grid");
 
-        container.querySelectorAll("[data-scheme-name]").forEach((button) => {
-            button.addEventListener("click", () => {
-                showToast(`${button.dataset.schemeName} fits land size, crop, or labour needs in this profile.`);
-            });
-        });
+        if (!container) {
+            return;
+        }
+
+        const relevantSchemes = getRelevantSchemes(state.profile);
+
+        if (!state.profile?.farmerName) {
+            document.getElementById("labour-scheme-summary").textContent = "Save farmer details to personalize this panel.";
+        } else {
+            document.getElementById("labour-scheme-summary").textContent = `${relevantSchemes.length} scheme(s) recommended for your saved profile.`;
+        }
+
+        renderSchemeCards(relevantSchemes, container);
     }
 
     function buildRecommendations(profile, role = state.userRole) {
@@ -3171,6 +3203,38 @@
         showToast.timeoutId = window.setTimeout(() => {
             toast.classList.remove("is-visible");
         }, 2600);
+    }
+
+    /**
+     * Search for contact information of a labourer/institution
+     */
+    function searchContactInfo(name, location) {
+        if (!name) {
+            showToast("No contact information available");
+            return;
+        }
+
+        // Create search query for contact information
+        const searchQuery = `${name} ${location} contact number phone email address`.trim();
+
+        // Encode the search query for URL
+        const encodedQuery = encodeURIComponent(searchQuery);
+
+        // Try different search engines in order of preference
+        const searchUrls = [
+            `https://www.google.com/search?q=${encodedQuery}`,
+            `https://www.bing.com/search?q=${encodedQuery}`,
+            `https://search.yahoo.com/search?p=${encodedQuery}`
+        ];
+
+        // Open the first search URL in a new tab/window
+        try {
+            window.open(searchUrls[0], '_blank', 'noopener,noreferrer');
+            showToast(`Searching for ${name} contact info...`);
+        } catch (error) {
+            console.error("Failed to open search:", error);
+            showToast("Unable to open search. Please check popup blocker.");
+        }
     }
 
     function bindLinkedInLabourSection() {

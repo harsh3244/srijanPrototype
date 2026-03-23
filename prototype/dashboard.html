@@ -423,12 +423,22 @@
                     <article class="panel-card" id="labour-hire-flow" hidden>
                         <div class="section-head"><div><span class="section-kicker">Hire Workers</span><h3>Step 1/2: Post a simple order</h3></div></div>
                         <form id="labour-hire-step-form" class="form-grid form-grid--single">
-                            <label class="field"><span>Work type</span><input type="text" name="workType" placeholder="e.g., Harvesting" required></label>
-                            <label class="field"><span>Location</span><input type="text" name="location" placeholder="Village" required></label>
-                            <label class="field"><span>No. workers</span><input type="number" name="workersNeeded" min="1" placeholder="5" required></label>
-                            <label class="field"><span>Wage/day</span><input type="number" name="dailyWage" min="0" placeholder="500" required></label>
-                            <label class="field"><span>Voice input</span><input type="text" name="voiceText" id="voice-text-hire" placeholder="Speak and fill" readonly></label>
-                            <button class="btn btn--ghost" type="button" id="btn-record-hire">🎤 Speak</button>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Work type</span><input type="text" name="workType" id="hire-workType" placeholder="e.g., Harvesting" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-workType" aria-label="Voice input for work type" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Location</span><input type="text" name="location" id="hire-location" placeholder="Village" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-location" aria-label="Voice input for location" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>No. workers</span><input type="number" name="workersNeeded" id="hire-workersNeeded" min="1" placeholder="5" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-workersNeeded" aria-label="Voice input for workers" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Wage/day</span><input type="number" name="dailyWage" id="hire-dailyWage" min="0" placeholder="500" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="hire-dailyWage" aria-label="Voice input for wage" title="Tap mic and speak">🎤</button>
+                            </div>
                             <div class="form-actions"><button class="btn btn--primary" type="submit">Post</button><button class="btn btn--secondary" type="button" id="btn-cancel-hire">Cancel</button></div>
                         </form>
                     </article>
@@ -436,11 +446,18 @@
                     <article class="panel-card" id="labour-work-flow" hidden>
                         <div class="section-head"><div><span class="section-kicker">Get Work</span><h3>Step 1/2: Free application</h3></div></div>
                         <form id="labour-work-step-form" class="form-grid form-grid--single">
-                            <label class="field"><span>Name</span><input type="text" name="applicantName" placeholder="Full name" required></label>
-                            <label class="field"><span>Work type</span><input type="text" name="workType" placeholder="e.g., Weeding" required></label>
-                            <label class="field"><span>Experience</span><input type="number" name="experience" min="0" placeholder="2" required></label>
-                            <label class="field"><span>Voice input</span><input type="text" name="voiceText" id="voice-text-work" placeholder="Speak and fill" readonly></label>
-                            <button class="btn btn--ghost" type="button" id="btn-record-work">🎤 Speak</button>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Name</span><input type="text" name="applicantName" id="work-applicantName" placeholder="Full name" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-applicantName" aria-label="Voice input for name" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Work type</span><input type="text" name="workType" id="work-workType" placeholder="e.g., Weeding" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-workType" aria-label="Voice input for work type" title="Tap mic and speak">🎤</button>
+                            </div>
+                            <div class="field-with-voice">
+                                <label class="field"><span>Experience</span><input type="number" name="experience" id="work-experience" min="0" placeholder="2" required></label>
+                                <button class="voice-mic-btn" type="button" data-voice-input="work-experience" aria-label="Voice input for experience" title="Tap mic and speak">🎤</button>
+                            </div>
                             <div class="form-actions"><button class="btn btn--primary" type="submit">Apply</button><button class="btn btn--secondary" type="button" id="btn-cancel-work">Cancel</button></div>
                         </form>
                     </article>
@@ -521,53 +538,17 @@
                         <article class="panel-card">
                             <div class="section-head">
                                 <div>
-                                    <span class="section-kicker">Post Labour Requirement</span>
-                                    <h3>Tell workers what you need</h3>
+                                    <span class="section-kicker">Government Schemes</span>
+                                    <h3>Scheme recommendations for your profile</h3>
                                 </div>
-                                <p>Requests are stored locally in the browser so they remain available during the demo.</p>
+                                <p>Based on saved farmer details, these scheme options help meet your labour and farming needs.</p>
                             </div>
 
-                            <form id="labour-need-form" class="form-grid form-grid--single">
-                                <label class="field">
-                                    <span>Work Type</span>
-                                    <select name="workType" required>
-                                        <option value="">Select work type</option>
-                                        <option>Harvesting</option>
-                                        <option>Sugarcane Cutting</option>
-                                        <option>Weeding</option>
-                                        <option>Transplanting</option>
-                                        <option>Spraying</option>
-                                        <option>Loading</option>
-                                    </select>
-                                </label>
-                                <label class="field">
-                                    <span>Number of Labourers Needed</span>
-                                    <input type="number" name="labourCount" min="1" placeholder="Example: 8" required>
-                                </label>
-                                <label class="field">
-                                    <span>Date Required</span>
-                                    <input type="date" name="requiredDate" required>
-                                </label>
-                                <label class="field">
-                                    <span>Time Required</span>
-                                    <input type="time" name="requiredTime" required>
-                                </label>
-                                <label class="field">
-                                    <span>Farm Location</span>
-                                    <input type="text" name="location" placeholder="Village / farm address" required>
-                                </label>
-                                <label class="field">
-                                    <span>Notes / Special Instructions</span>
-                                    <textarea name="notes" rows="4" placeholder="Mention crop, urgency, machine support, or shift length"></textarea>
-                                </label>
-                                <button class="btn btn--primary btn--wide" type="submit">
-                                    <i class="ri-send-plane-line" aria-hidden="true"></i>
-                                    Post Request
-                                </button>
-                            </form>
+                            <div class="scheme-intro">
+                                <p id="labour-scheme-summary">Save farmer details in Home to view personalized scheme recommendations below.</p>
+                            </div>
 
-                            <div class="posted-list" id="matched-labour-list"></div>
-                            <div class="posted-list" id="posted-labour-list"></div>
+                            <div class="card-grid card-grid--scheme" id="labour-scheme-card-grid"></div>
                         </article>
                     </div>
                 </section>
@@ -899,6 +880,8 @@
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         crossorigin=""
     ></script>
+    <script src="js/voice-utils.js"></script>
+    <script src="js/voice-integration.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

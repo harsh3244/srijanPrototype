@@ -816,6 +816,52 @@ button {
     font-weight: 800;
 }
 
+.global-language-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.global-language-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-base);
+}
+
+.global-language-select {
+    min-width: 9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-strong);
+    padding: 0.42rem 0.6rem;
+}
+
+.global-language-select:focus {
+    outline: 2px solid rgba(42, 173, 95, 0.22);
+    outline-offset: 1px;
+}
+
+.global-language-row--topbar {
+    margin: 0;
+    padding: 0.32rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.global-language-row--topbar .global-language-label {
+    font-size: 0.78rem;
+}
+
+.global-language-row--topbar .global-language-select {
+    min-width: 7.5rem;
+    font-size: 0.84rem;
+    padding: 0.35rem 0.5rem;
+}
+
 .app-shell {
     min-height: 100vh;
 }

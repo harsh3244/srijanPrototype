@@ -84,7 +84,7 @@
         <div class="app-main">
             <header class="topbar">
                 <div class="topbar__left">
-                    <button class="menu-button" type="button" data-sidebar-open aria-label="Open sidebar">
+                    <button class="menu-button" type="button" data-sidebar-open aria-label="Open sidebar" position="fixed">
                         <i class="ri-menu-3-line" aria-hidden="true"></i>
                     </button>
                     <div>
@@ -320,35 +320,72 @@
                         <p>This is the core farmer problem-solving section of the prototype.</p>
                     </div>
 
-                    <!-- LinkedIn-style Labour Finder Options -->
-                    <div class="labour-options-grid">
-                        <article class="labour-option-card">
-                            <div class="labour-option-header">
-                                <i class="ri-briefcase-line" aria-hidden="true"></i>
-                            </div>
-                            <h3>Hire a Worker</h3>
-                            <p>Post a job and find the right workers for your farm</p>
-                            <button class="btn btn--primary btn--block" type="button" id="btn-hire-worker">
-                                <i class="ri-add-line" aria-hidden="true"></i>
-                                Post a Job
-                            </button>
-                        </article>
-
-                        <article class="labour-option-card">
-                            <div class="labour-option-header">
-                                <i class="ri-file-user-line" aria-hidden="true"></i>
-                            </div>
-                            <h3>Apply for a Job</h3>
-                            <p>Browse and apply to available job opportunities</p>
-                            <button class="btn btn--secondary btn--block" type="button" id="btn-apply-job">
-                                <i class="ri-search-line" aria-hidden="true"></i>
-                                Browse Jobs
-                            </button>
-                        </article>
+                    <!-- simplified high-contrast icon-driven options for illiterate users -->
+                    <div class="labour-simple-grid" id="labour-simple-grid">
+                        <button class="labour-simple-btn" id="btn-simple-hire" data-mode="hire" aria-label="Hire workers">
+                            <i class="ri-tools-line"></i>
+                            <strong>हायर</strong>
+                            <small>Hire workers</small>
+                        </button>
+                        <button class="labour-simple-btn" id="btn-simple-work" data-mode="work" aria-label="Get work">
+                            <i class="ri-user-star-line"></i>
+                            <strong>काम</strong>
+                            <small>Get work</small>
+                        </button>
                     </div>
 
+                    <div class="labour-voice-actions">
+                        <button class="btn btn--ghost btn--compact" id="btn-speak-instructions" type="button">
+                            <i class="ri-mic-line"></i> Voice Guide
+                        </button>
+                        <label class="field" style="display:inline-flex;gap:.4rem;align-items:center;">
+                            <span>Language</span>
+                            <select id="labour-language-select" class="field">
+                                <option value="en-US">English</option>
+                                <option value="hi-IN">हिन्दी</option>
+                                <option value="mr-IN">मराठी</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="insight-box">
+                        <span class="insight-box__label">Step guidance</span>
+                        <strong id="labour-step-text">Choose Hire Workers or Get Work to continue.</strong>
+                    </div>
+
+                    <article class="panel-card" id="labour-hire-flow" hidden>
+                        <div class="section-head"><div><span class="section-kicker">Hire Workers</span><h3>Step 1/2: Post a simple order</h3></div></div>
+                        <form id="labour-hire-step-form" class="form-grid form-grid--single">
+                            <label class="field"><span>Work type</span><input type="text" name="workType" placeholder="e.g., Harvesting" required></label>
+                            <label class="field"><span>Location</span><input type="text" name="location" placeholder="Village" required></label>
+                            <label class="field"><span>No. workers</span><input type="number" name="workersNeeded" min="1" placeholder="5" required></label>
+                            <label class="field"><span>Wage/day</span><input type="number" name="dailyWage" min="0" placeholder="500" required></label>
+                            <label class="field"><span>Voice input</span><input type="text" name="voiceText" id="voice-text-hire" placeholder="Speak and fill" readonly></label>
+                            <button class="btn btn--ghost" type="button" id="btn-record-hire">🎤 Speak</button>
+                            <div class="form-actions"><button class="btn btn--primary" type="submit">Post</button><button class="btn btn--secondary" type="button" id="btn-cancel-hire">Cancel</button></div>
+                        </form>
+                    </article>
+
+                    <article class="panel-card" id="labour-work-flow" hidden>
+                        <div class="section-head"><div><span class="section-kicker">Get Work</span><h3>Step 1/2: Free application</h3></div></div>
+                        <form id="labour-work-step-form" class="form-grid form-grid--single">
+                            <label class="field"><span>Name</span><input type="text" name="applicantName" placeholder="Full name" required></label>
+                            <label class="field"><span>Work type</span><input type="text" name="workType" placeholder="e.g., Weeding" required></label>
+                            <label class="field"><span>Experience</span><input type="number" name="experience" min="0" placeholder="2" required></label>
+                            <label class="field"><span>Voice input</span><input type="text" name="voiceText" id="voice-text-work" placeholder="Speak and fill" readonly></label>
+                            <button class="btn btn--ghost" type="button" id="btn-record-work">🎤 Speak</button>
+                            <div class="form-actions"><button class="btn btn--primary" type="submit">Apply</button><button class="btn btn--secondary" type="button" id="btn-cancel-work">Cancel</button></div>
+                        </form>
+                    </article>
+
                     <article class="panel-card">
-                        <div class="filters-grid">
+                        <div class="section-head"><div><span class="section-kicker">Available matches</span><h3>Results</h3></div></div>
+                        <div id="labour-cards" class="card-grid"></div>
+                    </article>
+
+                    <article class="panel-card">
+                        <div class="section-head"><div><span class="section-kicker">Post Labour Requirement</span><h3>Tell workers what you need</h3></div></div>
+                        <p>Requests are stored locally in the browser so they remain available during the demo.</p>
+                        <form id="labour-need-form" class="form-grid form-grid--single">
                             <label class="field">
                                 <span>Work Type</span>
                                 <select id="labour-filter-work">
@@ -742,4 +779,4 @@
     <script src="js/script.js"></script>
 </body>
 </html>
-</
+

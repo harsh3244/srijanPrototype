@@ -461,6 +461,201 @@
         renderLabourCards();
         renderMatchedLabourSuggestions();
         renderPostedLabourRequirements();
+
+        const btnSimpleHire = document.getElementById("btn-simple-hire");
+        const btnSimpleWork = document.getElementById("btn-simple-work");
+        const btnSpeakInstructions = document.getElementById("btn-speak-instructions");
+        const languageSelect = document.getElementById("labour-language-select");
+        const btnHireCancel = document.getElementById("btn-cancel-hire");
+        const btnWorkCancel = document.getElementById("btn-cancel-work");
+
+        let activeMode = null;
+        let recognition = null;
+        let speechTarget = null;
+
+        // Voice translations for different languages
+        const voiceTranslations = {
+            "en-US": {
+                hireMode: "Select the work type and location, then press post.",
+                workMode: "Tell us your name and work experience, then apply.",
+                noMode: "Please select Hire Workers or Get Work first.",
+                hireInstructions: "You are in Hire Workers mode. Fill the form and post a job.",
+                workInstructions: "You are in Get Work mode. Fill the form and apply for a job.",
+                voiceCaptured: "Voice input captured: ",
+                voiceFailed: "Voice recognition failed, please try again.",
+                listening: "Listening ... speak now"
+            },
+            "hi-IN": {
+                hireMode: "काम का प्रकार और स्थान चुनें, फिर पोस्ट दबाएं।",
+                workMode: "हमें अपना नाम और काम का अनुभव बताएं, फिर आवेदन करें।",
+                noMode: "कृपया पहले मजदूर किराए पर लें या काम पाएं चुनें।",
+                hireInstructions: "आप मजदूर किराए पर लेने के मोड में हैं। फॉर्म भरें और नौकरी पोस्ट करें।",
+                workInstructions: "आप काम पाने के मोड में हैं। फॉर्म भरें और नौकरी के लिए आवेदन करें।",
+                voiceCaptured: "आवाज इनपुट कैप्चर किया गया: ",
+                voiceFailed: "आवाज पहचान विफल, कृपया फिर से प्रयास करें।",
+                listening: "सुन रहा हूं ... अभी बोलें"
+            },
+            "mr-IN": {
+                hireMode: "कामाचा प्रकार आणि स्थान निवडा, नंतर पोस्ट दाबा.",
+                workMode: "आम्हाला तुमचे नाव आणि कामाचा अनुभव सांगा, नंतर अर्ज करा.",
+                noMode: "कृपया प्रथम मजूर भाड्याने घ्या किंवा काम मिळवा निवडा.",
+                hireInstructions: "तुम्ही मजूर भाड्याने घेण्याच्या मोडमध्ये आहात. फॉर्म भरून नोकरी पोस्ट करा.",
+                workInstructions: "तुम्ही काम मिळविण्याच्या मोडमध्ये आहात. फॉर्म भरून नोकरीसाठी अर्ज करा.",
+                voiceCaptured: "वॉईस इनपुट कॅप्चर केला: ",
+                voiceFailed: "वॉईस रेकग्निशन अयशस्वी, कृपया पुन्हा प्रयत्न करा.",
+                listening: "ऐकत आहे ... आता बोला"
+            }
+        };
+
+        function setLabourMode(mode) {
+            activeMode = mode;
+            const hirePanel = document.getElementById("labour-hire-flow");
+            const workPanel = document.getElementById("labour-work-flow");
+            const stepText = document.getElementById("labour-step-text");
+
+            if (mode === "hire") {
+                hirePanel.hidden = false;
+                workPanel.hidden = true;
+                stepText.textContent = "Posting labour job: use voice input and submit the form.";
+                speakText(voiceTranslations[languageSelect.value].hireMode, languageSelect.value);
+            } else if (mode === "work") {
+                hirePanel.hidden = true;
+                workPanel.hidden = false;
+                stepText.textContent = "Applying for a job: fill your details and submit.";
+                speakText(voiceTranslations[languageSelect.value].workMode, languageSelect.value);
+            }
+        }
+
+        function speakText(text, lang = "en-US") {
+            if (!window.speechSynthesis) {
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startVoiceRecognition(targetId) {
+            const input = document.getElementById(targetId);
+            if (!input) {
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Voice input not supported in this browser.");
+                return;
+            }
+
+            if (recognition) {
+                recognition.abort();
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = languageSelect.value;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                input.value = transcript;
+                showToast(voiceTranslations[languageSelect.value].voiceCaptured + transcript);
+            };
+
+            recognition.onerror = () => {
+                showToast(voiceTranslations[languageSelect.value].voiceFailed);
+            };
+
+            recognition.onend = () => {
+                speechTarget = null;
+            };
+
+            speechTarget = targetId;
+            recognition.start();
+            showToast(voiceTranslations[languageSelect.value].listening);
+        }
+
+        btnSimpleHire?.addEventListener("click", () => setLabourMode("hire"));
+        btnSimpleWork?.addEventListener("click", () => setLabourMode("work"));
+
+        btnSpeakInstructions?.addEventListener("click", () => {
+            if (!activeMode) {
+                speakText(voiceTranslations[languageSelect.value].noMode, languageSelect.value);
+                return;
+            }
+            if (activeMode === "hire") {
+                speakText(voiceTranslations[languageSelect.value].hireInstructions, languageSelect.value);
+            } else {
+                speakText(voiceTranslations[languageSelect.value].workInstructions, languageSelect.value);
+            }
+        });
+
+        document.getElementById("btn-record-hire")?.addEventListener("click", () => startVoiceRecognition("voice-text-hire"));
+        document.getElementById("btn-record-work")?.addEventListener("click", () => startVoiceRecognition("voice-text-work"));
+
+        btnHireCancel?.addEventListener("click", () => {
+            document.getElementById("labour-hire-flow").hidden = true;
+            document.getElementById("labour-step-text").textContent = "Choose Hire Workers or Get Work to continue.";
+        });
+
+        btnWorkCancel?.addEventListener("click", () => {
+            document.getElementById("labour-work-flow").hidden = true;
+            document.getElementById("labour-step-text").textContent = "Choose Hire Workers or Get Work to continue.";
+        });
+
+        document.getElementById("labour-hire-step-form")?.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const job = {
+                id: `job-local-${Date.now()}`,
+                jobTitle: `${greedyTrim(formData.get("workType"))} job`,
+                workType: cleanText(formData.get("workType")),
+                workersNeeded: Number(formData.get("workersNeeded")),
+                jobLocation: cleanText(formData.get("location")),
+                dailyWage: Number(formData.get("dailyWage")),
+                jobDescription: "Simple farmer job request.",
+                posterName: state.profile?.farmerName || "Farmer",
+                createdAt: new Date().toISOString(),
+                applicants: []
+            };
+
+            state.jobPostings.unshift(job);
+            setUserStoredValue(USER_STORAGE_KEYS.jobPostings, state.jobPostings);
+            renderAvailableJobs();
+            showToast("Job posted in simplified mode.");
+            document.getElementById("labour-hire-flow").hidden = true;
+            setLabourMode(null);
+        });
+
+        document.getElementById("labour-work-step-form")?.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const app = {
+                id: `app-local-${Date.now()}`,
+                jobId: null,
+                applicantName: cleanText(formData.get("applicantName")),
+                applicantMobile: "",
+                experience: Number(formData.get("experience")),
+                skills: cleanText(formData.get("workType")),
+                coverLetter: "Simplified application",
+                isAvailable: true,
+                appliedAt: new Date().toISOString(),
+                status: "pending"
+            };
+
+            state.jobApplications.push(app);
+            setUserStoredValue(USER_STORAGE_KEYS.jobApplications, state.jobApplications);
+            showToast("Application submitted in simplified mode.");
+            document.getElementById("labour-work-flow").hidden = true;
+            setLabourMode(null);
+        });
+
+        function greedyTrim(value) {
+            return String(value || "").trim();
+        }
     }
 
     function bindChatSection() {

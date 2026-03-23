@@ -6,7 +6,7 @@
     <title>AgriShield | Farmer Labour Dashboard</title>
     <meta
         name="description"
-        content="Hackathon prototype for a farmer-first dashboard with Home, Labour Finding, AI Chatbot, and Government Schemes."
+        content="Hackathon prototype for a farmer-first dashboard with Home, Labour Finding, Tutorial Guide, and Government Schemes."
     >
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,13 +53,13 @@
                     <i class="ri-team-line" aria-hidden="true"></i>
                     <span>Labour Finding</span>
                 </button>
-                <button class="sidebar-link" type="button" data-nav="chatbot">
-                    <i class="ri-message-3-line" aria-hidden="true"></i>
-                    <span>AI Chatbot</span>
-                </button>
                 <button class="sidebar-link" type="button" data-nav="schemes">
                     <i class="ri-government-line" aria-hidden="true"></i>
                     <span>Government Schemes</span>
+                </button>
+                <button class="sidebar-link" type="button" data-open-guide>
+                    <i class="ri-book-open-line" aria-hidden="true"></i>
+                    <span>App Guide</span>
                 </button>
             </nav>
 
@@ -74,7 +74,7 @@
                 <ul class="simple-list simple-list--sidebar">
                     <li><i class="ri-check-line" aria-hidden="true"></i><span>Save the farmer profile</span></li>
                     <li><i class="ri-check-line" aria-hidden="true"></i><span>Find or post labour needs</span></li>
-                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Ask AI and review schemes</span></li>
+                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Review scheme recommendations</span></li>
                 </ul>
             </div>
         </aside>
@@ -90,7 +90,7 @@
                     <div>
                         <span class="topbar__kicker">Farmer Labour Support Platform</span>
                         <h1 data-page-title>Home</h1>
-                        <p data-page-subtitle>Save farmer details and unlock labour, AI, and scheme recommendations.</p>
+                        <p data-page-subtitle>Save farmer details and unlock labour and scheme recommendations.</p>
                     </div>
                 </div>
 
@@ -112,6 +112,10 @@
                         <i class="ri-logout-box-r-line" aria-hidden="true"></i>
                         Logout
                     </button>
+                    <button class="btn btn--secondary btn--compact" type="button" data-open-guide>
+                        <i class="ri-question-line" aria-hidden="true"></i>
+                        Guide
+                    </button>
                 </div>
             </header>
 
@@ -131,9 +135,9 @@
                                     <i class="ri-team-line" aria-hidden="true"></i>
                                     Explore Labour
                                 </button>
-                                <button class="btn btn--secondary" type="button" data-jump-view="chatbot">
-                                    <i class="ri-message-3-line" aria-hidden="true"></i>
-                                    Ask AI
+                                <button class="btn btn--secondary" type="button" data-jump-view="schemes">
+                                    <i class="ri-government-line" aria-hidden="true"></i>
+                                    View Schemes
                                 </button>
                             </div>
                         </div>
@@ -467,56 +471,6 @@
                     </div>
                 </section>
 
-                <section class="view-section" data-view="chatbot">
-                    <div class="section-banner section-banner--soft">
-                        <div>
-                            <span class="eyebrow">AI Chatbot</span>
-                            <h2>Ask for labour advice, crop help, worker shortage guidance, and scheme suggestions.</h2>
-                        </div>
-                        <p>The chatbot uses predefined JavaScript responses today and stays ready for API integration later.</p>
-                    </div>
-
-                    <div class="dashboard-grid dashboard-grid--chat">
-                        <article class="panel-card">
-                            <div class="section-head">
-                                <div>
-                                    <span class="section-kicker">Quick Prompts</span>
-                                    <h3>Use common farmer questions</h3>
-                                </div>
-                                <p>Tap a prompt to simulate realistic labour and support questions in the demo.</p>
-                            </div>
-
-                            <div class="chip-list">
-                                <button class="chip-button" type="button" data-chat-chip="Labour advice">Labour advice</button>
-                                <button class="chip-button" type="button" data-chat-chip="Crop help">Crop help</button>
-                                <button class="chip-button" type="button" data-chat-chip="Worker shortage">Worker shortage</button>
-                                <button class="chip-button" type="button" data-chat-chip="Scheme help">Scheme help</button>
-                                <button class="chip-button" type="button" data-chat-chip="Small farmer support">Small farmer support</button>
-                            </div>
-
-                            <div class="quick-help">
-                                <p>Example questions:</p>
-                                <ul class="simple-list">
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>How many labourers do I need for harvesting 2 acres?</span></li>
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>What should I do if workers are unavailable?</span></li>
-                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>Which scheme is useful for small farmers?</span></li>
-                                </ul>
-                            </div>
-                        </article>
-
-                        <article class="panel-card panel-card--chat">
-                            <div class="chat-window" id="chat-window"></div>
-
-                            <form id="chat-form" class="chat-form">
-                                <input type="text" id="chat-input" placeholder="Ask about labour, crops, worker shortage, or schemes" autocomplete="off">
-                                <button class="btn btn--primary btn--icon" type="submit" aria-label="Send chat message">
-                                    <i class="ri-send-plane-line" aria-hidden="true"></i>
-                                </button>
-                            </form>
-                        </article>
-                    </div>
-                </section>
-
                 <section class="view-section" data-view="schemes">
                     <div class="section-banner section-banner--green">
                         <div>
@@ -728,6 +682,111 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" data-modal="guide-welcome">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Welcome to AgriShield</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p>This one-time guide helps you understand login, profile setup, labour finding, and scheme flow.</p>
+                <div class="form-actions">
+                    <button class="btn btn--primary" type="button" id="open-guide-now">
+                        <i class="ri-book-open-line" aria-hidden="true"></i>
+                        Open Tutorial
+                    </button>
+                    <button class="btn btn--secondary" type="button" id="skip-guide-now" data-modal-close>
+                        Skip for now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" data-modal="guide-tutorial">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-dialog--large">
+            <div class="modal-header">
+                <h2>App Tutorial / Guide</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="guide-card-main">
+                    <div class="section-head section-head--tight">
+                        <div>
+                            <span class="eyebrow">App Guide</span>
+                            <h3>Follow these steps</h3>
+                        </div>
+                        <p>Use this tutorial directly from the dashboard.</p>
+                    </div>
+
+                    <div class="guide-step-list" data-guide-step-list></div>
+                </div>
+
+                <div class="guide-card-main guide-card-main--voice" style="margin-top: 1rem;">
+                    <div class="section-head section-head--tight">
+                        <div>
+                            <span class="eyebrow">Voice Help</span>
+                            <h3>Listen and control by voice</h3>
+                        </div>
+                        <p>Use buttons or speak commands.</p>
+                    </div>
+
+                    <div class="guide-language-row">
+                        <label class="guide-language-label" for="guide-language-select">Voice Language</label>
+                        <select id="guide-language-select" class="guide-language-select" data-guide-language>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi (हिन्दी)</option>
+                            <option value="mr">Marathi (मराठी)</option>
+                            <option value="ta">Tamil (தமிழ்)</option>
+                            <option value="te">Telugu (తెలుగు)</option>
+                            <option value="bn">Bengali (বাংলা)</option>
+                        </select>
+                    </div>
+
+                    <div class="voice-controls">
+                        <button class="btn btn--primary" type="button" data-guide-voice-play>
+                            <i class="ri-play-circle-line" aria-hidden="true"></i>
+                            Play Full Guide
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-repeat>
+                            <i class="ri-repeat-line" aria-hidden="true"></i>
+                            Repeat Step
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-stop>
+                            <i class="ri-stop-circle-line" aria-hidden="true"></i>
+                            Stop Voice
+                        </button>
+                        <button class="btn btn--secondary" type="button" data-guide-voice-listen>
+                            <i class="ri-mic-line" aria-hidden="true"></i>
+                            Voice Commands
+                        </button>
+                    </div>
+
+                    <div class="guide-voice-status" data-guide-voice-status>
+                        Voice help is ready. Press Play Full Guide to start.
+                    </div>
+
+                    <div class="guide-command-list">
+                        <div class="guide-command-chip">Say: play guide</div>
+                        <div class="guide-command-chip">Say: next step</div>
+                        <div class="guide-command-chip">Say: previous step</div>
+                        <div class="guide-command-chip">Say: repeat</div>
+                        <div class="guide-command-chip">Say: stop</div>
+                        <div class="guide-command-chip">Say: step 1 to step 6</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

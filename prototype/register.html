@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Register</title>
+    <meta
+        name="description"
+        content="Prototype registration page for AgriShield with username, mobile number, and password validation for the farmer dashboard."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="register">
+    <div class="login-shell">
+        <section class="login-story">
+            <a class="brand-badge" href="login.html" aria-label="AgriShield register">
+                <span class="brand-badge__icon">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span>
+                    <strong>AgriShield</strong>
+                    <small>Labour support assistant</small>
+                </span>
+            </a>
+
+            <div class="login-story__copy">
+                <span class="eyebrow eyebrow--light">Hackathon Prototype</span>
+                <h1>Create a simple account and enter the farmer labour support platform.</h1>
+                <p>
+                    Registration is frontend-only and stores the user in localStorage. After that, the farmer
+                    can log in, save farm details, and use Home, Labour Finding, AI Chatbot, and Government Schemes.
+                </p>
+            </div>
+
+            <div class="story-grid">
+                <article class="story-card">
+                    <i class="ri-user-add-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Register Fast</strong>
+                        <p>Create a demo account with username, mobile number, and password.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-lock-password-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Basic Validation</strong>
+                        <p>Password match and required field checks keep the auth flow realistic.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-dashboard-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Dashboard Ready</strong>
+                        <p>After login, the user can directly explore Home, labour finding, AI help, and schemes.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="story-panel">
+                <div>
+                    <span class="story-panel__label">Prototype Scope</span>
+                    <strong>No backend, just a clean demo flow</strong>
+                </div>
+                <p>This registration page is only meant for hackathon presentation and UI flow validation.</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="section-head section-head--tight">
+                    <span class="eyebrow">Register</span>
+                    <h2>Create your account</h2>
+                    <p>Fill the fields below and save the user in localStorage for this prototype.</p>
+                </div>
+
+                <form id="register-form" class="form-grid form-grid--single" novalidate>
+                    <label class="field">
+                        <span>Username</span>
+                        <input type="text" name="username" placeholder="Create a username" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Mobile Number</span>
+                        <input type="tel" name="mobile" inputmode="numeric" placeholder="10-digit mobile number" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Password</span>
+                        <input type="password" name="password" placeholder="Create a password" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Confirm Password</span>
+                        <input type="password" name="confirmPassword" placeholder="Re-enter password" required>
+                    </label>
+
+                    <div id="register-feedback" class="auth-feedback" hidden></div>
+
+                    <button class="btn btn--primary btn--wide" type="submit">
+                        <i class="ri-user-add-line" aria-hidden="true"></i>
+                        Register
+                    </button>
+                </form>
+
+                <button class="btn btn--secondary btn--wide" type="button" id="demo-register-button">
+                    <i class="ri-flashlight-line" aria-hidden="true"></i>
+                    Fill Demo Registration
+                </button>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a href="login.html">Login here</a>
+                </p>
+
+                <div class="login-note">
+                    <i class="ri-information-line" aria-hidden="true"></i>
+                    <p>This prototype stores registered users in localStorage only. Do not use real production credentials here.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" data-toast aria-live="polite"></div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

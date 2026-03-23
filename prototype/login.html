@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Login</title>
+    <meta
+        name="description"
+        content="Prototype login page for AgriShield with username, password, CAPTCHA validation, and access to the farmer dashboard."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="login">
+    <div class="login-shell">
+        <section class="login-story">
+            <a class="brand-badge" href="login.html" aria-label="AgriShield login">
+                <span class="brand-badge__icon">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span>
+                    <strong>AgriShield</strong>
+                    <small>Labour support assistant</small>
+                </span>
+            </a>
+
+            <div class="login-story__copy">
+                <span class="eyebrow eyebrow--light">Hackathon Prototype</span>
+                <h1>Simple login for a farmer-first labour support dashboard.</h1>
+                <p>
+                    Registered users can sign in with a username, password, and a small math CAPTCHA.
+                    This keeps the prototype easy to demo without adding any backend and opens the Home, Labour Finding, AI Chatbot, and Government Schemes dashboard.
+                </p>
+            </div>
+
+            <div class="story-grid">
+                <article class="story-card">
+                    <i class="ri-shield-check-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Prototype Auth</strong>
+                        <p>Frontend-only registration and login stored in localStorage.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-team-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Labour Access</strong>
+                        <p>Find workers, post labour needs, and present the full labour-support flow clearly.</p>
+                    </div>
+                </article>
+                <article class="story-card">
+                    <i class="ri-government-line" aria-hidden="true"></i>
+                    <div>
+                        <strong>Farmer Support</strong>
+                        <p>Connect labour planning with AI guidance and government schemes.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="story-panel">
+                <div>
+                    <span class="story-panel__label">Demo Ready</span>
+                    <strong>Fast to explain and easy to use</strong>
+                </div>
+                <p>No OTP, no backend, no complex setup. The auth flow is minimal but realistic enough for a hackathon demo.</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="section-head section-head--tight">
+                    <span class="eyebrow">Login</span>
+                    <h2>Enter your dashboard</h2>
+                    <p>Use your registered username and password, then solve the CAPTCHA to continue.</p>
+                </div>
+
+                <form id="login-form" class="form-grid form-grid--single" novalidate>
+                    <label class="field">
+                        <span>Username</span>
+                        <input type="text" name="username" placeholder="Enter your username" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Password</span>
+                        <input type="password" name="password" placeholder="Enter your password" required>
+                    </label>
+
+                    <div class="field">
+                        <span>CAPTCHA</span>
+                        <div class="captcha-box">
+                            <strong data-captcha-question>What is 2 + 3?</strong>
+                            <button class="btn btn--secondary btn--compact" type="button" id="captcha-refresh">
+                                <i class="ri-refresh-line" aria-hidden="true"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <label class="field">
+                        <span>CAPTCHA Answer</span>
+                        <input type="number" name="captchaAnswer" inputmode="numeric" placeholder="Enter the answer" required>
+                    </label>
+
+                    <div id="login-feedback" class="auth-feedback" hidden></div>
+
+                    <button class="btn btn--primary btn--wide" type="submit">
+                        <i class="ri-login-box-line" aria-hidden="true"></i>
+                        Login
+                    </button>
+                </form>
+
+                <button class="btn btn--secondary btn--wide" type="button" id="demo-login-button">
+                    <i class="ri-flashlight-line" aria-hidden="true"></i>
+                    Fill Demo Login
+                </button>
+
+                <p class="auth-switch">
+                    Don’t have an account?
+                    <a href="register.html">Register here</a>
+                </p>
+
+                <div class="login-note">
+                    <i class="ri-information-line" aria-hidden="true"></i>
+                    <p>User data is stored only in localStorage for the prototype. No backend or encryption is used.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" data-toast aria-live="polite"></div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

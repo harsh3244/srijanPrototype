@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Farmer Labour Dashboard</title>
+    <meta
+        name="description"
+        content="Hackathon prototype for a farmer-first dashboard with Home, Labour Finding, AI Chatbot, and Government Schemes."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+    >
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    >
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dashboard">
+    <div class="app-shell">
+        <aside class="app-sidebar" data-sidebar>
+            <div class="sidebar-top">
+                <a class="brand-badge brand-badge--sidebar" href="dashboard.html" aria-label="AgriShield dashboard">
+                    <span class="brand-badge__icon">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span>
+                        <strong>AgriShield</strong>
+                        <small>Farmer support dashboard</small>
+                    </span>
+                </a>
+
+                <button class="sidebar-close" type="button" data-sidebar-close aria-label="Close sidebar">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Dashboard sections">
+                <button class="sidebar-link is-active" type="button" data-nav="home">
+                    <i class="ri-home-5-line" aria-hidden="true"></i>
+                    <span>Home</span>
+                </button>
+                <button class="sidebar-link" type="button" data-nav="labour">
+                    <i class="ri-team-line" aria-hidden="true"></i>
+                    <span>Labour Finding</span>
+                </button>
+                <button class="sidebar-link" type="button" data-nav="chatbot">
+                    <i class="ri-message-3-line" aria-hidden="true"></i>
+                    <span>AI Chatbot</span>
+                </button>
+                <button class="sidebar-link" type="button" data-nav="schemes">
+                    <i class="ri-government-line" aria-hidden="true"></i>
+                    <span>Government Schemes</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-panel">
+                <span class="sidebar-panel__label">Core Flow</span>
+                <strong>Save farmer details, then solve labour access.</strong>
+                <p>The dashboard begins with the farmer profile, then moves into labour discovery, AI support, and matched scheme guidance.</p>
+            </div>
+
+            <div class="sidebar-panel sidebar-panel--soft">
+                <span class="sidebar-panel__label">Demo Story</span>
+                <ul class="simple-list simple-list--sidebar">
+                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Save the farmer profile</span></li>
+                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Find or post labour needs</span></li>
+                    <li><i class="ri-check-line" aria-hidden="true"></i><span>Ask AI and review schemes</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="mobile-backdrop" data-sidebar-backdrop></div>
+
+        <div class="app-main">
+            <header class="topbar">
+                <div class="topbar__left">
+                    <button class="menu-button" type="button" data-sidebar-open aria-label="Open sidebar">
+                        <i class="ri-menu-3-line" aria-hidden="true"></i>
+                    </button>
+                    <div>
+                        <span class="topbar__kicker">Farmer Labour Support Platform</span>
+                        <h1 data-page-title>Home</h1>
+                        <p data-page-subtitle>Save farmer details and unlock labour, AI, and scheme recommendations.</p>
+                    </div>
+                </div>
+
+                <div class="topbar__right">
+                    <button class="icon-button" type="button" title="Notifications">
+                        <i class="ri-notification-3-line" aria-hidden="true"></i>
+                        <span class="icon-badge" data-alert-count>3</span>
+                    </button>
+
+                    <div class="profile-pill">
+                        <span class="profile-pill__avatar" data-profile-avatar>FS</span>
+                        <div>
+                            <strong data-topbar-name>Farmer</strong>
+                            <small data-topbar-meta>Prototype login</small>
+                        </div>
+                    </div>
+
+                    <button class="btn btn--secondary btn--compact" type="button" id="logout-button">
+                        <i class="ri-logout-box-r-line" aria-hidden="true"></i>
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <main class="dashboard-stage">
+                <section class="view-section is-active" data-view="home">
+                    <div class="hero-panel hero-panel--home">
+                        <div class="hero-panel__copy">
+                            <span class="eyebrow">Farmer Home</span>
+                            <h2 data-home-welcome>Welcome to your smart farming support dashboard.</h2>
+                            <p>
+                                Save farmer details first, choose the farm location using search or the map,
+                                and then use the dashboard for labour support, AI guidance, and scheme discovery.
+                            </p>
+
+                            <div class="hero-actions">
+                                <button class="btn btn--primary" type="button" data-jump-view="labour">
+                                    <i class="ri-team-line" aria-hidden="true"></i>
+                                    Explore Labour
+                                </button>
+                                <button class="btn btn--secondary" type="button" data-jump-view="chatbot">
+                                    <i class="ri-message-3-line" aria-hidden="true"></i>
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="hero-metrics">
+                            <article class="metric-tile">
+                                <span>Farmer Name</span>
+                                <strong data-stat-name>Not saved yet</strong>
+                            </article>
+                            <article class="metric-tile">
+                                <span>Main Crop</span>
+                                <strong data-stat-crop>Profile needed</strong>
+                            </article>
+                            <article class="metric-tile">
+                                <span>Land Area</span>
+                                <strong data-stat-land>Profile needed</strong>
+                            </article>
+                            <article class="metric-tile">
+                                <span>Suggested Schemes</span>
+                                <strong data-stat-schemes>0 matches</strong>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid" id="home-summary-grid"></div>
+
+                    <div class="dashboard-grid dashboard-grid--home">
+                        <article class="panel-card">
+                            <div class="section-head">
+                                <div>
+                                    <span class="section-kicker">Farmer Profile</span>
+                                    <h3>Farmer Details Form</h3>
+                                </div>
+                                <p>All data is stored in localStorage for this hackathon prototype.</p>
+                            </div>
+
+                            <form id="farmer-details-form" class="form-grid form-grid--double">
+                                <label class="field">
+                                    <span>Full Name</span>
+                                    <input type="text" name="farmerName" placeholder="Enter full name" required>
+                                </label>
+                                <label class="field">
+                                    <span>Mobile Number</span>
+                                    <input type="tel" name="mobileNumber" inputmode="numeric" placeholder="10-digit mobile number" required>
+                                </label>
+                                <label class="field">
+                                    <span>Village</span>
+                                    <input type="text" name="village" placeholder="Enter village">
+                                </label>
+                                <label class="field">
+                                    <span>Taluka / Tehsil</span>
+                                    <input type="text" name="taluka" placeholder="Enter taluka or tehsil">
+                                </label>
+                                <label class="field">
+                                    <span>District</span>
+                                    <input type="text" name="district" placeholder="Enter district">
+                                </label>
+                                <label class="field">
+                                    <span>State</span>
+                                    <input type="text" name="state" placeholder="Enter state">
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Full Address</span>
+                                    <input type="text" name="fullAddress" placeholder="Search a place or select on the map">
+                                </label>
+
+                                <div class="map-panel field--wide">
+                                    <div class="section-head section-head--tight">
+                                        <div>
+                                            <span class="section-kicker">Choose Location on Map</span>
+                                            <h3>Search or Select Farm Location</h3>
+                                        </div>
+                                        <p>Search a place like a Google-style location picker, or click on the map to capture the farm location.</p>
+                                    </div>
+
+                                    <div class="search-bar" id="location-search-form" role="search">
+                                        <label class="search-field" for="location-search-input">
+                                            <i class="ri-search-line" aria-hidden="true"></i>
+                                            <input
+                                                type="search"
+                                                id="location-search-input"
+                                                placeholder="Search village, farm area, taluka, or address"
+                                                autocomplete="off"
+                                            >
+                                        </label>
+                                        <button class="btn btn--secondary" type="button" id="location-search-button">
+                                            <i class="ri-map-pin-search-line" aria-hidden="true"></i>
+                                            Search Place
+                                        </button>
+                                    </div>
+
+                                    <div id="location-search-results" class="location-search-results" hidden></div>
+
+                                    <div id="location-map" class="map-picker" aria-label="Farmer location picker"></div>
+                                    <p class="map-status" data-map-status>Search a location or click on the map to choose the farm location.</p>
+
+                                    <div class="form-grid form-grid--double coordinates-grid">
+                                        <label class="field">
+                                            <span>Latitude</span>
+                                            <input type="text" name="latitude" placeholder="Latitude will auto-fill" readonly>
+                                        </label>
+                                        <label class="field">
+                                            <span>Longitude</span>
+                                            <input type="text" name="longitude" placeholder="Longitude will auto-fill" readonly>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <label class="field">
+                                    <span>Land Area (acres)</span>
+                                    <input type="number" name="landArea" min="0" step="0.1" placeholder="Example: 2.5">
+                                </label>
+                                <label class="field">
+                                    <span>Main Crop</span>
+                                    <select name="mainCrop">
+                                        <option value="">Select crop</option>
+                                        <option>Rice</option>
+                                        <option>Wheat</option>
+                                        <option>Sugarcane</option>
+                                        <option>Cotton</option>
+                                        <option>Tomato</option>
+                                        <option>Onion</option>
+                                        <option>Maize</option>
+                                        <option>Soybean</option>
+                                    </select>
+                                </label>
+                                <label class="field field--wide">
+                                    <span>Farming Type</span>
+                                    <select name="farmingType">
+                                        <option value="">Select farming type</option>
+                                        <option>Small Farmer</option>
+                                        <option>Seasonal Hiring</option>
+                                        <option>Family Farming</option>
+                                        <option>Commercial Farming</option>
+                                        <option>Horticulture</option>
+                                    </select>
+                                </label>
+
+                                <div class="form-actions form-actions--wide">
+                                    <button class="btn btn--primary" type="submit">
+                                        <i class="ri-save-line" aria-hidden="true"></i>
+                                        Save Details
+                                    </button>
+                                </div>
+                            </form>
+                        </article>
+
+                        <article class="panel-card panel-card--accent">
+                            <div class="section-head">
+                                <div>
+                                    <span class="section-kicker">Profile Snapshot</span>
+                                    <h3>Saved Farmer Summary</h3>
+                                </div>
+                                <p data-profile-state>Profile not saved yet</p>
+                            </div>
+
+                            <div class="summary-grid" id="profile-summary-grid"></div>
+
+                            <div class="insight-box">
+                                <span class="insight-box__label">Next Best Step</span>
+                                <strong data-home-next-step>Save the farmer details and choose the farm location.</strong>
+                                <p data-home-next-detail>The dashboard will then recommend labour finding, AI support, and relevant schemes.</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="section-head">
+                        <div>
+                            <span class="section-kicker">Recommendations</span>
+                            <h3>Personalized actions for this farmer</h3>
+                        </div>
+                        <p>These cards adapt to the saved location, land area, crop, and farming type.</p>
+                    </div>
+
+                    <div class="card-grid card-grid--service" id="recommendations-grid"></div>
+                </section>
+
+                <section class="view-section" data-view="labour">
+                    <div class="section-banner section-banner--teal">
+                        <div>
+                            <span class="eyebrow">Labour Finding</span>
+                            <h2>Find nearby labour, filter available workers, and post a clear labour requirement.</h2>
+                        </div>
+                        <p>This is the core farmer problem-solving section of the prototype.</p>
+                    </div>
+
+                    <article class="panel-card">
+                        <div class="filters-grid">
+                            <label class="field">
+                                <span>Work Type</span>
+                                <select id="labour-filter-work">
+                                    <option value="">All work types</option>
+                                    <option>Harvesting</option>
+                                    <option>Sugarcane Cutting</option>
+                                    <option>Weeding</option>
+                                    <option>Transplanting</option>
+                                    <option>Spraying</option>
+                                    <option>Loading</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Individual / Group</span>
+                                <select id="labour-filter-type">
+                                    <option value="">All</option>
+                                    <option>Individual</option>
+                                    <option>Group</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Location</span>
+                                <input type="text" id="labour-filter-location" placeholder="Search location">
+                            </label>
+                            <label class="field">
+                                <span>Minimum Workers</span>
+                                <select id="labour-filter-count">
+                                    <option value="0">Any</option>
+                                    <option value="2">2+</option>
+                                    <option value="5">5+</option>
+                                    <option value="10">10+</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Availability</span>
+                                <select id="labour-filter-availability">
+                                    <option value="">All availability</option>
+                                    <option value="Available today">Available today</option>
+                                    <option value="Available this week">Available this week</option>
+                                    <option value="Limited availability">Limited availability</option>
+                                </select>
+                            </label>
+                            <div class="form-actions">
+                                <button class="btn btn--secondary" type="button" id="labour-reset-button">
+                                    <i class="ri-refresh-line" aria-hidden="true"></i>
+                                    Reset Filters
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div class="dashboard-grid dashboard-grid--split">
+                        <article class="panel-card">
+                            <div class="section-head">
+                                <div>
+                                    <span class="section-kicker">Labour Availability</span>
+                                    <h3>Available labourers and groups</h3>
+                                </div>
+                                <p id="labour-result-meta">Showing labour support nearby.</p>
+                            </div>
+
+                            <div class="card-grid" id="labour-cards"></div>
+                        </article>
+
+                        <article class="panel-card">
+                            <div class="section-head">
+                                <div>
+                                    <span class="section-kicker">Post Labour Requirement</span>
+                                    <h3>Tell workers what you need</h3>
+                                </div>
+                                <p>Requests are stored locally in the browser so they remain available during the demo.</p>
+                            </div>
+
+                            <form id="labour-need-form" class="form-grid form-grid--single">
+                                <label class="field">
+                                    <span>Work Type</span>
+                                    <select name="workType" required>
+                                        <option value="">Select work type</option>
+                                        <option>Harvesting</option>
+                                        <option>Sugarcane Cutting</option>
+                                        <option>Weeding</option>
+                                        <option>Transplanting</option>
+                                        <option>Spraying</option>
+                                        <option>Loading</option>
+                                    </select>
+                                </label>
+                                <label class="field">
+                                    <span>Number of Labourers Needed</span>
+                                    <input type="number" name="labourCount" min="1" placeholder="Example: 8" required>
+                                </label>
+                                <label class="field">
+                                    <span>Date Required</span>
+                                    <input type="date" name="requiredDate" required>
+                                </label>
+                                <label class="field">
+                                    <span>Time Required</span>
+                                    <input type="time" name="requiredTime" required>
+                                </label>
+                                <label class="field">
+                                    <span>Farm Location</span>
+                                    <input type="text" name="location" placeholder="Village / farm address" required>
+                                </label>
+                                <label class="field">
+                                    <span>Notes / Special Instructions</span>
+                                    <textarea name="notes" rows="4" placeholder="Mention crop, urgency, machine support, or shift length"></textarea>
+                                </label>
+                                <button class="btn btn--primary btn--wide" type="submit">
+                                    <i class="ri-send-plane-line" aria-hidden="true"></i>
+                                    Post Request
+                                </button>
+                            </form>
+
+                            <div class="posted-list" id="matched-labour-list"></div>
+                            <div class="posted-list" id="posted-labour-list"></div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="view-section" data-view="chatbot">
+                    <div class="section-banner section-banner--soft">
+                        <div>
+                            <span class="eyebrow">AI Chatbot</span>
+                            <h2>Ask for labour advice, crop help, worker shortage guidance, and scheme suggestions.</h2>
+                        </div>
+                        <p>The chatbot uses predefined JavaScript responses today and stays ready for API integration later.</p>
+                    </div>
+
+                    <div class="dashboard-grid dashboard-grid--chat">
+                        <article class="panel-card">
+                            <div class="section-head">
+                                <div>
+                                    <span class="section-kicker">Quick Prompts</span>
+                                    <h3>Use common farmer questions</h3>
+                                </div>
+                                <p>Tap a prompt to simulate realistic labour and support questions in the demo.</p>
+                            </div>
+
+                            <div class="chip-list">
+                                <button class="chip-button" type="button" data-chat-chip="Labour advice">Labour advice</button>
+                                <button class="chip-button" type="button" data-chat-chip="Crop help">Crop help</button>
+                                <button class="chip-button" type="button" data-chat-chip="Worker shortage">Worker shortage</button>
+                                <button class="chip-button" type="button" data-chat-chip="Scheme help">Scheme help</button>
+                                <button class="chip-button" type="button" data-chat-chip="Small farmer support">Small farmer support</button>
+                            </div>
+
+                            <div class="quick-help">
+                                <p>Example questions:</p>
+                                <ul class="simple-list">
+                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>How many labourers do I need for harvesting 2 acres?</span></li>
+                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>What should I do if workers are unavailable?</span></li>
+                                    <li><i class="ri-arrow-right-s-line" aria-hidden="true"></i><span>Which scheme is useful for small farmers?</span></li>
+                                </ul>
+                            </div>
+                        </article>
+
+                        <article class="panel-card panel-card--chat">
+                            <div class="chat-window" id="chat-window"></div>
+
+                            <form id="chat-form" class="chat-form">
+                                <input type="text" id="chat-input" placeholder="Ask about labour, crops, worker shortage, or schemes" autocomplete="off">
+                                <button class="btn btn--primary btn--icon" type="submit" aria-label="Send chat message">
+                                    <i class="ri-send-plane-line" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="view-section" data-view="schemes">
+                    <div class="section-banner section-banner--green">
+                        <div>
+                            <span class="eyebrow">Government Schemes</span>
+                            <h2>See schemes that match land size, crop, and labour-related farmer needs.</h2>
+                        </div>
+                        <p>Filters and recommendations are based on the farmer details saved on the Home page.</p>
+                    </div>
+
+                    <article class="panel-card panel-card--accent">
+                        <div class="section-head">
+                            <div>
+                                <span class="section-kicker">Smart Matching</span>
+                                <h3>Recommended scheme summary</h3>
+                            </div>
+                            <p data-scheme-summary>Save farmer details on Home to personalize this list.</p>
+                        </div>
+
+                        <div class="chip-list" id="scheme-filter-chips">
+                            <button class="chip-button is-active" type="button" data-scheme-filter="all">All</button>
+                            <button class="chip-button" type="button" data-scheme-filter="small-farmer">Small Farmer</button>
+                            <button class="chip-button" type="button" data-scheme-filter="crop-support">Crop Support</button>
+                            <button class="chip-button" type="button" data-scheme-filter="labour-support">Labour Support</button>
+                            <button class="chip-button" type="button" data-scheme-filter="equipment-subsidy">Equipment Subsidy</button>
+                            <button class="chip-button" type="button" data-scheme-filter="insurance">Insurance</button>
+                        </div>
+                    </article>
+
+                    <div class="card-grid card-grid--scheme" id="scheme-card-grid"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div class="toast" data-toast aria-live="polite"></div>
+
+    <script src="js/mock-data.js"></script>
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        crossorigin=""
+    ></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

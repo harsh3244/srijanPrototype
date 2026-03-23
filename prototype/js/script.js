@@ -8,7 +8,9 @@
         profile: "agrishield_labour_profile",
         labourPosts: "agrishield_labour_posts",
         chatHistory: "agrishield_labour_chat_history",
-        activeView: "agrishield_labour_active_view"
+        activeView: "agrishield_labour_active_view",
+        jobPostings: "agrishield_job_postings",
+        jobApplications: "agrishield_job_applications"
     };
 
     const VIEW_META = {
@@ -48,7 +50,10 @@
         labourPosts: [],
         chatHistory: [],
         activeView: "home",
-        activeSchemeFilter: "all"
+        activeSchemeFilter: "all",
+        jobPostings: [],
+        jobApplications: [],
+        currentJobForApplication: null
     };
     const mapState = {
         instance: null,
@@ -261,6 +266,8 @@
         state.labourPosts = getUserStoredValue(USER_STORAGE_KEYS.labourPosts, []);
         state.chatHistory = getUserStoredValue(USER_STORAGE_KEYS.chatHistory, []);
         state.activeView = getUserStoredValue(USER_STORAGE_KEYS.activeView, "home");
+        state.jobPostings = getUserStoredValue(USER_STORAGE_KEYS.jobPostings, []);
+        state.jobApplications = getUserStoredValue(USER_STORAGE_KEYS.jobApplications, []);
 
         if (!state.chatHistory.length) {
             state.chatHistory = [DEFAULT_CHAT_GREETING];
@@ -273,6 +280,7 @@
         bindLabourSection();
         bindChatSection();
         bindSchemesSection();
+        bindLinkedInLabourSection();
 
         refreshGlobalUI();
         setActiveView(state.activeView);
@@ -1775,5 +1783,295 @@
         showToast.timeoutId = window.setTimeout(() => {
             toast.classList.remove("is-visible");
         }, 2600);
+    }
+
+    function bindLinkedInLabourSection() {
+        const hireWorkerBtn = document.getElementById("btn-hire-worker");
+        const applyJobBtn = document.getElementById("btn-apply-job");
+        const hireWorkerForm = document.getElementById("hire-worker-form");
+        const jobApplicationForm = document.getElementById("job-application-form");
+        const modalBackdrops = document.querySelectorAll(".modal-backdrop");
+        const modalCloseButtons = document.querySelectorAll(".modal-close");
+
+        // Open modals
+        hireWorkerBtn?.addEventListener("click", () => {
+            openModal("hire-worker");
+        });
+
+        applyJobBtn?.addEventListener("click", () => {
+            openModal("apply-job");
+            renderAvailableJobs();
+        });
+
+        // Close modals
+        modalBackdrops.forEach((backdrop) => {
+            backdrop.addEventListener("click", (e) => {
+                const modal = e.target.closest(".modal");
+                if (modal) {
+                    closeModal(modal.dataset.modal);
+                }
+            });
+        });
+
+        modalCloseButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const modal = button.closest(".modal");
+                if (modal) {
+                    closeModal(modal.dataset.modal);
+                }
+            });
+        });
+
+        // Handle job posting form submission
+        hireWorkerForm?.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(hireWorkerForm);
+            const jobPosting = {
+                id: `job-${Date.now()}`,
+                jobTitle: cleanText(formData.get("jobTitle")),
+                jobDescription: cleanText(formData.get("jobDescription")),
+                workType: cleanText(formData.get("workType")),
+                workersNeeded: parseInt(formData.get("workersNeeded")),
+                jobDate: cleanText(formData.get("jobDate")),
+                jobTime: cleanText(formData.get("jobTime")),
+                jobLocation: cleanText(formData.get("jobLocation")),
+                dailyWage: parseInt(formData.get("dailyWage")),
+                skillsRequired: cleanText(formData.get("skillsRequired")),
+                contactMobile: cleanText(formData.get("contactMobile")),
+                posterName: state.profile?.farmerName || "Farmer",
+                createdAt: new Date().toISOString(),
+                applicants: []
+            };
+
+            if (!jobPosting.jobTitle || !jobPosting.workType || !jobPosting.jobDate) {
+                showToast("Please fill all required fields.");
+                return;
+            }
+
+            state.jobPostings.unshift(jobPosting);
+            setUserStoredValue(USER_STORAGE_KEYS.jobPostings, state.jobPostings);
+            hireWorkerForm.reset();
+            closeModal("hire-worker");
+            showToast("Job posted successfully!");
+        });
+
+        // Handle job application form submission
+        jobApplicationForm?.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            if (!state.currentJobForApplication) {
+                showToast("Please select a job first.");
+                return;
+            }
+
+            const formData = new FormData(jobApplicationForm);
+            const application = {
+                id: `app-${Date.now()}`,
+                jobId: state.currentJobForApplication.id,
+                applicantName: cleanText(formData.get("applicantName")),
+                applicantMobile: cleanText(formData.get("applicantMobile")),
+                experience: parseInt(formData.get("experience")),
+                skills: cleanText(formData.get("skills")),
+                coverLetter: cleanText(formData.get("coverLetter")),
+                isAvailable: formData.get("availability") === "on",
+                appliedAt: new Date().toISOString()
+            };
+
+            if (!application.applicantName || !application.applicantMobile) {
+                showToast("Please fill all required fields.");
+                return;
+            }
+
+            state.jobApplications.push(application);
+            setUserStoredValue(USER_STORAGE_KEYS.jobApplications, state.jobApplications);
+
+            // Add applicant to job
+            const job = state.jobPostings.find((j) => j.id === state.currentJobForApplication.id);
+            if (job) {
+                job.applicants = job.applicants || [];
+                job.applicants.push(application);
+                setUserStoredValue(USER_STORAGE_KEYS.jobPostings, state.jobPostings);
+            }
+
+            jobApplicationForm.reset();
+            closeModal("job-application");
+            showToast("Application submitted successfully!");
+        });
+
+        // Search and filter jobs
+        const jobSearchInput = document.getElementById("job-search-input");
+        const jobFilterType = document.getElementById("job-filter-type");
+        const jobFilterWage = document.getElementById("job-filter-wage");
+
+        jobSearchInput?.addEventListener("input", renderAvailableJobs);
+        jobFilterType?.addEventListener("change", renderAvailableJobs);
+        jobFilterWage?.addEventListener("change", renderAvailableJobs);
+
+        // Add some mock jobs for demo
+        addMockJobPostings();
+        renderAvailableJobs();
+    }
+
+    function openModal(modalId) {
+        const modal = document.querySelector(`[data-modal="${modalId}"]`);
+        if (modal) {
+            modal.classList.add("is-open");
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.querySelector(`[data-modal="${modalId}"]`);
+        if (modal) {
+            modal.classList.remove("is-open");
+        }
+    }
+
+    function addMockJobPostings() {
+        if (state.jobPostings.length === 0) {
+            const mockJobs = [
+                {
+                    id: "mock-job-1",
+                    jobTitle: "Harvesting Workers Needed",
+                    jobDescription: "We need experienced harvesting workers for rice cultivation. Daily work, good wages.",
+                    workType: "Harvesting",
+                    workersNeeded: 5,
+                    jobDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+                    jobTime: "06:00",
+                    jobLocation: "Ahmednagar, Maharashtra",
+                    dailyWage: 500,
+                    skillsRequired: "Harvesting experience",
+                    contactMobile: "9876543210",
+                    posterName: "Raj Kumar",
+                    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+                    applicants: []
+                },
+                {
+                    id: "mock-job-2",
+                    jobTitle: "Sugarcane Cutters Required",
+                    jobDescription: "Urgent need for sugarcane cutters. Heavy machinery support available. Experienced workers preferred.",
+                    workType: "Sugarcane Cutting",
+                    workersNeeded: 8,
+                    jobDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+                    jobTime: "05:30",
+                    jobLocation: "Pune, Maharashtra",
+                    dailyWage: 600,
+                    skillsRequired: "Machine operation",
+                    contactMobile: "8765432109",
+                    posterName: "Priya Sharma",
+                    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+                    applicants: []
+                },
+                {
+                    id: "mock-job-3",
+                    jobTitle: "Weeding & Fertilizing Services",
+                    jobDescription: "Need workers for weeding and fertilizing. Suitable for beginners. Training provided.",
+                    workType: "Weeding",
+                    workersNeeded: 3,
+                    jobDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+                    jobTime: "07:00",
+                    jobLocation: "Nashik, Maharashtra",
+                    dailyWage: 350,
+                    skillsRequired: "None",
+                    contactMobile: "7654321098",
+                    posterName: "Arun Patel",
+                    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                    applicants: []
+                }
+            ];
+
+            state.jobPostings = [...mockJobs, ...state.jobPostings];
+            setUserStoredValue(USER_STORAGE_KEYS.jobPostings, state.jobPostings);
+        }
+    }
+
+    function renderAvailableJobs() {
+        const jobListings = document.getElementById("job-listings");
+        const noJobsMessage = document.getElementById("no-jobs-message");
+        const searchQuery = (document.getElementById("job-search-input")?.value || "").toLowerCase();
+        const filterType = document.getElementById("job-filter-type")?.value || "";
+        const filterWage = document.getElementById("job-filter-wage")?.value || "";
+
+        if (!jobListings) {
+            return;
+        }
+
+        let filteredJobs = state.jobPostings.filter((job) => {
+            const matchesSearch = searchQuery === "" || job.jobTitle.toLowerCase().includes(searchQuery) || job.jobLocation.toLowerCase().includes(searchQuery);
+            const matchesType = filterType === "" || job.workType === filterType;
+            const matchesWage = filterWage === "" || checkWageRange(job.dailyWage, filterWage);
+
+            return matchesSearch && matchesType && matchesWage;
+        });
+
+        if (filteredJobs.length === 0) {
+            jobListings.innerHTML = "";
+            noJobsMessage.style.display = "block";
+            return;
+        }
+
+        noJobsMessage.style.display = "none";
+        jobListings.innerHTML = filteredJobs.map((job) => `
+            <div class="job-card">
+                <div class="job-card-header">
+                    <h3 class="job-card-title">${job.jobTitle}</h3>
+                    <span class="job-card-wage">Rs. ${job.dailyWage}/day</span>
+                </div>
+                <p class="job-card-location"><i class="ri-map-pin-line" aria-hidden="true"></i> ${job.jobLocation}</p>
+                <p class="job-card-description">${job.jobDescription}</p>
+                <div class="job-card-details">
+                    <span class="job-card-detail"><i class="ri-team-line"></i> ${job.workersNeeded} spots</span>
+                    <span class="job-card-detail"><i class="ri-calendar-line"></i> ${formatDate(job.jobDate)}</span>
+                    <span class="job-card-detail"><i class="ri-time-line"></i> ${job.jobTime}</span>
+                </div>
+                <button class="job-card-apply" type="button" data-apply-job="${job.id}">
+                    Apply Now
+                </button>
+            </div>
+        `).join("");
+
+        // Add event listeners to apply buttons
+        document.querySelectorAll("[data-apply-job]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const jobId = button.dataset.applyJob;
+                const job = state.jobPostings.find((j) => j.id === jobId);
+                if (job) {
+                    state.currentJobForApplication = job;
+                    showJobApplicationModal(job);
+                }
+            });
+        });
+    }
+
+    function showJobApplicationModal(job) {
+        const detailsContainer = document.getElementById("job-application-details");
+        const form = document.getElementById("job-application-form");
+
+        detailsContainer.innerHTML = `
+            <h3>${job.jobTitle}</h3>
+            <p><strong>Work Type:</strong> ${job.workType}</p>
+            <p><strong>Date:</strong> ${formatDate(job.jobDate)}</p>
+            <p><strong>Time:</strong> ${job.jobTime}</p>
+            <p><strong>Location:</strong> ${job.jobLocation}</p>
+            <p><strong>Daily Wage:</strong> Rs. ${job.dailyWage}</p>
+            <p><strong>Workers Needed:</strong> ${job.workersNeeded}</p>
+        `;
+
+        form.reset();
+        closeModal("apply-job");
+        openModal("job-application");
+    }
+
+    function checkWageRange(wage, range) {
+        if (range === "0-300") return wage <= 300;
+        if (range === "300-500") return wage >= 300 && wage <= 500;
+        if (range === "500-800") return wage >= 500 && wage <= 800;
+        if (range === "800") return wage >= 800;
+        return true;
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
     }
 })();

@@ -1,0 +1,326 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Safe Farming, Simple AI Help</title>
+    <meta
+        name="description"
+        content="AgriShield is a village-friendly AI platform for fraud checks, scheme guidance, crop analysis, irrigation advice, language support, and nearby agriculture labs."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    >
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body data-page="home">
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <!-- Shared header -->
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="index.html" aria-label="AgriShield home">
+                <span class="brand-mark">
+                    <img src="assests/logo.png" alt="AgriShield logo">
+                </span>
+                <span class="brand-copy">
+                    <strong>AgriShield</strong>
+                    <small>Simple AI for safer farming</small>
+                </span>
+            </a>
+
+            <button
+                class="nav-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="site-nav"
+                aria-label="Toggle menu"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                <a data-page-link="home" href="index.html"><i class="ri-home-5-line" aria-hidden="true"></i><span>Home</span></a>
+                <a data-page-link="fraud" href="fraud-detection.html"><i class="ri-shield-check-line" aria-hidden="true"></i><span>Fraud Check</span></a>
+                <a data-page-link="schemes" href="gov-schemes.html"><i class="ri-file-list-3-line" aria-hidden="true"></i><span>Scheme Guide</span></a>
+                <a data-page-link="irrigation" href="irrigation.html"><i class="ri-drop-line" aria-hidden="true"></i><span>Irrigation</span></a>
+                <a data-page-link="crop" href="crop-analyzer.html"><i class="ri-seedling-line" aria-hidden="true"></i><span>Crop Analyzer</span></a>
+                <a data-page-link="languages" href="languages.html"><i class="ri-volume-up-line" aria-hidden="true"></i><span>Languages</span></a>
+                <a data-page-link="labs" href="agri-labs.html"><i class="ri-map-pin-range-line" aria-hidden="true"></i><span>Agri Labs</span></a>
+                <a data-page-link="auth" href="auth.html"><i class="ri-user-3-line" aria-hidden="true"></i><span>Login</span></a>
+            </nav>
+
+            <div class="sidebar-help">
+                <strong>Easy Use</strong>
+                <p>Choose one tool, read the short answer, and take the next safe step.</p>
+            </div>
+
+            <a class="header-cta" href="fraud-detection.html">Quick Fraud Check</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <!-- Home hero -->
+        <section class="hero hero--home">
+            <div class="hero__copy" data-reveal>
+                <span class="eyebrow">Hackathon Prototype / Farmer-First / Village-Friendly</span>
+                <h1>One safe place for fraud checks, crop help, water advice, and local support.</h1>
+                <p class="hero-copy">
+                    AgriShield is designed so farmers and families can quickly choose what they need today:
+                    check if a loan or government scheme is fake, understand crop problems, save water,
+                    talk in their own language, or find a nearby agriculture lab.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn btn--primary" href="fraud-detection.html">
+                        <i class="ri-shield-check-line"></i>
+                        Check Loan or Scheme
+                    </a>
+                    <a class="btn btn--secondary" href="#routes">
+                        <i class="ri-layout-grid-line"></i>
+                        Choose a Feature
+                    </a>
+                </div>
+
+                <div class="status-legend">
+                    <span class="status-pill status-pill--safe">Safe / सुरक्षित</span>
+                    <span class="status-pill status-pill--warning">Check Carefully / ध्यान से देखें</span>
+                    <span class="status-pill status-pill--danger">Stop / रुकें</span>
+                </div>
+            </div>
+
+            <aside class="hero__panel panel" data-reveal="scale">
+                <span class="section-kicker">Today with AgriShield</span>
+                <h2>Choose the help you need right now.</h2>
+
+                <div class="task-list">
+                    <article class="task-item">
+                        <span class="task-icon"><i class="ri-government-line"></i></span>
+                        <div>
+                            <strong>Loan and scheme safety</strong>
+                            <p>Check if a message, website, or agent looks real before paying money.</p>
+                        </div>
+                    </article>
+                    <article class="task-item">
+                        <span class="task-icon"><i class="ri-leaf-line"></i></span>
+                        <div>
+                            <strong>Crop problem check</strong>
+                            <p>Upload a crop photo and get simple disease and treatment guidance.</p>
+                        </div>
+                    </article>
+                    <article class="task-item">
+                        <span class="task-icon"><i class="ri-drop-line"></i></span>
+                        <div>
+                            <strong>Water saving advice</strong>
+                            <p>See if the field needs irrigation now or if rain means you should wait.</p>
+                        </div>
+                    </article>
+                    <article class="task-item">
+                        <span class="task-icon"><i class="ri-global-line"></i></span>
+                        <div>
+                            <strong>Talk in local language</strong>
+                            <p>Voice help is easier to use when the answer comes in the farmer's own language.</p>
+                        </div>
+                    </article>
+                </div>
+            </aside>
+        </section>
+
+        <!-- Quick routes -->
+        <section class="section" id="routes">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">Quick Access</span>
+                <h2>Choose what you want to do</h2>
+                <p>
+                    The homepage is intentionally simple. Every important feature has its own page,
+                    so the farmer does not have to search through a crowded dashboard.
+                </p>
+            </div>
+
+            <div class="route-grid">
+                <a class="route-card route-card--primary" href="fraud-detection.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-shield-check-line"></i></span>
+                    <h3>Check Loans &amp; Govt Schemes</h3>
+                    <p>Best place to verify messages, links, portals, agents, and fake registration fees.</p>
+                    <span class="route-card__cta">Open Fraud Check <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="gov-schemes.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-file-list-3-line"></i></span>
+                    <h3>Find the Right Scheme</h3>
+                    <p>See matched schemes, benefits, documents needed, and safe next steps.</p>
+                    <span class="route-card__cta">Open Scheme Guide <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="crop-analyzer.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-seedling-line"></i></span>
+                    <h3>Analyze Crop Health</h3>
+                    <p>Photo-based disease check with simple treatment guidance and urgency level.</p>
+                    <span class="route-card__cta">Open Crop Analyzer <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="irrigation.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-drop-line"></i></span>
+                    <h3>See Irrigation Advice</h3>
+                    <p>Know if watering is needed now, later, or not at all because rain is coming.</p>
+                    <span class="route-card__cta">Open Irrigation AI <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="languages.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-volume-up-line"></i></span>
+                    <h3>Use Your Own Language</h3>
+                    <p>Preview how AgriShield speaks in major Indian languages with voice-first support.</p>
+                    <span class="route-card__cta">Open Languages <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="agri-labs.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-map-pin-range-line"></i></span>
+                    <h3>Find Nearby Agri Labs</h3>
+                    <p>Get contact details for testing centers, KVKs, experts, and local support points.</p>
+                    <span class="route-card__cta">Open Agri Labs <i class="ri-arrow-right-line"></i></span>
+                </a>
+
+                <a class="route-card" href="auth.html" data-reveal>
+                    <span class="route-card__icon"><i class="ri-user-3-line"></i></span>
+                    <h3>Login or Register</h3>
+                    <p>Create an account with password and captcha verification. No OTP is required in this flow.</p>
+                    <span class="route-card__cta">Open Secure Access <i class="ri-arrow-right-line"></i></span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Ease of use -->
+        <section class="section">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">Easy to Use</span>
+                <h2>Made for real farmers, not only for judges</h2>
+                <p>
+                    The design uses large buttons, short sentences, high contrast, and clear action words.
+                    Village users should understand the result in a few seconds.
+                </p>
+            </div>
+
+            <div class="info-grid info-grid--four">
+                <article class="info-card" data-reveal>
+                    <span class="info-card__icon"><i class="ri-thumb-up-line"></i></span>
+                    <h3>Simple result words</h3>
+                    <p>Every risk screen uses only three clear states: Safe, Check Carefully, or Stop.</p>
+                </article>
+
+                <article class="info-card" data-reveal>
+                    <span class="info-card__icon"><i class="ri-volume-up-line"></i></span>
+                    <h3>Voice-first support</h3>
+                    <p>Useful for users who are more comfortable speaking than typing on a phone.</p>
+                </article>
+
+                <article class="info-card" data-reveal>
+                    <span class="info-card__icon"><i class="ri-smartphone-line"></i></span>
+                    <h3>Large mobile controls</h3>
+                    <p>Bigger tap areas and clean sections make the experience easier on small screens.</p>
+                </article>
+
+                <article class="info-card" data-reveal>
+                    <span class="info-card__icon"><i class="ri-customer-service-line"></i></span>
+                    <h3>Local help when needed</h3>
+                    <p>Agri labs, KVKs, and support contacts are surfaced when AI alone is not enough.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Impact -->
+        <section class="section">
+            <div class="section-heading" data-reveal>
+                <span class="section-kicker">Impact Snapshot</span>
+                <h2>Trust, clarity, and action in one platform</h2>
+                <p>
+                    AgriShield combines security, intelligence, and accessibility so the farmer can move from
+                    confusion to action faster.
+                </p>
+            </div>
+
+            <div class="metric-grid">
+                <article class="metric-card" data-reveal>
+                    <span class="metric-card__value counter" data-count="60" data-suffix="s">0</span>
+                    <h3>To first fraud signal</h3>
+                    <p>Fast enough to prevent money from being sent too early.</p>
+                </article>
+                <article class="metric-card" data-reveal>
+                    <span class="metric-card__value counter" data-count="27">0</span>
+                    <h3>Official Indian languages</h3>
+                    <p>Strong accessibility for voice-based help and local understanding.</p>
+                </article>
+                <article class="metric-card" data-reveal>
+                    <span class="metric-card__value counter" data-count="24" data-suffix="/7">0</span>
+                    <h3>Alert readiness</h3>
+                    <p>Scam signals, weather updates, and expert routes stay active all day.</p>
+                </article>
+                <article class="metric-card" data-reveal>
+                    <span class="metric-card__value counter" data-count="7">0</span>
+                    <h3>Feature pages</h3>
+                    <p>Separate journeys reduce confusion and let each task stay clean and focused.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Closing callout -->
+        <section class="section">
+            <div class="cta-panel" data-reveal="scale">
+                <div>
+                    <span class="section-kicker">Start Here</span>
+                    <h2>If a farmer only opens one page, it should be the fraud check page.</h2>
+                    <p>
+                        That is where AgriShield protects money first. After that, the rest of the platform
+                        helps improve productivity and support.
+                    </p>
+                </div>
+                <div class="cta-panel__actions">
+                    <a class="btn btn--primary" href="fraud-detection.html">Open Fraud Check</a>
+                    <a class="btn btn--secondary" href="gov-schemes.html">Open Scheme Guide</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Shared footer -->
+    <footer class="site-footer">
+        <div class="footer-shell">
+            <div class="footer-brand">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">
+                        <img src="assests/logo.png" alt="AgriShield logo">
+                    </span>
+                    <span class="brand-copy">
+                        <strong>AgriShield</strong>
+                        <small>Safer farming through simple AI</small>
+                    </span>
+                </a>
+                <p>Hackathon prototype focused on fraud prevention, crop intelligence, and village-friendly access.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="fraud-detection.html">Fraud Check</a>
+                <a href="gov-schemes.html">Gov Schemes</a>
+                <a href="crop-analyzer.html">Crop Analyzer</a>
+                <a href="irrigation.html">Irrigation</a>
+                <a href="languages.html">Languages</a>
+                <a href="agri-labs.html">Agri Labs</a>
+            </div>
+
+            <div class="footer-meta">
+                <span>&copy; <span class="js-year"></span> AgriShield</span>
+                <span>Designed for mobile-first rural use</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

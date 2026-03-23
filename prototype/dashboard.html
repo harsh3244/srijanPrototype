@@ -320,6 +320,33 @@
                         <p>This is the core farmer problem-solving section of the prototype.</p>
                     </div>
 
+                    <!-- LinkedIn-style Labour Finder Options -->
+                    <div class="labour-options-grid">
+                        <article class="labour-option-card">
+                            <div class="labour-option-header">
+                                <i class="ri-briefcase-line" aria-hidden="true"></i>
+                            </div>
+                            <h3>Hire a Worker</h3>
+                            <p>Post a job and find the right workers for your farm</p>
+                            <button class="btn btn--primary btn--block" type="button" id="btn-hire-worker">
+                                <i class="ri-add-line" aria-hidden="true"></i>
+                                Post a Job
+                            </button>
+                        </article>
+
+                        <article class="labour-option-card">
+                            <div class="labour-option-header">
+                                <i class="ri-file-user-line" aria-hidden="true"></i>
+                            </div>
+                            <h3>Apply for a Job</h3>
+                            <p>Browse and apply to available job opportunities</p>
+                            <button class="btn btn--secondary btn--block" type="button" id="btn-apply-job">
+                                <i class="ri-search-line" aria-hidden="true"></i>
+                                Browse Jobs
+                            </button>
+                        </article>
+                    </div>
+
                     <article class="panel-card">
                         <div class="filters-grid">
                             <label class="field">
@@ -524,6 +551,187 @@
         </div>
     </div>
 
+    <!-- Hire a Worker Modal -->
+    <div class="modal" id="hire-worker-modal" data-modal="hire-worker">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Post a Job</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <form id="hire-worker-form" class="form-grid form-grid--single">
+                <label class="field">
+                    <span>Job Title</span>
+                    <input type="text" name="jobTitle" placeholder="e.g., Harvesting Workers, Sugarcane Cutters" required>
+                </label>
+                <label class="field">
+                    <span>Job Description</span>
+                    <textarea name="jobDescription" rows="4" placeholder="Describe the job details, responsibilities, and requirements" required></textarea>
+                </label>
+                <label class="field">
+                    <span>Work Type</span>
+                    <select name="workType" required>
+                        <option value="">Select work type</option>
+                        <option>Harvesting</option>
+                        <option>Sugarcane Cutting</option>
+                        <option>Weeding</option>
+                        <option>Transplanting</option>
+                        <option>Spraying</option>
+                        <option>Loading</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Number of Workers Needed</span>
+                    <input type="number" name="workersNeeded" min="1" placeholder="Example: 5" required>
+                </label>
+                <label class="field">
+                    <span>Date Required</span>
+                    <input type="date" name="jobDate" required>
+                </label>
+                <label class="field">
+                    <span>Time Required</span>
+                    <input type="time" name="jobTime" required>
+                </label>
+                <label class="field">
+                    <span>Location</span>
+                    <input type="text" name="jobLocation" placeholder="Farm location / address" required>
+                </label>
+                <label class="field">
+                    <span>Daily Wage (in Rs.)</span>
+                    <input type="number" name="dailyWage" min="0" step="10" placeholder="Example: 500" required>
+                </label>
+                <label class="field">
+                    <span>Skills Required (Optional)</span>
+                    <input type="text" name="skillsRequired" placeholder="e.g., Machine operation, Weeding experience">
+                </label>
+                <label class="field">
+                    <span>Contact Mobile Number</span>
+                    <input type="tel" name="contactMobile" placeholder="Your contact number" required>
+                </label>
+
+                <div class="form-actions">
+                    <button class="btn btn--primary btn--wide" type="submit">
+                        <i class="ri-send-plane-line" aria-hidden="true"></i>
+                        Post Job
+                    </button>
+                    <button class="btn btn--secondary btn--wide" type="button" data-modal-close>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Apply for Job Modal -->
+    <div class="modal" id="apply-job-modal" data-modal="apply-job">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-dialog--large">
+            <div class="modal-header">
+                <h2>Browse & Apply for Jobs</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Job Listings -->
+                <div class="job-listings-container">
+                    <div class="job-search-bar">
+                        <label class="search-field">
+                            <i class="ri-search-line" aria-hidden="true"></i>
+                            <input type="text" id="job-search-input" placeholder="Search jobs by title, location, or type..." autocomplete="off">
+                        </label>
+                        <div class="job-filters">
+                            <select id="job-filter-type">
+                                <option value="">All job types</option>
+                                <option>Harvesting</option>
+                                <option>Sugarcane Cutting</option>
+                                <option>Weeding</option>
+                                <option>Transplanting</option>
+                                <option>Spraying</option>
+                                <option>Loading</option>
+                                <option>Other</option>
+                            </select>
+                            <select id="job-filter-wage">
+                                <option value="">All wages</option>
+                                <option value="0-300">Up to Rs. 300</option>
+                                <option value="300-500">Rs. 300 - 500</option>
+                                <option value="500-800">Rs. 500 - 800</option>
+                                <option value="800">Rs. 800+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="job-listings" class="job-listings"></div>
+                    <div id="no-jobs-message" class="empty-state" style="display: none;">
+                        <i class="ri-inbox-line" aria-hidden="true"></i>
+                        <p>No jobs available. Try different filters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Application Modal (Opens from job listing) -->
+    <div class="modal" id="job-application-modal" data-modal="job-application">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Apply for Job</h2>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="job-application-details" class="job-application-details"></div>
+
+                <form id="job-application-form" class="form-grid form-grid--single">
+                    <label class="field">
+                        <span>Your Full Name</span>
+                        <input type="text" name="applicantName" placeholder="Enter your full name" required>
+                    </label>
+                    <label class="field">
+                        <span>Mobile Number</span>
+                        <input type="tel" name="applicantMobile" placeholder="Your contact number" required>
+                    </label>
+                    <label class="field">
+                        <span>Your Experience (Years)</span>
+                        <input type="number" name="experience" min="0" placeholder="Example: 3" required>
+                    </label>
+                    <label class="field">
+                        <span>Your Skills</span>
+                        <textarea name="skills" rows="3" placeholder="List your skills and expertise" required></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Why are you interested in this job?</span>
+                        <textarea name="coverLetter" rows="3" placeholder="Tell the employer why you're a good fit" required></textarea>
+                    </label>
+                    <label class="field">
+                        <span class="field-checkbox">
+                            <input type="checkbox" name="availability" required>
+                            <span>I am available on the specified date</span>
+                        </label>
+                    </label>
+
+                    <div class="form-actions">
+                        <button class="btn btn--primary btn--wide" type="submit">
+                            <i class="ri-send-plane-line" aria-hidden="true"></i>
+                            Submit Application
+                        </button>
+                        <button class="btn btn--secondary btn--wide" type="button" data-modal-close>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" data-toast aria-live="polite"></div>
 
     <script src="js/mock-data.js"></script>
@@ -534,3 +742,4 @@
     <script src="js/script.js"></script>
 </body>
 </html>
+</
